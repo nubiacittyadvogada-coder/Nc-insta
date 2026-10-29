@@ -142,7 +142,7 @@ const DIFERENCIAIS = ['ironia', 'contradição inesperada', 'humor ácido', 'exp
 const HOOKS = ['contradição', 'pergunta', 'confissão', 'alerta', 'opinião polêmica', 'cena', 'dado', 'lista'];
 const CTAS = ['salvar', 'compartilhar', 'comentar', 'seguir', 'direct', 'link na bio', 'nenhum'];
 const CLICHES = ['acredite em você', 'nunca desista', 'zona de conforto', 'o sucesso é', 'você é capaz', 'melhor versão', 'o segredo do sucesso', 'tudo é possível', 'foco, força e fé', 'só depende de você', 'sonhe grande', 'faça acontecer', 'quem quer arruma', 'transforme sua vida', 'neste post', 'é importante ressaltar', 'vale ressaltar', 'no mundo de hoje', 'cada vez mais', 'mulheres poderosas', 'contrate devagar', 'demita rápido', 'emprego com cnpj', 'feito é melhor que perfeito', 'não é sorte', 'gratidão sempre'];
-const DIMS = { format: 'Formato', tema: 'Tema', tipoGancho: 'Gancho', duracaoFaixa: 'Duração', tipoCta: 'CTA', turno: 'Horário', goal: 'Objetivo' };
+const DIMS = { estiloReel: 'Estilo do Reel', format: 'Formato', tema: 'Tema', tipoGancho: 'Gancho', duracaoFaixa: 'Duração', tipoCta: 'CTA', turno: 'Horário', goal: 'Objetivo' };
 const STATUS = { aprovar: ['Aguardando aprovação', 'warn'], gravar: ['Gravar', 'wine'], pronto: ['Pronto', 'ok'], agendado: ['Agendado', 'ok'], publicado: ['Publicado', ''], rejeitado: ['Rejeitado', 'bad'] };
 const STYLE_NAME = { editorial: 'Editorial sofisticado', lifestyle: 'Lifestyle com foto', colagem: 'Colagem criativa', jornalistico: 'Jornalístico provocativo', minimal: 'Minimalismo tipográfico', agenda: 'Agenda sobre foto' };
 const REJECT_REASONS = ['Não é a minha voz', 'Gancho fraco', 'Tema repetido', 'Risco jurídico ou ético', 'Muito comercial', 'Parece texto de IA', 'Opinião que não é minha'];
@@ -434,7 +434,7 @@ function rowsWithTags() {
 const idx = (r) => pct((r.shares || 0) + (r.saves || 0), r.reach);
 function compare(rows, dim) {
   // impulsionados ficam fora das comparações: pago distorce o desempenho orgânico
-  const g = {}; rows.forEach(r => { const k = r[dim]; if (!k || r.pago) return; (g[k] = g[k] || []).push(r); });
+  const g = {}; rows.forEach(r => { const k = r[dim]; if (!k || r.pago || r.campanha) return; (g[k] = g[k] || []).push(r); });
   return Object.entries(g).map(([k, arr]) => ({ k, n: arr.length, reach: avgOf(arr, r => r.reach), share: avgOf(arr, r => pct(r.shares, r.reach)), save: avgOf(arr, r => pct(r.saves, r.reach)), follows: avgOf(arr, r => r.follows), visits: avgOf(arr, r => r.profileVisits), leads: sumOf(arr, r => r.leads) }))
     .sort((a, b) => ((b.share || 0) + (b.save || 0)) - ((a.share || 0) + (a.save || 0)));
 }
@@ -458,7 +458,7 @@ function perfSummary() {
 }
 function analyze() {
   const rows = rowsWithTags();
-  const ranked = rows.filter(r => idx(r) != null && !r.pago).sort((a, b) => idx(b) - idx(a));
+  const ranked = rows.filter(r => idx(r) != null && !r.pago && !r.campanha).sort((a, b) => idx(b) - idx(a));
   return { rows, formats: compare(rows, 'format'), top: ranked.slice(0, 5), bottom: ranked.slice(-5).reverse(), score: idx };
 }
 function vResultados() {
@@ -479,7 +479,7 @@ function vResultados() {
   <p class="small muted">Conexão direta com Metricool ou com a API oficial da Meta: Fase 2. Depende da sua autorização e, no caso do Metricool, de plano com acesso à API.</p>`;
 }
 function postTable(rows, score) {
-  return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Formato</th><th>Publicação</th><th>Alcance</th><th>Índice</th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r.date || '')}</td><td>${esc(r.format || '')}</td><td class="t">${r.pago ? '<span class="pill warn">impulsionado</span> ' : ''}${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc((r.titulo || 'abrir').slice(0, 70))}</a>` : esc((r.titulo || '').slice(0, 70))}</td><td>${f1(r.reach)}</td><td>${f1(score(r))}%</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Formato</th><th>Publicação</th><th>Alcance</th><th>Índice</th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r.date || '')}</td><td>${esc(r.format || '')}</td><td class="t">${r.pago ? '<span class="pill warn">impulsionado</span> ' : ''}${r.campanha ? '<span class="pill">campanha</span> ' : ''}${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc((r.titulo || 'abrir').slice(0, 70))}</a>` : esc((r.titulo || '').slice(0, 70))}</td><td>${f1(r.reach)}</td><td>${f1(score(r))}%</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 // ---------- diretor de marketing ----------
@@ -1277,7 +1277,7 @@ async function weeklyReport() {
   if (!rows.length && !F.length) { toast('Sem dados: importe métricas ou registre a semana do funil primeiro.'); return; }
   toast('Analisando a semana…');
   const lim = new Date(); lim.setDate(lim.getDate() - 14);
-  const pubs = rows.filter(r => !r.d || r.d >= lim).slice(0, 40).map(r => ({ impulsionado: !!r.pago, data: r.date, formato: r.format, objetivo: r.goal, tema: r.tema, gancho: r.tipoGancho, cta: r.tipoCta, duracao: r.duracaoFaixa, horario: r.turno, titulo: (r.titulo || '').slice(0, 90), alcance: r.reach, compart: r.shares, salvos: r.saves, comentarios: r.comments, novosSeguidores: r.follows, visitasPerfil: r.profileVisits, cliques: r.linkClicks, oportunidades: r.leads, vendas: r.vendas }));
+  const pubs = rows.filter(r => !r.d || r.d >= lim).slice(0, 40).map(r => ({ impulsionado: !!r.pago, campanhaEleitoral: !!r.campanha, estilo: r.estiloReel || '', tempoMedio: num(r.avgWatch), data: r.date, formato: r.format, objetivo: r.goal, tema: r.tema, gancho: r.tipoGancho, cta: r.tipoCta, duracao: r.duracaoFaixa, horario: r.turno, titulo: (r.titulo || '').slice(0, 90), alcance: r.reach, compart: r.shares, salvos: r.saves, comentarios: r.comments, novosSeguidores: r.follows, visitasPerfil: r.profileVisits, cliques: r.linkClicks, oportunidades: r.leads, vendas: r.vendas }));
   const comparativos = {};
   Object.keys(DIMS).forEach(d => { const cmp = compare(rows, d); if (cmp.length) comparativos[DIMS[d]] = cmp.map(x => ({ grupo: x.k, n: x.n, pctCompart: x.share == null ? null : +x.share.toFixed(2), pctSalv: x.save == null ? null : +x.save.toFixed(2), seguidoresPorPost: x.follows == null ? null : +x.follows.toFixed(1), oportunidades: x.leads })); });
   const data = { periodo: `${addDays(today(), -7)} a ${today()}`, publicacoes: pubs, comparativos, funil: F.slice(-6).map(f => ({ semana: f.semana, seguidores: f.seguidores, visitas: f.visitas, cliques: f.cliques, oportunidades: f.leads, vendas: f.vendas })),
@@ -1285,7 +1285,7 @@ async function weeklyReport() {
     experimentos: S.experiments.filter(e => e.status !== 'descartado').map(e => ({ hipotese: e.hipotese, status: e.status, resultado: e.resultado || null })),
     emObservacao: underperformers(rows), distribuicaoAlvo: brand().mix, totalMedidas: rows.length };
   const R = await callAI(`Você é o diretor de marketing do Instagram da Núbia Citty (advogada criminalista, empresária, mentora). Escreva o relatório semanal em português, direto, sem travessões.
-REGRAS: 1) "observado" só com fatos dos DADOS, citando números. Sem dado para a pergunta: escreva "Sem dados suficientes" e diga qual dado falta. 2) "hipoteses" são interpretações. Publicações impulsionadas (tráfego pago) não provam desempenho orgânico: cite separado. 3) Separe correlação de causalidade. 4) Não atribua venda a uma publicação sem dado de atribuição. 5) Nunca garanta viralização ou vendas. 6) Cada experimento muda UMA variável e tem métrica de sucesso. 7) Conteúdo com desempenho ruim só continua com hipótese de melhoria. 8) Mudanças relevantes de distribuição, séries ou posicionamento vão em "mudancasPropostas" para a Núbia aprovar. 9) Não sugira copiar tendências.
+REGRAS: 1) "observado" só com fatos dos DADOS, citando números. Sem dado para a pergunta: escreva "Sem dados suficientes" e diga qual dado falta. 2) "hipoteses" são interpretações. Publicações impulsionadas (tráfego pago) e de campanha eleitoral não provam desempenho orgânico atual: cite separado. 3) Separe correlação de causalidade. 4) Não atribua venda a uma publicação sem dado de atribuição. 5) Nunca garanta viralização ou vendas. 6) Cada experimento muda UMA variável e tem métrica de sucesso. 7) Conteúdo com desempenho ruim só continua com hipótese de melhoria. 8) Mudanças relevantes de distribuição, séries ou posicionamento vão em "mudancasPropostas" para a Núbia aprovar. 9) Não sugira copiar tendências.
 DADOS: ${JSON.stringify(data)}
 Responda só JSON: {"observado":{"cresceu":"","seguidores":"","compartilhamentos":"","autoridade":"","oportunidades":"","perdaConversao":""},"hipoteses":[""],"recomendacoes":{"parar":[""],"continuar":[""],"comecar":[""]},"experimentos":[{"hipotese":"","variavel":"formato|tema|horario|gancho|cta|duracao","controle":"","variante":"","metrica":"","duracao":""}],"mudancasPropostas":[{"tipo":"mix|serie|posicionamento","descricao":"","motivo":"","payload":{}}],"limitacoes":""}
 Para "mix", payload = {"crescimento":n,"autoridade":n,"conversao":n} somando 100. Para "serie", payload = {"id":"…","status":"ativa|teste|pausada"} (séries: ${S.series.map(s => s.id + ' = ' + s.nome).join('; ')}).`);
