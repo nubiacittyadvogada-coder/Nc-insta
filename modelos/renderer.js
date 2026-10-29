@@ -303,17 +303,18 @@
       const pos = s.textPos || 'topo';
       const maxW = W - 220;
       const st = s.overlayStyle || 'caixa';
-      const font = st === 'serif' ? serif(600) : sans(700);
-      const block = fit(ctx, s.title, { font, max: st === 'serif' ? 76 : 62, min: 36, lh: 1.22, maxW: maxW - 96, maxH: 620 });
+      const font = st === 'serif' ? serif(600) : st === 'creme' ? serif(500) : sans(700);
+      const block = fit(ctx, s.title, { font, max: st === 'serif' ? 76 : st === 'creme' ? 92 : 62, min: 36, lh: st === 'creme' ? 1.08 : 1.22, maxW: maxW - 96, maxH: 620 });
       const bw = block.widest + 96, bh = block.h + 76;
       const x = (W - bw) / 2;
       const y = pos === 'centro' ? (H - bh) / 2 - 80 : pos === 'base' ? H - 560 - bh : 300;
-      if (st !== 'sombra') {
+      if (st === 'creme') { ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 2; }
+      else if (st !== 'sombra') {
         ctx.fillStyle = st === 'serif' ? 'rgba(107,30,46,.94)' : 'rgba(246,241,234,.96)';
         roundRect(ctx, x, y, bw, bh, 22); ctx.fill();
       } else { ctx.shadowColor = 'rgba(0,0,0,.65)'; ctx.shadowBlur = 18; }
-      draw(ctx, block, { x: x + 48, y: y + 38, maxW: bw - 96, lh: 1.22, align: 'center', font,
-        color: st === 'caixa' ? C.preto : C.off, emColor: st === 'caixa' ? C.vinho : C.bege });
+      draw(ctx, block, { x: x + 48, y: y + 38, maxW: bw - 96, lh: st === 'creme' ? 1.08 : 1.22, align: 'center', font,
+        color: st === 'caixa' ? C.preto : st === 'creme' ? '#F4E9C8' : C.off, emColor: st === 'caixa' ? C.vinho : st === 'creme' ? '#F4E9C8' : C.bege });
       ctx.shadowColor = 'transparent';
     }
   };
