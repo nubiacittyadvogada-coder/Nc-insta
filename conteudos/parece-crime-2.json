@@ -1,0 +1,35 @@
+[
+  {
+    "id": "pc02-carrossel-parece-crime",
+    "type": "carrossel",
+    "title": "Parece crime, mas não é. Parte 2",
+    "slug": "carrossel-parece-crime-parte-2",
+    "goal": "seguidores",
+    "objective": "crescimento",
+    "series": "parece-crime",
+    "seriesName": "Parece crime, mas não é",
+    "style": "jornalistico",
+    "status": "aprovar",
+    "precisaGravacao": false,
+    "precisaInputPessoal": false,
+    "experimentId": "e-2026-10-30-parece-crime-organico",
+    "validarOpiniao": "Confira se algum dos 5 itens já estava na parte 1 (o Reel 'Você sabia de todos estes?'). Se repetir, eu troco.",
+    "riscos": "Conteúdo informativo. Cada item tem uma exceção que precisa aparecer para não virar orientação errada: dívida com pensão alimentícia dá prisão; fuga com violência é crime; mentir o próprio nome para a polícia é crime.",
+    "tags": { "tema": "Direitos e garantias", "tipoGancho": "lista", "tipoCta": "seguir" },
+    "payload": {
+      "cards": [
+        { "kicker": "Parece crime, mas não é", "title": "5 coisas que *parecem crime* mas não são. Parte 2", "body": "Voltei com mais cinco, uai." },
+        { "kicker": "Parece crime, mas não é", "title": "Gravar uma conversa *da qual você participa*, sem avisar o outro", "body": "O STF decidiu que é prova lícita (Tema 237). Crime é grampear conversa dos outros.", "source": "STF, RE 583.937, Tema 237" },
+        { "kicker": "Parece crime, mas não é", "title": "Dever dinheiro *e não conseguir pagar*", "body": "Ninguém vai preso por dívida. A exceção é a pensão alimentícia. E enganar pra pegar o dinheiro é outra história: estelionato.", "source": "CF, art. 5º, LXVII; Súmula Vinculante 25" },
+        { "kicker": "Parece crime, mas não é", "title": "Fugir da prisão *sem violência contra ninguém*", "body": "A fuga em si não é crime para quem está preso. Vira crime se usar violência contra pessoa. Quem ajuda a fuga também comete crime.", "source": "CP, arts. 351 e 352" },
+        { "kicker": "Parece crime, mas não é", "title": "Ficar *calado* no interrogatório", "body": "É direito constitucional e não pode ser usado contra você. Silêncio não é confissão.", "source": "CF, art. 5º, LXIII; CPP, art. 186" },
+        { "kicker": "Parece crime, mas não é", "title": "O réu *não contar a verdade* sobre os fatos no interrogatório", "body": "Réu não presta compromisso e não comete falso testemunho. Mas mentir o próprio nome pra polícia é crime de falsa identidade.", "source": "CP, arts. 307 e 342; Súmula 522 do STJ" },
+        { "kicker": "Parece crime, mas não é", "title": "Qual desses *você jurava* que era crime?", "body": "Segue pra parte 3. E manda pra aquele amigo que adora dizer 'isso dá cadeia'." }
+      ],
+      "legenda": "Parte 2. Direito penal sem juridiquês e com as exceções, porque é nelas que mora o problema.\n\nConteúdo informativo. Caso concreto precisa de análise de advogado.",
+      "cta": "Segue o perfil pra não perder a parte 3.",
+      "objetivoEstrategico": "Testar em orgânico (sem impulsionamento) o formato de utilidade penal em lista que trouxe 158 seguidores com tráfego pago. Métrica: seguidores por post e salvamentos."
+    },
+    "qualidade": { "aprovado": true, "nota": 8, "diferencial": "contradição inesperada", "explicacao": "Cada card derruba uma crença popular ('isso dá cadeia') e traz a exceção, no padrão 'Sim, você que...' da Luana e 'Remédio pra...' da Letícia.", "comparacao": "Mesma mecânica das referências de utilidade penal, com itens próprios e fundamento citado.", "motivos": [], "trechos": [], "refs": 0, "reescritas": 0, "at": "2026-10-30T02:30:00Z" }
+  }
+]
