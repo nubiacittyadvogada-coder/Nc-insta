@@ -138,7 +138,7 @@
   {
     "id": "t03-carrossel-pitacos",
     "type": "carrossel",
-    "title": "Pitacos que você não me pediu, mas vou te dar mesmo assim. Versão dona de escritório.",
+    "title": "Ninguém me pediu pitaco. Vou dar assim mesmo, uai. Versão dona de escritório.",
     "slug": "carrossel-pitacos-dona-de-escritorio",
     "objective": "crescimento",
     "series": "pitacos",
@@ -151,7 +151,7 @@
     "payload": {
       "cards": [
         {
-          "title": "Pitacos que você não me pediu, mas vou te dar *mesmo assim.*",
+          "title": "Ninguém me pediu pitaco. Vou dar *assim mesmo, uai.*",
           "body": "Versão dona de escritório."
         },
         {

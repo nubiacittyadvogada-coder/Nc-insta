@@ -1,11 +1,11 @@
-# Pitacos que você não me pediu, mas vou te dar mesmo assim. Versão dona de escritório.
+# Ninguém me pediu pitaco. Vou dar assim mesmo, uai. Versão dona de escritório.
 
 Formato: carrossel · Objetivo: crescimento · Série: Pitacos que ninguém me pediu
 
 > Validar: As opiniões dos cards 2 a 5 estão atribuídas a você, inclusive a do honorário (card 5). Aprove só se concordar com cada uma.
 
 ## Cards
-1. Pitacos que você não me pediu, mas vou te dar mesmo assim. | Versão dona de escritório.
+1. Ninguém me pediu pitaco. Vou dar assim mesmo, uai. | Versão dona de escritório.
 2. Você não precisa de mais clientes. Precisa parar de atender cliente que te custa dinheiro. | Aquele que liga às 23h, pede desconto e some na hora do boleto. Isso não é cliente. É hobby caro.
 3. Ninguém te contratou pela sua gravata. Mas muita gente desistiu pelo seu WhatsApp. | Áudio de 4 minutos, resposta três dias depois. O cliente julga o escritório antes de ler a petição.
 4. Se o estagiário sabe a senha do sistema e você não, quem é o dono do escritório? | Delegar não é sumir. É saber exatamente o que foi entregue.
