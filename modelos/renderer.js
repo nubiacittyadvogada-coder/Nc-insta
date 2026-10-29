@@ -21,7 +21,7 @@
     capa: { w: 1080, h: 1920, top: 330, bottom: 330 },   // capa de Reel: texto dentro do recorte 1080x1350 do grid
     overlay: { w: 1080, h: 1920, top: 0, bottom: 0 }
   };
-  const STYLES = ['editorial', 'lifestyle', 'colagem', 'jornalistico', 'minimal'];
+  const STYLES = ['editorial', 'lifestyle', 'colagem', 'jornalistico', 'minimal', 'agenda'];
   const HANDLE = '@nubiacitty';
 
   // ---------- utilidades ----------
@@ -298,6 +298,63 @@
       footer(ctx, W, H, s, f, C.off, C.dourado, s.variant === 'capa' ? 'ARRASTA  →' : '');
     },
 
+    // agenda de calendário sobre foto: rotina e contraste ("07:00 audiência · 11:30 prova do vestido")
+    agenda(ctx, W, H, s, f) {
+      if (s.photo) cover(ctx, s.photo, 0, 0, W, H);
+      else {
+        const g = ctx.createLinearGradient(0, 0, 0, H);
+        g.addColorStop(0, C.begeEsc); g.addColorStop(1, C.bege); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+        grain(ctx, W, H, 0.08, false);
+      }
+      let evs = (s.eventos || []).filter(e => e && e.titulo).slice(0, 4);
+      if (!evs.length) evs = [{ hora: s.time || '09:30', titulo: s.title || '' }];
+      const toMin = (h) => { const m = String(h || '').match(/(\d{1,2}):?(\d{2})?/); return m ? (+m[1]) * 60 + (+(m[2] || 0)) : 540; };
+      evs = evs.map(e => Object.assign({}, e, { min: toMin(e.hora) })).sort((a, b) => a.min - b.min);
+      const hours = [];
+      if (evs.length === 1) { const h = Math.floor(evs[0].min / 60); hours.push(h - 1, h, h + 1); }
+      else evs.forEach(e => { const h = Math.floor(e.min / 60); if (!hours.includes(h)) hours.push(h); });
+      const rowH = 118, head = s.dia ? 96 : 0, pad = 34;
+      const cw = W - 180, ch = head + hours.length * rowH + pad * 2, cx = 90;
+      const box = contentBox(W, H, f, s, 120, 140);
+      const cy = Math.max(box.y, box.y + (box.h - ch) / 2 - (s.body ? 60 : 0));
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 10;
+      ctx.fillStyle = C.branco; ctx.fillRect(cx, cy, cw, ch); ctx.restore();
+      if (s.dia) {
+        ctx.font = sans(500)(28); ctx.fillStyle = '#4A4243'; ctx.textAlign = 'left';
+        spaced(ctx, String(s.dia).toUpperCase(), cx + cw / 2, cy + 58, 2, 'center');
+        ctx.fillStyle = '#E2DBD3'; ctx.fillRect(cx, cy + head, cw, 2);
+      }
+      const top = cy + head + pad;
+      hours.forEach((h, i) => {
+        const y = top + i * rowH + 20;
+        ctx.font = sans(400)(26); ctx.fillStyle = '#9A9092';
+        ctx.fillText(`${String((h + 24) % 24).padStart(2, '0')}:00`, cx + 30, y + 9);
+        ctx.fillStyle = '#E6E0D9'; ctx.fillRect(cx + 130, y, cw - 160, 2);
+      });
+      evs.forEach(e => {
+        const hi = hours.indexOf(Math.floor(e.min / 60)); if (hi < 0) return;
+        const y = top + hi * rowH + 20 + (evs.length === 1 ? ((e.min % 60) / 60) * rowH : 0) - 34;
+        ctx.font = sans(700)(29);
+        const tw = Math.min(cw - 200, Math.max(300, ctx.measureText(String(e.titulo).toUpperCase()).width + 70));
+        const bx = cx + 150, bh = 92;
+        ctx.fillStyle = '#F1E8E2'; ctx.fillRect(bx, y, tw, bh);
+        ctx.fillStyle = C.vinho; ctx.fillRect(bx, y, 6, bh);
+        const t = fit(ctx, String(e.titulo).toUpperCase(), { font: sans(700), max: 29, min: 18, lh: 1.1, maxW: tw - 44, maxH: 40 });
+        draw(ctx, t, { x: bx + 24, y: y + 12, maxW: tw - 44, lh: 1.1, align: 'left', font: sans(700), color: C.preto });
+        ctx.strokeStyle = '#4A4243'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(bx + 36, y + 66, 11, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(bx + 36, y + 59); ctx.lineTo(bx + 36, y + 66); ctx.lineTo(bx + 42, y + 69); ctx.stroke();
+        ctx.font = sans(500)(25); ctx.fillStyle = '#4A4243'; ctx.fillText(String(e.hora || ''), bx + 56, y + 75);
+      });
+      if (s.body) {
+        const b = fit(ctx, s.body, { font: serif(500), max: 64, min: 34, lh: 1.1, maxW: W - 192, maxH: 300 });
+        ctx.save(); ctx.shadowColor = s.photo ? 'rgba(0,0,0,.55)' : 'transparent'; ctx.shadowBlur = 20;
+        draw(ctx, b, { x: 96, y: cy + ch + 56, maxW: W - 192, lh: 1.1, align: 'center', font: serif(500), color: s.photo ? '#F4E9C8' : C.preto, emColor: s.photo ? '#F4E9C8' : C.vinho });
+        ctx.restore();
+      }
+      if (s.total > 1) { ctx.font = sans(600)(22); ctx.fillStyle = s.photo ? C.off : C.preto; spaced(ctx, `${s.index}/${s.total}`, W - 96, f.top + 44, 3, 'right'); }
+      ctx.font = sans(700)(22); ctx.fillStyle = s.photo ? C.off : C.preto; spaced(ctx, HANDLE, 96, H - f.bottom - 18, 2, 'left');
+    },
+
     // texto para sobrepor ao vídeo do Reel de 7 segundos (fundo transparente)
     overlay(ctx, W, H, s) {
       const pos = s.textPos || 'topo';
@@ -354,13 +411,13 @@
       const cards = p.cards || []; const n = cards.length;
       return cards.map((cd, i) => ({ name: `${base}-card-${String(i + 1).padStart(2, '0')}.png`, spec: {
         format: 'carrossel', style: cd.style || style, theme: cd.theme, variant: i === 0 ? 'capa' : i === n - 1 ? 'final' : 'meio',
-        kicker: cd.kicker || kicker, title: cd.title, body: cd.body, index: i + 1, total: n, source: cd.source, date: cd.date } }));
+        kicker: cd.kicker || kicker, title: cd.title, body: cd.body, index: i + 1, total: n, source: cd.source, date: cd.date, eventos: cd.eventos, dia: cd.dia } }));
     }
     if (c.type === 'stories') {
       const st = p.stories || []; const n = st.length;
       return st.map((s, i) => ({ name: `${base}-story-${String(i + 1).padStart(2, '0')}.png`, spec: {
         format: 'story', style: s.style || style, theme: s.theme, variant: s.variant || 'meio', kicker: s.kicker || '',
-        title: s.texto, body: s.apoio, index: i + 1, total: n, sticker: !!(s.sticker && s.sticker.tipo) } }));
+        title: s.texto, body: s.apoio, index: i + 1, total: n, sticker: !!(s.sticker && s.sticker.tipo && s.sticker.tipo !== 'nenhum'), eventos: s.eventos, dia: s.dia } }));
     }
     if (c.type === 'estatico') {
       const cd = p.card || {};

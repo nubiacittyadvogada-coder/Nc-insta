@@ -22,3 +22,15 @@ Estruturas que se repetem nas referências com melhor desempenho:
 2. **Virada metafórica em duas frases** (martelo e prego; equipe da primeira temporada)
 3. **Contraste entre glamour e rotina criminal** (delegacia, DEIC, presídio como cenário real)
 4. **Direito penal aplicado a dor do dia a dia** (difamação, calúnia, investigar o namorado): é o que mais gera salvamentos
+
+### Segundo lote (29/10/2026)
+
++11 referências de texto (@biancalimss, @marcelarigo, @rebecaquessada, @thaisasotaoo, @estude.isaa, @eu.suellens, @nathalyamusadubai, @jaque.martinelle, @vanessacastro.oficial, @jimmyhosts, @grafitecompoesia como referência só visual) e 4 referências visuais (modelos do Canva e matriz desenhada à mão).
+
+Novas estruturas:
+5. **Abertura "Imagina..."** com virada (Bianca, Nathalya, Gizelly)
+6. **Autoironia sobre competência** da mulher que trabalha muito (ansiedade, acelerada, autoestima ligada a competência)
+7. **Paralelismo moral** ("Eu olhei pra sua xícara... Você olhou pra minha... Não somos iguais.")
+8. **Educada que vira ácida** ("prezo pela empatia, mas...")
+
+Novo estilo visual derivado: **Agenda sobre foto** (`agenda` em `renderer.js`).

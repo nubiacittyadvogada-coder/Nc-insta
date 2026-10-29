@@ -144,7 +144,7 @@ const CTAS = ['salvar', 'compartilhar', 'comentar', 'seguir', 'direct', 'link na
 const CLICHES = ['acredite em você', 'nunca desista', 'zona de conforto', 'o sucesso é', 'você é capaz', 'melhor versão', 'o segredo do sucesso', 'tudo é possível', 'foco, força e fé', 'só depende de você', 'sonhe grande', 'faça acontecer', 'quem quer arruma', 'transforme sua vida', 'neste post', 'é importante ressaltar', 'vale ressaltar', 'no mundo de hoje', 'cada vez mais', 'mulheres poderosas', 'contrate devagar', 'demita rápido', 'emprego com cnpj', 'feito é melhor que perfeito', 'não é sorte', 'gratidão sempre'];
 const DIMS = { format: 'Formato', tema: 'Tema', tipoGancho: 'Gancho', duracaoFaixa: 'Duração', tipoCta: 'CTA', turno: 'Horário', goal: 'Objetivo' };
 const STATUS = { aprovar: ['Aguardando aprovação', 'warn'], gravar: ['Gravar', 'wine'], pronto: ['Pronto', 'ok'], agendado: ['Agendado', 'ok'], publicado: ['Publicado', ''], rejeitado: ['Rejeitado', 'bad'] };
-const STYLE_NAME = { editorial: 'Editorial sofisticado', lifestyle: 'Lifestyle com foto', colagem: 'Colagem criativa', jornalistico: 'Jornalístico provocativo', minimal: 'Minimalismo tipográfico' };
+const STYLE_NAME = { editorial: 'Editorial sofisticado', lifestyle: 'Lifestyle com foto', colagem: 'Colagem criativa', jornalistico: 'Jornalístico provocativo', minimal: 'Minimalismo tipográfico', agenda: 'Agenda sobre foto' };
 const REJECT_REASONS = ['Não é a minha voz', 'Gancho fraco', 'Tema repetido', 'Risco jurídico ou ético', 'Muito comercial', 'Parece texto de IA', 'Opinião que não é minha'];
 
 const DEFAULT_BRAND = {
@@ -797,8 +797,8 @@ function examples() {
 const SCHEMAS = {
   reel7: '{"title":"…","style":"…","payload":{"frase":"frase forte com *ênfase*, até 18 palavras","alternativas":["…","…"],"cena":"cena simples que a Núbia grava sozinha","posicaoTexto":"topo|centro","estiloTexto":"caixa|creme|serif|sombra","estiloVisual":"…","trilha":"orientação de áudio da biblioteca licenciada do Instagram","legenda":"curta","cta":"…","objetivoEstrategico":"…"}}',
   reelFalado: '{"title":"…","style":"…","payload":{"duracao":60,"gancho":"primeiros 3 segundos","roteiro":[{"inicio":0,"fim":4,"fala":"…"}],"orientacoes":["…"],"textoCapa":"com *ênfase*, até 9 palavras","legenda":"…","cta":"…","cortes":["…"],"fundamentos":"leis citadas, só se tiver certeza, ou vazio","objetivoEstrategico":"…"}}',
-  carrossel: '{"title":"…","style":"…","payload":{"cards":[{"title":"com *ênfase*","body":"curto ou vazio"}],"legenda":"…","cta":"…","objetivoEstrategico":"…"}}',
-  stories: '{"title":"…","style":"…","payload":{"stories":[{"kicker":"…","texto":"com *ênfase*","apoio":"opcional","sticker":{"tipo":"enquete|perguntas|slider|quiz|nenhum","pergunta":"…","opcoes":["…"]},"orientacao":"…"}],"cta":"…","objetivoEstrategico":"…"}}',
+  carrossel: '{"title":"…","style":"…","payload":{"cards":[{"title":"com *ênfase*","body":"curto ou vazio","dia":"só no estilo agenda","eventos":[{"hora":"07:00","titulo":"só no estilo agenda"}]}],"legenda":"…","cta":"…","objetivoEstrategico":"…"}}',
+  stories: '{"title":"…","style":"…","payload":{"stories":[{"kicker":"…","texto":"com *ênfase*","apoio":"opcional","sticker":{"tipo":"enquete|perguntas|slider|quiz|nenhum","pergunta":"…","opcoes":["…"]},"orientacao":"…","dia":"só no estilo agenda","eventos":[{"hora":"07:00","titulo":"só no estilo agenda"}]}],"cta":"…","objetivoEstrategico":"…"}}',
   estatico: '{"title":"…","style":"…","payload":{"card":{"kicker":"…","title":"com *ênfase*","body":"opcional"},"legenda":"…","cta":"…","objetivoEstrategico":"…"}}'
 };
 const RULES_FORMAT = {
@@ -831,7 +831,8 @@ DESEMPENHO OBSERVADO: ${perfSummary()}
 
 FORMATO: ${RULES_FORMAT[o.type]}
 OBJETIVO DESTE CONTEÚDO: ${GOALS[o.goal] || 'Alcance'}. O conteúdo inteiro, inclusive o CTA, serve a este objetivo.${serie ? `\nSÉRIE: "${serie.nome}". ${serie.descricao || ''}` : ''}
-ESTILO VISUAL: ${o.style === 'auto' ? `escolha entre editorial, lifestyle, colagem, jornalistico, minimal. Varie em relação aos últimos usados (${lastStyles || 'nenhum'}).` : o.style}
+ESTILO AGENDA: horários sobre foto, ótimo para rotina e contraste (audiência às 7h, prova do vestido às 11h30). Os eventos têm que ser reais: sem agenda informada pela Núbia, use [SUA AGENDA: …] e precisaInputPessoal true.
+ESTILO VISUAL: ${o.style === 'auto' ? `escolha entre editorial, lifestyle, colagem, jornalistico, minimal, agenda. Varie em relação aos últimos usados (${lastStyles || 'nenhum'}).` : o.style}
 ${prod ? `PRODUTO (campanha orgânica): ${prod.nome}. Público: ${prod.publico || '-'}. Benefícios: ${prod.beneficios || '-'}. Preço: ${prod.preco || 'não informar'}. Objeções: ${prod.objecoes || '-'}. Provas autorizadas: ${prod.provas || 'nenhuma, então não cite resultados'}. Restrições: ${prod.restricoes || '-'}. Link: ${prod.link || '-'}.` : ''}
 PEDIDO DA NÚBIA: ${o.brief || 'Proponha o tema mais forte para este formato e objetivo.'}
 ${o.feedback ? `ESTA É UMA NOVA VERSÃO. Versão anterior: ${o.previous}\nO que ela quer diferente: ${o.feedback}` : ''}
@@ -881,7 +882,7 @@ function fullText(c) {
 const clicheHits = (text) => { const low = text.toLowerCase(); return CLICHES.filter(x => low.includes(x)); };
 async function qualityCheck(type, c) {
   const text = fullText(Object.assign({ type }, c)); const hits = clicheHits(text);
-  const refs = refsTexto(10);
+  const refs = refsTexto(12);
   const ap = S.learning.filter(l => ['aprovado', 'aprovado_contra_filtro', 'editado'].includes(l.action)).slice(0, 6).map(l => '- ' + (l.after || l.texto));
   const out = await callAI(`Você é a editora-chefe mais exigente da Núbia Citty (advogada criminalista, empresária, mentora; voz autêntica, direta, provocativa, bem-humorada, ocasionalmente ácida). Avalie se a proposta abaixo é genérica.
 PROPOSTA (${TYPE[type]}):\n${text}
