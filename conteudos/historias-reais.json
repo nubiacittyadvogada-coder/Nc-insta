@@ -1,0 +1,145 @@
+[
+  {
+    "id": "h01-reel7-juri",
+    "type": "reel7",
+    "title": "A única mulher na tribuna do júri",
+    "slug": "reel7-unica-mulher-no-juri",
+    "goal": "alcance",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "",
+    "style": "editorial",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "riscos": "OAB: não identifique processo, comarca, data nem réu. Conte como experiência, sem tom de promessa de resultado (Provimento 205/2021 e Código de Ética, art. 42).",
+    "tags": { "tema": "Liderança feminina", "tipoGancho": "contradição", "tipoCta": "compartilhar" },
+    "payload": {
+      "duracao": 7,
+      "frase": "Cinco réus. Quatro advogados homens e eu na tribuna. *Só o meu saiu absolvido.*",
+      "alternativas": [
+        "No júri, quase sempre sou a única mulher na tribuna. *Eu já acostumei. Eles é que ainda não.*",
+        "Promotor homem, juiz homem, quatro colegas homens. *E a absolvição foi da mulher, uai.*"
+      ],
+      "cena": "Você no corredor do fórum ajeitando a beca, sem olhar pra câmera. Nos 2 últimos segundos, olha direto pra lente. Se não puder gravar no fórum, grave de beca no escritório.",
+      "posicaoTexto": "topo",
+      "estiloTexto": "creme",
+      "estiloVisual": "Serifa creme sem caixa sobre a cena real, no padrão das referências.",
+      "trilha": "Áudio da biblioteca do Instagram: algo tenso e elegante (piano grave, batida lenta).",
+      "legenda": "Quatro de terno e gravata e uma de salto. O júri não reparou nisso. O povo é que ainda repara.",
+      "cta": "Manda pra uma advogada que já foi a única mulher da sala.",
+      "objetivoEstrategico": "Alcance pela identidade-ponte (mulher competente num ambiente masculino). Métrica: compartilhamentos e seguidores por post."
+    },
+    "qualidade": { "aprovado": true, "nota": 9, "diferencial": "experiência real", "explicacao": "Fato real contado pela Núbia, com contradição numérica (cinco réus, só um absolvido, o da única mulher).", "comparacao": "Mesma mecânica de contraste das referências da Chiquetti e da Luana, com história própria.", "motivos": [], "trechos": [], "refs": 0, "reescritas": 0, "at": "2026-10-30T02:00:00Z" }
+  },
+  {
+    "id": "h02-reel7-delegacia",
+    "type": "reel7",
+    "title": "Me chamaram de antiética na delegacia",
+    "slug": "reel7-antietica-na-delegacia",
+    "goal": "seguidores",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "",
+    "style": "editorial",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "validarOpiniao": "Confirme um ponto antes de postar: quando a família te procurou, você deu ciência ao advogado que já atuava no caso? O Código de Ética (art. 14) exige isso ao aceitar causa com colega constituído, salvo urgência. Se deu ciência, o post está blindado. Se não, alguém vai usar isso nos comentários.",
+    "riscos": "Não identifique o colega, a delegacia nem a cidade. Evite afirmar que foi crime: a imunidade profissional do advogado (Estatuto da OAB, art. 7º, § 2º) torna discutível falar em injúria nesse contexto.",
+    "tags": { "tema": "Advocacia criminal", "tipoGancho": "confissão", "tipoCta": "comentar" },
+    "payload": {
+      "duracao": 7,
+      "frase": "Me chamaram de antiética na delegacia porque a família me procurou. *Antiético é gritar com colega, doutor.*",
+      "alternativas": [
+        "Ele gritou, me chamou de ridícula na frente de todo mundo. *O cliente ouviu tudo e escolheu ficar comigo.*",
+        "Podia processar? Podia. *Preferi deixar o cliente escolher quem era a advogada dele.*"
+      ],
+      "cena": "Você dentro do carro, estacionada, ajeitando os óculos escuros com calma. Câmera fixa no painel. Sem sorrir.",
+      "posicaoTexto": "topo",
+      "estiloTexto": "caixa",
+      "estiloVisual": "Caixa clara com destaque em vinho, legível sobre cena de carro.",
+      "trilha": "Áudio da biblioteca do Instagram com clima de deboche elegante.",
+      "legenda": "Tem colega que confunde concorrência com grito. A família escolhe quem ela quiser. E o cliente também.",
+      "cta": "Advogada, já gritaram com você no trabalho? Conta aqui.",
+      "objetivoEstrategico": "Seguidores entre advogadas (público da mentoria) por identificação. Métricas: comentários e seguidores por post."
+    },
+    "qualidade": { "aprovado": true, "nota": 8, "diferencial": "experiência real", "explicacao": "Situação real com virada irônica: quem acusa de antiética é quem age sem ética.", "comparacao": "Estrutura 'fala ouvida + resposta' das referências da Gizelly e da Luana.", "motivos": [], "trechos": [], "refs": 0, "reescritas": 0, "at": "2026-10-30T02:00:00Z" }
+  },
+  {
+    "id": "h03-carrossel-contratacao",
+    "type": "carrossel",
+    "title": "O erro mais caro do meu escritório não foi um processo",
+    "slug": "carrossel-erro-mais-caro",
+    "goal": "conversao",
+    "objective": "conversao",
+    "series": "dona-de-escritorio",
+    "seriesName": "Coisas que aprendi sendo dona de escritório",
+    "style": "minimal",
+    "status": "aprovar",
+    "precisaGravacao": false,
+    "precisaInputPessoal": false,
+    "validarOpiniao": "Os cards 4 e 5 são conclusões atribuídas a você (sinal de alerta e pergunta que você faz antes de contratar). Aprove só se for verdade hoje.",
+    "tags": { "tema": "Gestão de escritórios", "tipoGancho": "confissão", "tipoCta": "link na bio" },
+    "payload": {
+      "cards": [
+        { "title": "O erro mais caro do meu escritório *não foi um processo.*", "body": "Foi gente." },
+        { "title": "Contratei gente que não olhava na mesma direção. *E fingi que era fase.*", "body": "Competência sem alinhamento cansa a equipe inteira." },
+        { "title": "Pior que contratar errado: *ver a admiração acabar e continuar junto.*", "body": "Quando a pessoa já não acredita no escritório, o trabalho vira favor." },
+        { "title": "Quando você precisa conferir tudo que alguém entrega, *a confiança já foi embora.*", "body": "E sem confiança não existe delegação." },
+        { "title": "Hoje eu pergunto antes de contratar: *essa pessoa ia admirar o que a gente constrói?*", "body": "Técnica eu ensino. Admiração, não." },
+        { "title": "Equipe certa não se acha. *Se escolhe, se cuida e, quando precisa, se troca.*", "body": "Na mentoria, a gente começa por aqui." }
+      ],
+      "legenda": "Levei tempo pra admitir: o prejuízo maior não veio de cliente que não pagou. Veio de gente que eu mantive tempo demais.\n\nQual desses você está vivendo agora?",
+      "cta": "Se você quer montar equipe com método, a aplicação da mentoria está no link da bio.",
+      "objetivoEstrategico": "Conversão para a mentoria com história real de gestão, sem explicação direta. Métricas: salvamentos, cliques no link e aplicações."
+    },
+    "qualidade": { "aprovado": true, "nota": 8, "diferencial": "experiência real", "explicacao": "Erro real contado pela Núbia (contratar e manter pessoas desalinhadas), com virada no card 1 ('foi gente').", "comparacao": "Confissão com virada curta, como nas referências da Marcela e da Bianca, aplicada a gestão.", "motivos": [], "trechos": [], "refs": 0, "reescritas": 0, "at": "2026-10-30T02:00:00Z" }
+  },
+  {
+    "id": "h04-reelfalado-pai",
+    "type": "reelFalado",
+    "title": "O pai que ia ao meu escritório toda semana",
+    "slug": "reel-falado-pai-toda-semana",
+    "goal": "autoridade",
+    "objective": "autoridade",
+    "series": null,
+    "seriesName": "",
+    "style": "minimal",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "validarOpiniao": "Confirme: você atuava pela família da vítima? O roteiro parte disso. Não diga nomes, cidade nem ano.",
+    "riscos": "Tema sensível (feminicídio). Grave com tom sério, sem música animada. O Código de Ética (art. 42) veda debater causa sob seu patrocínio: conte a experiência humana, nunca detalhes do processo.",
+    "tags": { "tema": "Advocacia criminal", "tipoGancho": "cena", "tipoCta": "salvar" },
+    "payload": {
+      "duracao": 60,
+      "gancho": "Teve um caso de feminicídio em que a família que eu representava ia no meu escritório toda semana. Toda semana.",
+      "roteiro": [
+        { "inicio": 0, "fim": 6, "fala": "Teve um caso de feminicídio em que a família que eu representava ia no meu escritório toda semana. Toda semana." },
+        { "inicio": 6, "fim": 18, "fala": "Eu demorei a entender. Eles não iam só pra saber do processo. Iam pra eu segurar o pai. Pra ele não fazer justiça com as próprias mãos." },
+        { "inicio": 18, "fim": 32, "fala": "E toda semana eu fazia a mesma coisa: acalmava, explicava cada passo e dizia que a justiça ia ser feita pelo caminho certo. E ele ia embora mais tranquilo." },
+        { "inicio": 32, "fim": 46, "fala": "Ninguém te conta isso na faculdade. Na advocacia criminal, às vezes o seu trabalho é impedir que uma tragédia vire duas." },
+        { "inicio": 46, "fim": 60, "fala": "Justiça com as próprias mãos não devolve ninguém. Só aumenta o número de famílias destruídas. Por isso a gente insiste no processo, mesmo quando ele demora." }
+      ],
+      "orientacoes": [
+        "Grave sentada no escritório, luz suave, roupa escura. Tom baixo e firme.",
+        "Fale olhando para a lente. Pausa de 1 segundo depois de 'Toda semana'.",
+        "Não leia: entenda cada bloco e conte com suas palavras.",
+        "Sem música ou com trilha instrumental bem baixa."
+      ],
+      "textoCapa": "O pai que ia ao meu escritório *toda semana.*",
+      "temaCapa": "escuro",
+      "legenda": "Tem caso que a gente não esquece. Esse me ensinou que, às vezes, o trabalho é segurar a dor de alguém até a justiça chegar.",
+      "cta": "Salva. E manda pra quem acha que advogado criminal só defende réu.",
+      "cortes": [
+        "Corte seco depois de 'Toda semana'.",
+        "Zoom leve (110%) em 'impedir que uma tragédia vire duas'.",
+        "Texto na tela só na última frase: 'Justiça com as próprias mãos não devolve ninguém.'"
+      ],
+      "fundamentos": "",
+      "objetivoEstrategico": "Autoridade e conexão emocional com história real. Quebra o estigma de que criminalista só defende réu. Métricas: salvamentos, compartilhamentos e seguidores."
+    },
+    "qualidade": { "aprovado": true, "nota": 9, "diferencial": "experiência real", "explicacao": "História real e rara (segurar o pai da vítima toda semana), com frase de impacto própria ('impedir que uma tragédia vire duas').", "comparacao": "Narrativa original; nenhuma referência tem esse tipo de história.", "motivos": [], "trechos": [], "refs": 0, "reescritas": 0, "at": "2026-10-30T02:00:00Z" }
+  }
+]
