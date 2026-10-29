@@ -127,12 +127,22 @@ td.t { white-space: normal; min-width: 160px }
 const S = {
   db: null, assets: null, sample: null, downloads: null, user: null,
   contents: [], products: [], references: [], metrics: [], learning: [], series: [], reports: [], radar: [], log: [],
+  experiments: [], decisions: [], funnel: [], goals: null, dim: 'format',
   brand: null, usage: null, rotina: null, loaded: false, offline: false, busy: {}
 };
-const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'resultados', 'vendas', 'marca'];
+const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'diretor', 'resultados', 'vendas', 'marca'];
 const TYPE = { reel7: 'Reel 7s', reelFalado: 'Reel falado', carrossel: 'Carrossel', stories: 'Stories', estatico: 'Post' };
 const OBJ = { crescimento: 'Crescimento', autoridade: 'Autoridade', conversao: 'Conversão' };
 const OBJ_COLOR = { crescimento: 'var(--wine)', autoridade: 'var(--gold)', conversao: 'var(--ok)' };
+// objetivo de cada conteúdo (5) e o pilar da distribuição editorial a que pertence (3)
+const GOALS = { alcance: 'Alcance', seguidores: 'Seguidores', autoridade: 'Autoridade', relacionamento: 'Relacionamento', conversao: 'Conversão' };
+const PILLAR = { alcance: 'crescimento', seguidores: 'crescimento', autoridade: 'autoridade', relacionamento: 'autoridade', conversao: 'conversao' };
+const goalOf = (c) => c.goal || ({ crescimento: 'alcance', autoridade: 'autoridade', conversao: 'conversao' })[c.objective] || 'alcance';
+const DIFERENCIAIS = ['ironia', 'contradição inesperada', 'humor ácido', 'experiência real', 'opinião marcante', 'construção narrativa original'];
+const HOOKS = ['contradição', 'pergunta', 'confissão', 'alerta', 'opinião polêmica', 'cena', 'dado', 'lista'];
+const CTAS = ['salvar', 'compartilhar', 'comentar', 'seguir', 'direct', 'link na bio', 'nenhum'];
+const CLICHES = ['acredite em você', 'nunca desista', 'zona de conforto', 'o sucesso é', 'você é capaz', 'melhor versão', 'o segredo do sucesso', 'tudo é possível', 'foco, força e fé', 'só depende de você', 'sonhe grande', 'faça acontecer', 'quem quer arruma', 'transforme sua vida', 'neste post', 'é importante ressaltar', 'vale ressaltar', 'no mundo de hoje', 'cada vez mais', 'mulheres poderosas', 'contrate devagar', 'demita rápido', 'emprego com cnpj', 'feito é melhor que perfeito', 'não é sorte', 'gratidão sempre'];
+const DIMS = { format: 'Formato', tema: 'Tema', tipoGancho: 'Gancho', duracaoFaixa: 'Duração', tipoCta: 'CTA', turno: 'Horário', goal: 'Objetivo' };
 const STATUS = { aprovar: ['Aguardando aprovação', 'warn'], gravar: ['Gravar', 'wine'], pronto: ['Pronto', 'ok'], agendado: ['Agendado', 'ok'], publicado: ['Publicado', ''], rejeitado: ['Rejeitado', 'bad'] };
 const STYLE_NAME = { editorial: 'Editorial sofisticado', lifestyle: 'Lifestyle com foto', colagem: 'Colagem criativa', jornalistico: 'Jornalístico provocativo', minimal: 'Minimalismo tipográfico' };
 const REJECT_REASONS = ['Não é a minha voz', 'Gancho fraco', 'Tema repetido', 'Risco jurídico ou ético', 'Muito comercial', 'Parece texto de IA', 'Opinião que não é minha'];
@@ -189,9 +199,11 @@ async function boot() {
   const [db, assets, sample, downloads, user] = await Promise.all(['db', 'assets', 'sample', 'downloads', 'user'].map(n => c.use(n).catch(() => null)));
   Object.assign(S, { db, assets, sample, downloads, user });
   if (!db) { S.offline = true; S.loaded = true; render(); return; }
-  const sub = (name, key, q) => (q || col(name)).onSnapshot(snap => { S[key] = snap.docs.map(d => Object.assign({ id: d.id }, d.data())); S.loaded = true; render(); }, () => { S.loaded = true; render(); });
+  const sub = (name, key, q) => (q || col(name)).onSnapshot(snap => { S[key] = snap.docs.map(d => Object.assign({}, d.data(), { id: d.id })); S.loaded = true; render(); }, () => { S.loaded = true; render(); });
   sub('contents', 'contents'); sub('products', 'products'); sub('references', 'references'); sub('metrics', 'metrics');
   sub('series', 'series'); sub('reports', 'reports'); sub('radar', 'radar');
+  sub('experiments', 'experiments'); sub('decisions', 'decisions'); sub('funnel', 'funnel');
+  col('settings').doc('goals').onSnapshot(d => { S.goals = d.exists ? d.data() : null; render(); });
   sub('learning', 'learning', col('learning').orderBy('at', 'desc').limit(150));
   sub('log', 'log', col('log').orderBy('at', 'desc').limit(40));
   col('settings').doc('brand').onSnapshot(d => { S.brand = d.exists ? d.data() : null; render(); });
@@ -214,13 +226,14 @@ function renderNav() {
   const v = view(); const n = (st) => S.contents.filter(c => c.status === st).length;
   const items = [['hoje', 'Hoje'], ['gravar', 'Gravar', n('gravar')], ['aprovar', 'Aprovar', n('aprovar')], ['prontos', 'Prontos'], ['mais', 'Mais']];
   $('#nav').innerHTML = items.map(([k, label, badge]) => {
-    const cur = k === v || (k === 'mais' && ['calendario', 'resultados', 'vendas', 'marca'].includes(v));
+    const cur = k === v || (k === 'mais' && ['calendario', 'diretor', 'resultados', 'vendas', 'marca'].includes(v));
     return `<a href="${k === 'mais' ? '#' : '#' + k}" data-nav="${k}" ${cur ? 'aria-current="page"' : ''}>${ICON[k]}<span>${label}</span>${badge ? `<span class="badge">${badge}</span>` : ''}</a>`;
   }).join('');
 }
 document.addEventListener('click', (e) => {
   const a = e.target.closest('[data-nav="mais"]');
   if (a) { e.preventDefault(); openSheet(`<h2>Mais</h2><div class="more">
+    <a href="#diretor" data-close style="grid-column:1/-1"><b>Diretor de marketing</b><span class="small muted">Metas, funil, experimentos e relatório semanal</span></a>
     <a href="#calendario" data-close><b>Calendário</b><span class="small muted">Programação das publicações</span></a>
     <a href="#resultados" data-close><b>Resultados</b><span class="small muted">Métricas e relatórios</span></a>
     <a href="#vendas" data-close><b>Vendas</b><span class="small muted">Produtos e campanhas</span></a>
@@ -265,7 +278,9 @@ function strip(c) {
 // ================= cartão de conteúdo =================
 function meta(c) {
   const [label, tone] = STATUS[c.status] || ['', ''];
-  return `<div class="row"><span class="pill wine">${TYPE[c.type] || c.type}</span><span class="pill">${OBJ[c.objective] || ''}</span>
+  const q = c.qualidade;
+  return `<div class="row"><span class="pill wine">${TYPE[c.type] || c.type}</span><span class="pill">Objetivo: ${GOALS[goalOf(c)]}</span>
+    ${q ? `<span class="pill ${q.aprovado ? 'ok' : 'bad'}">${q.aprovado ? 'Diferencial: ' + esc(q.diferencial) : 'Genérico'}</span>` : ''}
     ${c.seriesName ? `<span class="pill">${esc(c.seriesName)}</span>` : ''}<span class="pill ${tone}">${label}</span>
     ${c.scheduledFor ? `<span class="pill">${fmtDay(c.scheduledFor)}</span>` : ''}</div>`;
 }
@@ -290,8 +305,18 @@ function detail(c) {
   if (p.legenda) out.push(`<div class="box"><div class="row between"><span class="eyebrow">Legenda</span><button class="btn ghost small" data-copy="${esc(c.id)}">Copiar legenda</button></div><p>${rich(p.legenda)}</p>${p.cta ? `<p><b>CTA:</b> ${esc(p.cta)}</p>` : ''}</div>`);
   else if (p.cta) out.push(`<p><b>CTA:</b> ${esc(p.cta)}</p>`);
   if (p.objetivoEstrategico) out.push(`<p class="small muted"><b>Estratégia:</b> ${esc(p.objetivoEstrategico)}</p>`);
+  out.push(qualityBox(c));
   if (c.riscos) out.push(`<p class="small"><span class="pill warn">Atenção</span> ${esc(c.riscos)}</p>`);
   return out.join('');
+}
+function qualityBox(c) {
+  const q = c.qualidade;
+  if (!q) return `<p class="small muted">Ainda não passou pelo filtro anti-genérico. Ele roda quando você tocar em Aprovar.</p>`;
+  return `<details class="box"><summary class="small">Filtro anti-genérico: nota ${q.nota}/10${q.reescritas ? ` · reescrito ${q.reescritas}x` : ''}</summary><div class="stack" style="gap:6px;margin-top:8px">
+    ${q.explicacao ? `<p class="small"><b>Diferencial:</b> ${esc(q.explicacao)}</p>` : ''}
+    ${q.comparacao ? `<p class="small"><b>Comparado às referências${q.refs ? ` (${q.refs})` : ''}:</b> ${esc(q.comparacao)}</p>` : ''}
+    ${!q.refs ? '<p class="small muted">Nenhuma referência de texto cadastrada: a comparação usou o manual e os seus aprovados. Cadastre referências em Minha marca.</p>' : ''}
+    ${q.motivos?.length && !q.aprovado ? `<p class="small"><b>Problemas:</b> ${q.motivos.map(esc).join('; ')}</p>` : ''}</div></details>`;
 }
 function alerts(c) {
   const a = [];
@@ -342,6 +367,7 @@ function vHoje() {
   ${pessoal.length ? `<section><h2>Preciso de você</h2>${pessoal.map(c => `<div class="card"><span class="pill wine">${TYPE[c.type]}</span><h3>${esc(plain(c.title))}</h3><p class="small">${esc(c.perguntaPessoal || '')}</p><div class="row"><button class="btn" data-act="responder" data-id="${c.id}">Responder</button></div></div>`).join('')}</section>` : ''}
   <section><h2>Publicar hoje</h2>${hoje.length ? hoje.map(c => contentCard(c, c.status === 'aprovar' ? 'aprovar' : c.status === 'gravar' ? 'gravar' : 'pronto')).join('') : empty('Nada agendado para hoje', 'Agende conteúdos prontos no Calendário ou crie um novo agora.')}</section>
   ${mixCard()}
+  ${diretorResumo()}
   <section><h2>Radar de pautas</h2>${S.radar.length ? S.radar.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 6).map(radarCard).join('') : empty('Nenhuma pauta no radar ainda', 'A pesquisa diária de notícias e tendências alimenta esta lista quando a rotina automática estiver ativada.')}</section>
   <div class="card"><span class="eyebrow">Rotina automática</span>${rot ? `<p class="small">Última execução: <b>${new Date(rot.ultimaExecucao).toLocaleString('pt-BR')}</b>. ${esc(rot.resumo || '')}</p>` : `<p class="small">Ainda não ativada. Quando você autorizar, uma rotina diária pesquisa pautas, prepara propostas e deixa tudo aqui em Aprovar.</p>`}</div>`;
 }
@@ -375,38 +401,174 @@ function vCalendario() {
   return `${header('Calendário', 'Próximos <em>14 dias</em>', 'Conteúdos agendados aparecem aqui. Toque em um dia vazio para ver o que pode entrar.')}
   ${mixCard()}
   <div class="card" style="gap:0">${days.map(d => { const items = sched.filter(c => c.scheduledFor === d); const dt = new Date(d + 'T12:00:00');
-    return `<div class="day"><div class="d"><small>${dt.toLocaleDateString('pt-BR', { weekday: 'short' })}</small>${dt.getDate()}</div><div class="stack" style="gap:6px">${items.length ? items.map(c => `<div class="row"><span class="pill ${(STATUS[c.status] || [])[1] || ''}">${TYPE[c.type]}</span><span class="small">${esc(plain(c.title))}</span></div>`).join('') : `<span class="small muted">Livre</span>`}</div></div>`; }).join('')}</div>
+    return `<div class="day"><div class="d"><small>${dt.toLocaleDateString('pt-BR', { weekday: 'short' })}</small>${dt.getDate()}</div><div class="stack" style="gap:6px">${items.length ? items.map(c => `<div class="row"><span class="pill ${(STATUS[c.status] || [])[1] || ''}">${TYPE[c.type]}</span><span class="pill">${GOALS[goalOf(c)]}</span><span class="small">${esc(plain(c.title))}</span></div>`).join('') : `<span class="small muted">Livre</span>`}</div></div>`; }).join('')}</div>
   <section><h2>Sem data</h2>${semData.length ? semData.map(c => `<div class="card"><div class="row between"><div class="stack" style="gap:4px;min-width:0"><span class="small muted">${TYPE[c.type]} · ${(STATUS[c.status] || [''])[0]}</span><b>${esc(plain(c.title))}</b></div><button class="btn" data-act="agendar" data-id="${c.id}">Definir data</button></div></div>`).join('') : empty('Tudo com data', 'Nenhum conteúdo esperando agendamento.')}</section>
   <p class="small muted">Publicação automática no Instagram ainda não está conectada. Hoje o fluxo é: você baixa em Prontos e publica pelo app do Instagram (ou pelo Metricool, se usar).</p>`;
 }
 
 // ---------- resultados ----------
+const avgOf = (arr, f) => { const v = arr.map(f).filter(x => x != null && Number.isFinite(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+const sumOf = (arr, f) => { const v = arr.map(f).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) : null; };
+const median = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : 0; };
+const parseDate = (s) => { if (!s) return null; const m = String(s).match(/(\d{4})-(\d{2})-(\d{2})/) || String(s).match(/(\d{2})\/(\d{2})\/(\d{4})/); if (!m) return null; const d = m[1].length === 4 ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(+m[3], +m[2] - 1, +m[1]); return isNaN(d) ? null : d; };
+// junta cada métrica com as etiquetas do conteúdo de origem (tema, gancho, CTA, duração, horário)
+function rowsWithTags() {
+  return S.metrics.map(m => {
+    const c = m.contentId ? S.contents.find(x => x.id === m.contentId) : null;
+    const reach = num(m.reach) ?? num(m.views);
+    const dur = num(m.duracao) ?? (c?.payload?.duracao ?? null);
+    const hm = m.horario || (String(m.date || '').match(/\b(\d{1,2}):\d{2}/) || [])[1];
+    const hora = hm == null ? null : parseInt(hm, 10);
+    return Object.assign({}, m, {
+      reach, views: num(m.views), likes: num(m.likes), comments: num(m.comments), shares: num(m.shares), saves: num(m.saves), follows: num(m.follows),
+      profileVisits: num(m.profileVisits), linkClicks: num(m.linkClicks), leads: num(m.leads), vendas: num(m.vendas), d: parseDate(m.date),
+      format: m.format || (c ? TYPE[c.type] : ''), tema: m.tema || c?.tags?.tema || '', tipoGancho: m.tipoGancho || c?.tags?.tipoGancho || '', tipoCta: m.tipoCta || c?.tags?.tipoCta || '',
+      goal: GOALS[m.goal] || (c ? GOALS[goalOf(c)] : ''), titulo: m.caption || m.tema || (c ? plain(c.title) : ''),
+      duracaoFaixa: dur == null ? '' : dur <= 10 ? 'até 10s' : dur <= 30 ? '11 a 30s' : dur <= 60 ? '31 a 60s' : 'mais de 60s',
+      turno: hora == null || isNaN(hora) ? '' : hora < 12 ? 'manhã' : hora < 18 ? 'tarde' : 'noite'
+    });
+  });
+}
+const idx = (r) => pct((r.shares || 0) + (r.saves || 0), r.reach);
+function compare(rows, dim) {
+  const g = {}; rows.forEach(r => { const k = r[dim]; if (!k) return; (g[k] = g[k] || []).push(r); });
+  return Object.entries(g).map(([k, arr]) => ({ k, n: arr.length, reach: avgOf(arr, r => r.reach), share: avgOf(arr, r => pct(r.shares, r.reach)), save: avgOf(arr, r => pct(r.saves, r.reach)), follows: avgOf(arr, r => r.follows), visits: avgOf(arr, r => r.profileVisits), leads: sumOf(arr, r => r.leads) }))
+    .sort((a, b) => ((b.share || 0) + (b.save || 0)) - ((a.share || 0) + (a.save || 0)));
+}
+// grupos com 3+ publicações e índice (compart. + salv.) abaixo de 60% da mediana do mesmo recorte
+function underperformers(rows) {
+  const out = [];
+  ['tema', 'format', 'tipoGancho', 'tipoCta'].forEach(dim => {
+    const groups = compare(rows, dim).filter(x => x.n >= 3 && x.share != null);
+    if (groups.length < 2) return;
+    const vals = groups.map(x => (x.share || 0) + (x.save || 0)); const med = median(vals);
+    groups.forEach((x, i) => { if (vals[i] < med * 0.6) out.push({ dim, k: x.k, n: x.n, indice: vals[i], mediana: med }); });
+  });
+  return out;
+}
+function perfSummary() {
+  const rows = rowsWithTags();
+  if (rows.length < 3) return 'Ainda não há métricas suficientes (menos de 3 publicações medidas). Não presuma desempenho e não cite números.';
+  const best = ['format', 'tema', 'tipoGancho', 'tipoCta'].map(d => { const c = compare(rows, d).filter(x => x.n >= 2); return c.length ? `${DIMS[d]} com melhor índice de compartilhamento + salvamento: ${c[0].k} (${f1((c[0].share || 0) + (c[0].save || 0))}%, n=${c[0].n})` : null; }).filter(Boolean);
+  const under = underperformers(rows).map(u => `${DIMS[u.dim]} "${u.k}" (${f1(u.indice)}% contra mediana de ${f1(u.mediana)}%, n=${u.n})`);
+  return `${rows.length} publicações medidas. ${best.join('. ')}.` + (under.length ? `\nEM OBSERVAÇÃO POR DESEMPENHO RUIM: ${under.join('; ')}. Só proponha algo desses grupos com "hipoteseMelhoria" explícita (o que muda e por quê).` : '');
+}
 function analyze() {
-  const rows = S.metrics.map(m => Object.assign({}, m, { reach: num(m.reach), views: num(m.views), likes: num(m.likes), comments: num(m.comments), shares: num(m.shares), saves: num(m.saves), follows: num(m.follows), profileVisits: num(m.profileVisits) }));
-  const by = {};
-  rows.forEach(r => { const k = r.format || 'Sem formato'; (by[k] = by[k] || []).push(r); });
-  const avg = (arr, f) => { const v = arr.map(f).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
-  const formats = Object.entries(by).map(([k, arr]) => ({ format: k, n: arr.length, reach: avg(arr, r => r.reach ?? r.views), shareRate: avg(arr, r => pct(r.shares, r.reach ?? r.views)), saveRate: avg(arr, r => pct(r.saves, r.reach ?? r.views)), engRate: avg(arr, r => pct((r.likes || 0) + (r.comments || 0) + (r.shares || 0) + (r.saves || 0), r.reach ?? r.views)), follows: avg(arr, r => r.follows) }));
-  const score = (r) => pct((r.shares || 0) + (r.saves || 0), r.reach ?? r.views);
-  const ranked = rows.filter(r => score(r) != null).sort((a, b) => score(b) - score(a));
-  return { rows, formats, top: ranked.slice(0, 5), bottom: ranked.slice(-5).reverse(), score };
+  const rows = rowsWithTags();
+  const ranked = rows.filter(r => idx(r) != null).sort((a, b) => idx(b) - idx(a));
+  return { rows, formats: compare(rows, 'format'), top: ranked.slice(0, 5), bottom: ranked.slice(-5).reverse(), score: idx };
 }
 function vResultados() {
-  const A = analyze(); const rep = S.reports.slice().sort((a, b) => (b.at || '').localeCompare(a.at || ''))[0];
+  const A = analyze();
+  const semMetrica = S.contents.filter(c => c.status === 'publicado' && !S.metrics.some(m => m.contentId === c.id));
+  const semTag = S.metrics.filter(m => !m.tema && !m.contentId).length;
   return `${header('Resultados', 'O que os <em>números</em> dizem', 'Só aparecem dados reais importados ou digitados por você. Nada aqui é estimado.')}
   <div class="row"><button class="btn primary" data-act="importar">Importar CSV (Metricool ou Instagram)</button><button class="btn" data-act="metrica">Adicionar manualmente</button></div>
-  ${!A.rows.length ? empty('Sem métricas ainda', 'Exporte o relatório de publicações do Metricool (ou do Meta Business Suite) em CSV e importe aqui. A Central calcula formatos vencedores, taxas de compartilhamento e salvamento, e gera o relatório semanal.') : `
-  <div class="card"><h3>Por formato</h3><div class="table-wrap"><table><thead><tr><th>Formato</th><th>Posts</th><th>Alcance médio</th><th>% compart.</th><th>% salvam.</th><th>% engaj.</th></tr></thead><tbody>
-  ${A.formats.map(f => `<tr><td>${esc(f.format)}</td><td>${f.n}</td><td>${f1(f.reach)}</td><td>${f1(f.shareRate)}</td><td>${f1(f.saveRate)}</td><td>${f1(f.engRate)}</td></tr>`).join('')}</tbody></table></div>
+  ${semMetrica.length ? `<section><h2>Publicados sem resultado</h2><p class="small muted">Registre os números para a Central aprender o que funciona.</p>${semMetrica.map(c => `<div class="card"><div class="row between"><div class="stack" style="gap:2px;min-width:0"><span class="small muted">${TYPE[c.type]} · ${GOALS[goalOf(c)]}</span><b>${esc(plain(c.title))}</b></div><button class="btn" data-act="resultado" data-id="${c.id}">Registrar resultado</button></div></div>`).join('')}</section>` : ''}
+  ${!A.rows.length ? empty('Sem métricas ainda', 'Exporte o relatório de publicações do Metricool (ou do Meta Business Suite) em CSV e importe aqui. A Central compara tema, formato, gancho, duração, CTA e horário.') : `
+  ${semTag ? `<div class="card"><p class="small"><b>${semTag}</b> publicação(ões) importada(s) sem tema, gancho e CTA. Sem isso não dá para comparar abordagens.</p><div class="row"><button class="btn" data-act="classificar">Classificar com IA</button></div></div>` : ''}
+  <div class="card"><h3>Por formato</h3><div class="table-wrap"><table><thead><tr><th>Formato</th><th>Posts</th><th>Alcance médio</th><th>% compart.</th><th>% salvam.</th><th>Seguidores/post</th></tr></thead><tbody>
+  ${A.formats.map(f => `<tr><td>${esc(f.k)}</td><td>${f.n}</td><td>${f1(f.reach)}</td><td>${f1(f.share)}</td><td>${f1(f.save)}</td><td>${f1(f.follows)}</td></tr>`).join('')}</tbody></table></div>
   <p class="small muted">Amostras pequenas (menos de 5 posts por formato) indicam tendência, não conclusão.</p></div>
   <div class="card"><h3>Melhores publicações</h3><p class="small muted">Critério: compartilhamentos + salvamentos sobre alcance. Curtida sozinha não decide.</p>${postTable(A.top, A.score)}</div>
-  <div class="card"><h3>Piores publicações</h3>${postTable(A.bottom, A.score)}</div>
-  <div class="row"><button class="btn primary" data-act="relatorio">Gerar relatório semanal</button></div>`}
-  ${rep ? `<div class="card"><span class="eyebrow">Relatório de ${new Date(rep.at).toLocaleDateString('pt-BR')}</span><div>${rich(rep.texto)}</div></div>` : ''}
+  <div class="card"><h3>Piores publicações</h3>${postTable(A.bottom, A.score)}</div>`}
+  <div class="card"><p class="small">Comparativos por tema, gancho, duração, CTA e horário, funil, experimentos e relatório semanal ficam no <a href="#diretor">Diretor de marketing</a>.</p></div>
   <p class="small muted">Conexão direta com Metricool ou com a API oficial da Meta: Fase 2. Depende da sua autorização e, no caso do Metricool, de plano com acesso à API.</p>`;
 }
 function postTable(rows, score) {
-  return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Formato</th><th>Publicação</th><th>Alcance</th><th>Índice</th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r.date || '')}</td><td>${esc(r.format || '')}</td><td class="t">${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc((r.caption || r.tema || 'abrir').slice(0, 70))}</a>` : esc((r.caption || r.tema || '').slice(0, 70))}</td><td>${f1(r.reach ?? r.views)}</td><td>${f1(score(r))}%</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Formato</th><th>Publicação</th><th>Alcance</th><th>Índice</th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r.date || '')}</td><td>${esc(r.format || '')}</td><td class="t">${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc((r.titulo || 'abrir').slice(0, 70))}</a>` : esc((r.titulo || '').slice(0, 70))}</td><td>${f1(r.reach)}</td><td>${f1(score(r))}%</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+// ---------- diretor de marketing ----------
+const INDICADORES = {
+  seguidores_total: 'Seguidores (total)', novos_seguidores_semana: 'Novos seguidores na semana', taxa_compartilhamento: 'Taxa de compartilhamento (30 dias)',
+  taxa_salvamento: 'Taxa de salvamento (30 dias)', visitas_perfil_semana: 'Visitas ao perfil na semana', cliques_link_semana: 'Cliques no link na semana',
+  leads_semana: 'Oportunidades comerciais na semana', vendas_mes: 'Vendas no mês'
+};
+function funnelSorted() { return S.funnel.slice().sort((a, b) => (a.semana || '').localeCompare(b.semana || '')); }
+function indicador(k) {
+  const F = funnelSorted(); const last = F[F.length - 1]; const prev = F[F.length - 2];
+  const rows = rowsWithTags(); const lim = new Date(); lim.setDate(lim.getDate() - 30);
+  const rec = rows.filter(r => r.d && r.d >= lim);
+  switch (k) {
+    case 'seguidores_total': return num(last?.seguidores);
+    case 'novos_seguidores_semana': return last && prev && num(last.seguidores) != null && num(prev.seguidores) != null ? num(last.seguidores) - num(prev.seguidores) : null;
+    case 'taxa_compartilhamento': return avgOf(rec, r => pct(r.shares, r.reach));
+    case 'taxa_salvamento': return avgOf(rec, r => pct(r.saves, r.reach));
+    case 'visitas_perfil_semana': return num(last?.visitas);
+    case 'cliques_link_semana': return num(last?.cliques);
+    case 'leads_semana': return num(last?.leads);
+    case 'vendas_mes': { const m = today().slice(0, 7); return sumOf(F.filter(x => (x.semana || '').startsWith(m)), x => num(x.vendas)); }
+  }
+  return null;
+}
+function diretorResumo() {
+  const pend = S.decisions.filter(d => d.status === 'pendente').length + S.experiments.filter(e => e.status === 'proposto').length;
+  const rod = S.experiments.filter(e => e.status === 'rodando').length;
+  const rep = S.reports.slice().sort((a, b) => (b.at || '').localeCompare(a.at || ''))[0];
+  return `<div class="card"><div class="row between"><h3>Diretor de marketing</h3><a class="btn small" href="#diretor">Abrir</a></div>
+    <div class="row">${pend ? `<span class="pill warn">${pend} decisão(ões) esperando você</span>` : ''}<span class="pill">${rod} experimento(s) rodando</span><span class="pill">${rep ? 'Último relatório: ' + new Date(rep.at).toLocaleDateString('pt-BR') : 'Sem relatório ainda'}</span></div></div>`;
+}
+function vDiretor() {
+  const rows = rowsWithTags(); const metas = S.goals?.metas || [];
+  const decs = S.decisions.slice().sort((a, b) => (b.at || '').localeCompare(a.at || ''));
+  const pend = decs.filter(d => d.status === 'pendente'); const propostos = S.experiments.filter(e => e.status === 'proposto');
+  const rep = S.reports.filter(r => r.estruturado).sort((a, b) => (b.at || '').localeCompare(a.at || ''))[0];
+  const under = underperformers(rows);
+  const F = funnelSorted();
+  return `${header('Diretor de marketing', 'O que faz você <em>crescer</em>', 'Métricas observadas, hipóteses e recomendações sempre separadas. Nenhuma estratégia garante viralização ou vendas: o que vale é o resultado observado.')}
+  ${pend.length || propostos.length ? `<section><h2>Esperando sua decisão</h2>
+    ${pend.map(d => `<div class="card"><div class="row"><span class="pill warn">${esc(d.tipo === 'mix' ? 'Distribuição editorial' : d.tipo === 'serie' ? 'Série' : 'Posicionamento')}</span></div><p><b>${esc(d.descricao)}</b></p>${d.motivo ? `<p class="small muted">Por quê: ${esc(d.motivo)}</p>` : ''}<div class="row"><button class="btn primary" data-act="decidir" data-id="${d.id}" data-v="aprovada">Aprovar</button><button class="btn ghost" data-act="decidir" data-id="${d.id}" data-v="recusada">Recusar</button></div></div>`).join('')}
+    ${propostos.map(e => expCard(e)).join('')}</section>` : ''}
+  <section><div class="row between"><h2>Metas</h2><button class="btn" data-act="metas">${metas.length ? 'Ajustar metas' : 'Definir metas'}</button></div>
+    ${metas.length ? `<div class="card">${metas.map(m => { const v = indicador(m.indicador); const alvo = num(m.alvo); const pr = v != null && alvo ? Math.max(0, Math.min(100, v / alvo * 100)) : 0;
+      return `<div class="stack" style="gap:6px"><div class="row between"><span class="small"><b>${esc(INDICADORES[m.indicador] || m.indicador)}</b>${m.prazo ? ` · até ${esc(m.prazo)}` : ''}</span><span class="small" style="font-variant-numeric:tabular-nums">${v == null ? '<span class="muted">sem dado</span>' : f1(v)} / ${f1(alvo)}</span></div><div class="bar"><i style="width:${pr}%;background:var(--wine)"></i></div></div>`; }).join('')}</div>`
+      : empty('Nenhuma meta definida', 'Defina 3 ou 4 metas (seguidores, compartilhamento, oportunidades, vendas). Os indicadores são calculados com os dados que você registrar.')}</section>
+  <section><div class="row between"><h2>Funil comercial</h2><button class="btn" data-act="semanaFunil">Registrar semana</button></div>${funilCard(F)}</section>
+  <section><h2>Comparativos</h2>${compareCard(rows)}</section>
+  <section><h2>Em observação</h2>${under.length ? `<div class="card"><p class="small muted">Grupos abaixo de 60% da mediana (mínimo de 3 publicações). Só voltam ao calendário com uma hipótese de melhoria explícita.</p>${under.map(u => `<div class="row between"><span class="small"><b>${DIMS[u.dim]}:</b> ${esc(u.k)}</span><span class="small muted">${f1(u.indice)}% vs mediana ${f1(u.mediana)}% · n=${u.n}</span></div>`).join('')}</div>` : `<p class="small muted">${rows.length < 6 ? 'Dados insuficientes para apontar conteúdos fracos com segurança.' : 'Nenhum grupo com desempenho claramente ruim.'}</p>`}</section>
+  <section><div class="row between"><h2>Experimentos</h2><button class="btn" data-act="novoExp">Novo experimento</button></div>
+    ${S.experiments.filter(e => e.status !== 'proposto').length ? S.experiments.filter(e => e.status !== 'proposto').sort((a, b) => (b.criado || '').localeCompare(a.criado || '')).map(expCard).join('') : '<p class="small muted">Os três experimentos de cada relatório semanal aparecem aqui para você aprovar.</p>'}</section>
+  <section><div class="row between"><h2>Relatório semanal</h2><button class="btn primary" data-act="relatorio">Gerar relatório</button></div>${rep ? reportView(rep) : empty('Nenhum relatório ainda', 'O relatório responde: o que fez o perfil crescer, o que trouxe seguidores, o que gerou compartilhamentos, autoridade e oportunidades, onde houve perda de conversão, o que parar, continuar e começar, e os três experimentos da semana.')}</section>
+  <section><h2>Histórico de decisões</h2>${decs.filter(d => d.status !== 'pendente').length ? `<div class="card">${decs.filter(d => d.status !== 'pendente').slice(0, 30).map(d => `<div class="stack" style="gap:2px;padding-block:6px;border-bottom:1px solid var(--line)"><div class="row"><span class="pill ${d.status === 'aprovada' || d.status === 'registrada' ? 'ok' : 'bad'}">${esc(d.status)}</span><span class="small muted">${new Date(d.decididoEm || d.at).toLocaleDateString('pt-BR')}</span></div><span class="small"><b>${esc(d.descricao)}</b></span>${d.motivo ? `<span class="small muted">${esc(d.motivo)}</span>` : ''}</div>`).join('')}</div>` : '<p class="small muted">Sem decisões registradas.</p>'}</section>`;
+}
+function funilCard(F) {
+  if (!F.length) return empty('Funil sem dados', 'Registre por semana: seguidores, visitas ao perfil, cliques no link, oportunidades comerciais (conversas ou leads qualificados) e vendas. Sem isso, a Central não aponta perda de conversão.');
+  const last = F[F.length - 1];
+  const st = [['visitas', 'Visitas ao perfil'], ['cliques', 'Cliques no link'], ['leads', 'Oportunidades'], ['vendas', 'Vendas']].map(([k, l]) => ({ k, l, v: num(last[k]) }));
+  const conv = []; for (let i = 1; i < st.length; i++) if (st[i - 1].v && st[i].v != null) conv.push({ de: st[i - 1].l, para: st[i].l, t: st[i].v / st[i - 1].v * 100 });
+  const pior = conv.length > 1 ? conv.slice().sort((a, b) => a.t - b.t)[0] : null;
+  return `<div class="card"><span class="eyebrow">Semana de ${fmtDay(last.semana)}</span>
+    <div class="tiles" style="grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">${st.map(s => `<div class="tile" style="cursor:default;padding:10px 8px;min-width:0;overflow-wrap:anywhere"><b style="font-size:20px">${s.v == null ? '–' : f1(s.v)}</b><span class="small muted">${s.l}</span></div>`).join('')}</div>
+    ${conv.length ? `<div class="stack" style="gap:4px">${conv.map(c => `<div class="row between small"><span>${c.de} → ${c.para}</span><b style="font-variant-numeric:tabular-nums">${f1(c.t)}%</b></div>`).join('')}</div>` : ''}
+    ${pior ? `<p class="small"><span class="pill warn">Maior perda observada</span> ${pior.de} → ${pior.para} (${f1(pior.t)}%). Isso é observação de uma semana, não diagnóstico de causa.</p>` : '<p class="small muted">Preencha pelo menos três etapas para comparar conversões.</p>'}
+    ${F.length > 1 ? `<details><summary class="small">Histórico (${F.length} semanas)</summary><div class="table-wrap"><table><thead><tr><th>Semana</th><th>Seguidores</th><th>Visitas</th><th>Cliques</th><th>Oport.</th><th>Vendas</th></tr></thead><tbody>${F.slice().reverse().map(x => `<tr><td>${esc(x.semana)}</td><td>${f1(num(x.seguidores))}</td><td>${f1(num(x.visitas))}</td><td>${f1(num(x.cliques))}</td><td>${f1(num(x.leads))}</td><td>${f1(num(x.vendas))}</td></tr>`).join('')}</tbody></table></div></details>` : ''}</div>`;
+}
+function compareCard(rows) {
+  const d = S.dim; const data = compare(rows, d);
+  return `<div class="card"><div class="chips">${Object.entries(DIMS).map(([k, l]) => `<button type="button" data-act="dim" data-dim="${k}" aria-pressed="${k === d}">${l}</button>`).join('')}</div>
+    ${data.length ? `<div class="table-wrap"><table><thead><tr><th>${DIMS[d]}</th><th>Posts</th><th>% compart.</th><th>% salvam.</th><th>Seguidores/post</th><th>Visitas/post</th><th>Oport.</th></tr></thead><tbody>${data.map(x => `<tr><td class="t">${esc(x.k)}${x.n < 3 ? ' <span class="pill">amostra pequena</span>' : ''}</td><td>${x.n}</td><td>${f1(x.share)}</td><td>${f1(x.save)}</td><td>${f1(x.follows)}</td><td>${f1(x.visits)}</td><td>${f1(x.leads)}</td></tr>`).join('')}</tbody></table></div>`
+      : `<p class="small muted">Sem dados com ${DIMS[d].toLowerCase()} registrado. ${rows.length ? 'Use "Classificar com IA" em Resultados ou registre resultados a partir dos conteúdos publicados.' : 'Importe métricas em Resultados.'}</p>`}
+    <p class="small muted">Comparação mostra associação, não causa. Para afirmar causa, rode um experimento mudando uma variável por vez.</p></div>`;
+}
+function expCard(e) {
+  const tone = { proposto: 'warn', rodando: 'wine', concluido: 'ok', descartado: 'bad' }[e.status] || '';
+  return `<div class="card"><div class="row"><span class="pill ${tone}">${esc(e.status)}</span><span class="pill">Variável: ${esc(e.variavel || '–')}</span>${e.metrica ? `<span class="pill">Métrica: ${esc(e.metrica)}</span>` : ''}</div>
+    <p><b>${esc(e.hipotese)}</b></p><p class="small"><b>Controle:</b> ${esc(e.controle || '–')} · <b>Variante:</b> ${esc(e.variante || '–')}${e.duracao ? ` · ${esc(e.duracao)}` : ''}</p>
+    ${e.resultado ? `<p class="small"><b>Resultado observado:</b> ${esc(e.resultado)}</p><p class="small"><b>Decisão:</b> ${esc(e.decisao || '')}</p>` : ''}
+    <div class="row">${e.status === 'proposto' ? `<button class="btn primary" data-act="expStatus" data-id="${e.id}" data-v="rodando">Aprovar e rodar</button><button class="btn ghost" data-act="expStatus" data-id="${e.id}" data-v="descartado">Descartar</button>` : ''}
+    ${e.status === 'rodando' ? `<button class="btn" data-act="expResultado" data-id="${e.id}">Registrar resultado</button>` : ''}</div></div>`;
+}
+function reportView(r) {
+  const R = r.estruturado || {}; const o = R.observado || {}; const rc = R.recomendacoes || {};
+  const Q = [['cresceu', 'O que fez o perfil crescer?'], ['seguidores', 'Quais conteúdos trouxeram seguidores?'], ['compartilhamentos', 'O que gerou compartilhamentos?'], ['autoridade', 'Quais conteúdos fortaleceram autoridade?'], ['oportunidades', 'O que gerou oportunidades comerciais?'], ['perdaConversao', 'Onde houve perda de conversão?']];
+  const list = (a) => (a || []).length ? `<ul>${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="small muted">Nada.</p>';
+  return `<div class="card"><span class="eyebrow">Semana encerrada em ${new Date(r.at).toLocaleDateString('pt-BR')} · base: ${r.base || 0} publicações medidas</span>
+    <h3>Observado (dados)</h3>${Q.map(([k, l]) => `<div class="box"><span class="eyebrow">${l}</span><p class="small">${esc(o[k] || 'Sem dados suficientes.')}</p></div>`).join('')}
+    <h3>Hipóteses</h3>${list(R.hipoteses)}
+    <h3>Recomendações</h3><div class="grid2"><div class="box"><span class="eyebrow">Parar</span>${list(rc.parar)}</div><div class="box"><span class="eyebrow">Continuar</span>${list(rc.continuar)}</div></div><div class="box"><span class="eyebrow">Começar</span>${list(rc.comecar)}</div>
+    <h3>Três experimentos da próxima semana</h3>${list((R.experimentos || []).map(e => `${e.hipotese} (variável: ${e.variavel}; métrica: ${e.metrica})`))}
+    ${R.limitacoes ? `<p class="small muted"><b>Limitações:</b> ${esc(R.limitacoes)}</p>` : ''}</div>`;
 }
 
 // ---------- vendas ----------
@@ -447,8 +609,8 @@ function vMarca() {
   <div class="card"><div class="row between"><h2>Distribuição</h2><button class="btn" data-act="mix">Ajustar</button></div>
     <div class="legend">${Object.keys(OBJ).map(k => `<span><b style="background:${OBJ_COLOR[k]}"></b>${OBJ[k]} ${b.mix[k]}%</span>`).join('')}</div>
     <p class="small muted">Hipótese inicial. Ajuste quando os resultados mostrarem outra coisa.</p></div>
-  <div class="card"><div class="row between"><h2>Biblioteca de referências</h2><button class="btn" data-act="referencia" ${S.assets ? '' : 'disabled'}>Adicionar</button></div>
-    ${S.references.length ? `<div class="refs">${S.references.map(r => `<figure>${r.url ? `<img src="${esc(r.url)}" alt="${esc(r.nota || 'Referência')}" loading="lazy">` : ''}<figcaption class="small"><div class="chips">${['estilo', 'tipografia', 'composicao', 'finalidade'].map(k => r[k] ? `<span class="pill">${esc(r[k])}</span>` : '').join('')}</div>${r.nota ? `<span class="muted">${esc(r.nota)}</span>` : ''}</figcaption><button class="btn ghost small danger" data-act="apagarRef" data-id="${r.id}">Remover</button></figure>`).join('')}</div>` : '<p class="small muted">Envie prints e fotos de referência com etiquetas de estilo, tipografia, composição e finalidade. Referências servem de inspiração: textos, fotos e layouts de outros criadores não são copiados.</p>'}</div>
+  <div class="card"><div class="row between"><h2>Biblioteca de referências</h2><button class="btn" data-act="referencia" ${S.db ? '' : 'disabled'}>Adicionar</button></div>
+    ${S.references.length ? `<div class="refs">${S.references.map(r => `<figure>${r.url ? `<img src="${esc(r.url)}" alt="${esc(r.nota || 'Referência')}" loading="lazy">` : r.texto ? `<blockquote class="box small" style="margin:0">“${esc(r.texto.slice(0, 220))}${r.texto.length > 220 ? '…' : ''}”${r.funciona ? `<br><span class="muted">Funciona por: ${esc(r.funciona)}</span>` : ''}</blockquote>` : ''}<figcaption class="small"><div class="chips">${['estilo', 'tipografia', 'composicao', 'finalidade'].map(k => r[k] ? `<span class="pill">${esc(r[k])}</span>` : '').join('')}</div>${r.nota ? `<span class="muted">${esc(r.nota)}</span>` : ''}</figcaption><button class="btn ghost small danger" data-act="apagarRef" data-id="${r.id}">Remover</button></figure>`).join('')}</div>` : '<p class="small muted">Cole roteiros, legendas e frases que têm a linguagem que você quer (seus ou de outros criadores) e envie imagens com etiquetas. O filtro anti-genérico compara cada proposta com essas referências. Nada é copiado.</p>'}</div>
   <div class="card"><h2>Segurança e dados</h2>
     <p class="small">Acesso: só pela sua conta do claude.ai. A página é privada até você compartilhar. Nenhuma senha ou token fica no código.</p>
     <p class="small">Uso de IA neste mês: <b>${used}</b> geração(ões).</p>
@@ -464,7 +626,7 @@ function render() {
     gravar: () => vLista(['gravar'], 'Gravar', 'Roteiros para <em>gravar</em>', 'Grave, envie o vídeo e a Central prepara o restante do que já está integrado.', 'Nada para gravar', 'Quando você aprovar um Reel, ele aparece aqui com cena e roteiro.'),
     aprovar: () => vLista(['aprovar'], 'Aprovar', 'Esperando seu <em>sim</em>', 'Nada é publicado sem a sua aprovação expressa.', 'Nada aguardando', 'Crie um conteúdo ou monte a semana para receber propostas.'),
     prontos: () => vLista(['pronto', 'agendado'], 'Prontos', 'Arquivos para <em>publicar</em>', 'Baixe os arquivos, copie a legenda e publique.', 'Nenhum arquivo pronto', 'Aprove conteúdos para que as artes finais apareçam aqui.'),
-    calendario: vCalendario, resultados: vResultados, vendas: vVendas, marca: vMarca
+    calendario: vCalendario, diretor: vDiretor, resultados: vResultados, vendas: vVendas, marca: vMarca
   }[v]();
   $('#app').innerHTML = html;
   $('#app').querySelectorAll('select[data-serie]').forEach(sel => sel.addEventListener('change', async () => {
@@ -502,11 +664,19 @@ const ACTIONS = {
   ir: (c, b) => { location.hash = b.dataset.to; },
   criar: (c, b) => openCreate({ brief: b.dataset.brief || '' }),
   semana: () => openWeek(),
-  async aprovar(c) {
+  async aprovar(c, b) {
     if (!needDb()) return;
+    const forcar = b && b.dataset.forcar === '1';
+    let q = c.qualidade;
+    if (!q && !c.editadoPelaNubia) {
+      if (!S.sample) { toast('O filtro anti-genérico usa IA: abra pelo claude.ai.'); return; }
+      await setBusy(c.id, 'Comparando com suas referências…');
+      try { q = await qualityCheck(c.type, c); q.reescritas = 0; await col('contents').doc(c.id).update({ qualidade: q }); } finally { setBusy(c.id); }
+    }
+    if (q && !q.aprovado && !forcar && !c.editadoPelaNubia) { gateSheet(c, q); return; }
     const next = c.precisaGravacao ? 'gravar' : 'pronto';
     await col('contents').doc(c.id).update({ status: next, aprovadoEm: now(), updatedAt: now() });
-    await learn('aprovado', c); log('aprovou', plain(c.title));
+    await learn(forcar ? 'aprovado_contra_filtro' : 'aprovado', c); log(forcar ? 'aprovou contra o filtro' : 'aprovou', plain(c.title));
     toast(next === 'gravar' ? 'Aprovado. Está em Gravar.' : 'Aprovado. Arquivos em Prontos.');
     if (!(c.files || []).some(f => f.kind === 'arte') && S.assets) produzirArquivos(Object.assign({}, c, { status: next }));
   },
@@ -561,7 +731,38 @@ const ACTIONS = {
       const rm = $('#ag-rm', el); if (rm) rm.addEventListener('click', async () => { await col('contents').doc(c.id).update({ scheduledFor: null, status: c.status === 'agendado' ? 'pronto' : c.status, updatedAt: now() }); closeSheet(); });
     });
   },
-  async publicado(c) { if (!needDb()) return; await col('contents').doc(c.id).update({ status: 'publicado', publicadoEm: now(), updatedAt: now() }); log('publicado', plain(c.title)); toast('Marcado como publicado. Importe as métricas depois.'); },
+  publicado(c) {
+    const local = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    openSheet(`<h2>Marcar como publicado</h2><p class="small muted">${esc(plain(c.title))}</p>
+      <label for="pb-url">Link do post (opcional)<input id="pb-url" type="url" placeholder="https://www.instagram.com/p/…"></label>
+      <label for="pb-dt">Data e hora da publicação<input id="pb-dt" type="datetime-local" value="${local}"></label>
+      <p class="small muted">O horário entra na comparação de desempenho por turno.</p><button class="btn primary" id="pb-ok">Salvar</button>`, (el) => {
+      $('#pb-ok', el).addEventListener('click', async () => {
+        if (!needDb()) return; const dt = $('#pb-dt', el).value;
+        await col('contents').doc(c.id).update({ status: 'publicado', publicadoEm: dt ? new Date(dt).toISOString() : now(), horario: dt ? dt.slice(11, 16) : '', postUrl: $('#pb-url', el).value.trim(), updatedAt: now() });
+        log('publicado', plain(c.title)); closeSheet(); toast('Publicado. Registre o resultado em 48h, em Resultados.');
+      });
+    });
+  },
+  resultado: (c) => openMetric(c),
+  classificar: () => classify(),
+  dim: (c, b) => { S.dim = b.dataset.dim; render(); },
+  async decidir(c, b) {
+    const d = S.decisions.find(x => x.id === b.dataset.id); if (!d || !needDb()) return; const v = b.dataset.v;
+    if (v === 'aprovada') await applyDecision(d);
+    await col('decisions').doc(d.id).update({ status: v, decididoEm: now() }); log('decisão ' + v, d.descricao); toast(v === 'aprovada' ? 'Aprovado e aplicado' : 'Recusado');
+  },
+  metas: () => openGoals(),
+  semanaFunil: () => openFunnel(),
+  novoExp: () => openExperiment(),
+  async expStatus(c, b) {
+    const e = S.experiments.find(x => x.id === b.dataset.id); if (!e || !needDb()) return; const v = b.dataset.v;
+    await col('experiments').doc(e.id).update(Object.assign({ status: v }, v === 'rodando' ? { inicio: today() } : {}));
+    await col('decisions').add({ at: now(), decididoEm: now(), tipo: 'experimento', descricao: (v === 'rodando' ? 'Experimento aprovado: ' : 'Experimento descartado: ') + e.hipotese, motivo: '', status: v === 'rodando' ? 'aprovada' : 'recusada' });
+    log('experimento ' + v, e.hipotese);
+  },
+  expResultado: (c, b) => openExpResult(S.experiments.find(x => x.id === b.dataset.id)),
+
   importar: () => openImport(),
   metrica: () => openMetric(),
   relatorio: () => weeklyReport(),
@@ -586,7 +787,7 @@ const ACTIONS = {
 // ================= geração com IA =================
 function examples() {
   const L = S.learning;
-  const ap = L.filter(l => l.action === 'aprovado').slice(0, 6).map(l => `- [${l.type}] ${l.texto}`).join('\n');
+  const ap = L.filter(l => l.action === 'aprovado' || l.action === 'aprovado_contra_filtro').slice(0, 6).map(l => `- [${l.type}] ${l.texto}`).join('\n');
   const rj = L.filter(l => l.action === 'rejeitado').slice(0, 6).map(l => `- [${l.type}] ${l.texto} → motivo: ${l.reason || 'não informado'}`).join('\n');
   const ed = L.filter(l => l.action === 'editado').slice(0, 5).map(l => `- antes: ${String(l.before || '').slice(0, 220)}\n  depois: ${String(l.after || '').slice(0, 220)}`).join('\n');
   return { ap, rj, ed };
@@ -621,8 +822,13 @@ REGRA PRINCIPAL: ${b.regraPrincipal}
 ÉTICA: ${b.oab}
 NUNCA invente histórias pessoais, números, depoimentos, decisões judiciais ou leis. Se o conteúdo pedir experiência pessoal, deixe um marcador [SUA HISTÓRIA: o que precisa] e preencha "precisaInputPessoal": true com a pergunta em "perguntaPessoal". Opiniões fortes atribuídas à Núbia: descreva em "validarOpiniao" quais ela precisa confirmar. Fatos jurídicos só com certeza. Não use travessões.
 
+DIFERENCIAL OBRIGATÓRIO: pelo menos um entre ${DIFERENCIAIS.join(', ')}. Proibido: frase motivacional comum, comparação previsível, conselho óbvio ou ditado de empreendedorismo conhecido, texto que qualquer influenciadora publicaria. Prefira originalidade, personalidade e identificação a frases bonitas. Se ficou genérico, reescreva antes de responder.
+TENDÊNCIAS: nunca copie. Adapte à personalidade, à experiência e aos objetivos da Núbia.
+REFERÊNCIAS CRIATIVAS DA NÚBIA (aprenda linguagem, ritmo, construção de frase e impacto; nunca copie o texto):\n${S.references.filter(r => r.texto).slice(0, 5).map(r => '- "' + r.texto.slice(0, 300) + '"' + (r.funciona ? ' (funciona por: ' + r.funciona + ')' : '')).join('\n') || '(nenhuma cadastrada)'}
+DESEMPENHO OBSERVADO: ${perfSummary()}
+
 FORMATO: ${RULES_FORMAT[o.type]}
-OBJETIVO: ${OBJ[o.objective]}${serie ? `\nSÉRIE: "${serie.nome}". ${serie.descricao || ''}` : ''}
+OBJETIVO DESTE CONTEÚDO: ${GOALS[o.goal] || 'Alcance'}. O conteúdo inteiro, inclusive o CTA, serve a este objetivo.${serie ? `\nSÉRIE: "${serie.nome}". ${serie.descricao || ''}` : ''}
 ESTILO VISUAL: ${o.style === 'auto' ? `escolha entre editorial, lifestyle, colagem, jornalistico, minimal. Varie em relação aos últimos usados (${lastStyles || 'nenhum'}).` : o.style}
 ${prod ? `PRODUTO (campanha orgânica): ${prod.nome}. Público: ${prod.publico || '-'}. Benefícios: ${prod.beneficios || '-'}. Preço: ${prod.preco || 'não informar'}. Objeções: ${prod.objecoes || '-'}. Provas autorizadas: ${prod.provas || 'nenhuma, então não cite resultados'}. Restrições: ${prod.restricoes || '-'}. Link: ${prod.link || '-'}.` : ''}
 PEDIDO DA NÚBIA: ${o.brief || 'Proponha o tema mais forte para este formato e objetivo.'}
@@ -635,7 +841,7 @@ TÍTULOS RECENTES (não repita o assunto):\n${recent || '(nenhum)'}
 
 Responda SOMENTE com um JSON válido neste formato:
 ${SCHEMAS[o.type]}
-Inclua também no nível raiz: "precisaInputPessoal": false, "perguntaPessoal": "", "validarOpiniao": "", "riscos": "riscos jurídicos, éticos ou de reputação, ou vazio".
+Inclua também no nível raiz: "precisaInputPessoal": false, "perguntaPessoal": "", "validarOpiniao": "", "riscos": "riscos jurídicos, éticos ou de reputação, ou vazio", "tags": {"tema": "um destes: ${b.temas.join(' | ')}", "tipoGancho": "${HOOKS.join('|')}", "tipoCta": "${CTAS.join('|')}"}, "diferencial": {"tipo": "${DIFERENCIAIS.join('|')}", "trecho": "trecho onde ele aparece"}, "hipoteseMelhoria": "se usar algo EM OBSERVAÇÃO, explique o que muda; senão vazio".
 Use *asteriscos* para marcar a ênfase visual (1 trecho por frase).`;
 }
 function normalize(type, raw) {
@@ -647,7 +853,8 @@ function normalize(type, raw) {
   if (type === 'estatico' && !p.card?.title) throw new Error('A IA não devolveu o texto do post. Gere de novo.');
   if (type === 'reel7') p.duracao = 7;
   const style = NCRender.STYLES.includes(r.style) ? r.style : 'editorial';
-  return { title: plain(r.title) || 'Sem título', style, payload: p, precisaInputPessoal: !!r.precisaInputPessoal, perguntaPessoal: r.perguntaPessoal || '', validarOpiniao: r.validarOpiniao || '', riscos: r.riscos || '' };
+  return { title: plain(r.title) || 'Sem título', style, payload: p, precisaInputPessoal: !!r.precisaInputPessoal, perguntaPessoal: r.perguntaPessoal || '', validarOpiniao: r.validarOpiniao || '', riscos: r.riscos || '', hipoteseMelhoria: r.hipoteseMelhoria || '',
+    tags: { tema: r.tags?.tema || '', tipoGancho: HOOKS.includes(r.tags?.tipoGancho) ? r.tags.tipoGancho : '', tipoCta: CTAS.includes(r.tags?.tipoCta) ? r.tags.tipoCta : '' } };
 }
 async function callAI(prompt) {
   if (!S.sample) throw new Error('A geração por IA precisa ser aberta pelo claude.ai e autorizada.');
@@ -656,13 +863,68 @@ async function callAI(prompt) {
   return out;
 }
 
+// ================= filtro anti-genérico =================
+function fullText(c) {
+  const p = c.payload || {}; const t = [c.title];
+  if (c.type === 'reel7') t.push(p.frase, ...(p.alternativas || []), p.cena);
+  if (c.type === 'reelFalado') t.push(p.gancho, ...(p.roteiro || []).map(b => b.fala), p.textoCapa);
+  if (c.type === 'carrossel') (p.cards || []).forEach(cd => t.push(cd.title, cd.body));
+  if (c.type === 'stories') (p.stories || []).forEach(x => t.push(x.texto, x.apoio));
+  if (c.type === 'estatico' && p.card) t.push(p.card.title, p.card.body);
+  t.push(p.legenda, p.cta);
+  return plain(t.filter(Boolean).join('\n'));
+}
+const clicheHits = (text) => { const low = text.toLowerCase(); return CLICHES.filter(x => low.includes(x)); };
+async function qualityCheck(type, c) {
+  const text = fullText(Object.assign({ type }, c)); const hits = clicheHits(text);
+  const refs = S.references.filter(r => r.texto).slice(0, 8);
+  const ap = S.learning.filter(l => ['aprovado', 'aprovado_contra_filtro', 'editado'].includes(l.action)).slice(0, 6).map(l => '- ' + (l.after || l.texto));
+  const out = await callAI(`Você é a editora-chefe mais exigente da Núbia Citty (advogada criminalista, empresária, mentora; voz autêntica, direta, provocativa, bem-humorada, ocasionalmente ácida). Avalie se a proposta abaixo é genérica.
+PROPOSTA (${TYPE[type]}):\n${text}
+REFERÊNCIAS CRIATIVAS DA NÚBIA (compare linguagem, ritmo, construção de frase e impacto emocional, não só o assunto):\n${refs.length ? refs.map((r, i) => `${i + 1}. "${r.texto.slice(0, 450)}"${r.funciona ? ` (funciona por: ${r.funciona})` : ''}`).join('\n') : '(nenhuma cadastrada: compare com o manual de voz e os textos aprovados)'}
+TEXTOS QUE ELA APROVOU OU ESCREVEU:\n${ap.join('\n') || '(nenhum ainda)'}
+CLICHÊS DETECTADOS AUTOMATICAMENTE: ${hits.join(', ') || 'nenhum'}
+CRITÉRIOS: precisa ter pelo menos um diferencial claro entre: ${DIFERENCIAIS.join(', ')}. Reprove: frase motivacional comum, comparação previsível, conselho óbvio, ditado de empreendedorismo conhecido, texto que qualquer influenciadora publicaria igual. "Experiência real" só vale se a experiência foi informada pela Núbia, nunca inventada.
+Responda só JSON: {"diferencial":"um item da lista ou nenhum","explicacao":"onde está o diferencial, citando o trecho","nota":0,"generico":false,"motivos":["…"],"trechosGenericos":["trecho exato"],"comparacaoReferencias":"como a proposta se compara ao ritmo e à linguagem das referências"}`);
+  const nota = Math.max(0, Math.min(10, Number(out.nota) || 0)); const dif = DIFERENCIAIS.includes(out.diferencial) ? out.diferencial : 'nenhum';
+  return { aprovado: !hits.length && !out.generico && dif !== 'nenhum' && nota >= 7, nota, diferencial: dif, explicacao: out.explicacao || '',
+    motivos: [...(Array.isArray(out.motivos) ? out.motivos : []), ...hits.map(h => `Clichê: "${h}"`)].slice(0, 6), trechos: (Array.isArray(out.trechosGenericos) ? out.trechosGenericos : []).slice(0, 4),
+    comparacao: out.comparacaoReferencias || '', refs: refs.length, at: now() };
+}
+// gera, avalia e reescreve até 2 vezes antes de apresentar
+async function gatedGenerate(o) {
+  let n = normalize(o.type, await callAI(buildPrompt(o)));
+  let q = await qualityCheck(o.type, n); let rew = 0;
+  while (!q.aprovado && rew < 2) {
+    rew++;
+    const fb = `O FILTRO ANTI-GENÉRICO REPROVOU (nota ${q.nota}/10). Motivos: ${q.motivos.join('; ')}. Trechos genéricos: ${q.trechos.join(' | ') || '-'}. Reescreva com um diferencial claro, mantendo o tema.` + (o.feedback ? ` Pedido da Núbia: ${o.feedback}` : '');
+    n = normalize(o.type, await callAI(buildPrompt(Object.assign({}, o, { feedback: fb, previous: JSON.stringify(n.payload).slice(0, 2500) }))));
+    q = await qualityCheck(o.type, n);
+  }
+  q.reescritas = rew;
+  return { n, q };
+}
+function gateSheet(c, q) {
+  openSheet(`<h2>Parece genérico</h2><p class="small">Nota ${q.nota}/10.${q.diferencial === 'nenhum' ? ' Não encontrei um diferencial claro.' : ''}</p>
+    ${q.motivos.length ? `<ul class="small">${q.motivos.map(m => `<li>${esc(m)}</li>`).join('')}</ul>` : ''}
+    ${q.trechos.length ? `<p class="small"><b>Trechos:</b> ${q.trechos.map(esc).join(' | ')}</p>` : ''}
+    ${q.comparacao ? `<p class="small muted">${esc(q.comparacao)}</p>` : ''}
+    <div class="row"><button class="btn primary" id="gt-rw">Reescrever com o filtro</button><button class="btn ghost" id="gt-ok">Aprovar mesmo assim</button></div>
+    <p class="small muted">Se aprovar mesmo assim, a Central registra que você discordou do filtro e aprende com isso.</p>`, (el) => {
+    $('#gt-rw', el).addEventListener('click', () => { closeSheet(); regenerate(c, 'Reescreva para ter um diferencial claro: ' + q.motivos.join('; ')).catch(e => toast(e.message || 'Falhou')); });
+    $('#gt-ok', el).addEventListener('click', () => { closeSheet(); ACTIONS.aprovar(Object.assign({}, c, { qualidade: q }), { dataset: { forcar: '1' } }); });
+  });
+}
 async function generate(o) {
   if (!needDb()) return null;
-  const tmpId = 'novo-' + uid(); S.busy[tmpId] = 'Gerando…';
-  const raw = await callAI(buildPrompt(o));
-  delete S.busy[tmpId];
-  const n = normalize(o.type, raw); const serie = o.series ? S.series.find(s => s.id === o.series) : null;
-  const c = Object.assign({ id: uid(), type: o.type, objective: o.objective, series: o.series || null, seriesName: serie ? serie.nome : '', status: 'aprovar', createdAt: now(), updatedAt: now(), version: 1, origem: 'app', precisaGravacao: o.type === 'reel7' || o.type === 'reelFalado', productId: o.product ? o.product.id : null, scheduledFor: o.date || null, files: [] }, n);
+  const { n, q } = await gatedGenerate(o);
+  if (!q.aprovado) {
+    await col('learning').add({ at: now(), action: 'filtro_descartou', type: o.type, title: n.title, texto: mainText(Object.assign({ type: o.type }, n)), reason: q.motivos.join('; ') });
+    log('filtro descartou', n.title);
+    throw new Error(`Descartei a proposta: continuou genérica depois de 2 reescritas (${q.motivos.slice(0, 2).join('; ') || 'sem diferencial claro'}). Tente outro tema ou ângulo.`);
+  }
+  const serie = o.series ? S.series.find(s => s.id === o.series) : null;
+  const c = Object.assign({ id: uid(), type: o.type, goal: o.goal || 'alcance', objective: PILLAR[o.goal] || 'crescimento', qualidade: q, experimentId: o.experimentId || null, series: o.series || null, seriesName: serie ? serie.nome : '', status: 'aprovar', createdAt: now(), updatedAt: now(), version: 1, origem: 'app', precisaGravacao: o.type === 'reel7' || o.type === 'reelFalado', productId: o.product ? o.product.id : null, scheduledFor: o.date || null, files: [] }, n);
   c.slug = NCRender.slug(c.title);
   await col('contents').doc(c.id).set(c);
   log('gerou', c.title);
@@ -673,8 +935,8 @@ async function regenerate(c, feedback) {
   if (!needDb()) return;
   await setBusy(c.id, 'Gerando nova versão…');
   try {
-    const raw = await callAI(buildPrompt({ type: c.type, objective: c.objective, series: c.series, style: c.style, brief: plain(c.title), feedback, previous: JSON.stringify(c.payload).slice(0, 2500), product: S.products.find(p => p.id === c.productId) }));
-    const n = normalize(c.type, raw);
+    const { n, q } = await gatedGenerate({ type: c.type, goal: goalOf(c), series: c.series, style: c.style, brief: plain(c.title), feedback, previous: JSON.stringify(c.payload).slice(0, 2500), product: S.products.find(p => p.id === c.productId) });
+    n.qualidade = q; n.editadoPelaNubia = false;
     const versions = [...(c.versions || []), { at: now(), title: c.title, payload: c.payload }].slice(-3);
     await learn('nova_versao', c, { reason: feedback });
     const upd = Object.assign({}, n, { versions, version: (c.version || 1) + 1, status: 'aprovar', updatedAt: now() });
@@ -768,47 +1030,63 @@ function openCreate(pre) {
   const active = S.series.filter(s => s.status !== 'pausada');
   openSheet(`<h2>Criar conteúdo</h2>
     <div class="grid2"><label for="cr-type">Formato<select id="cr-type">${optList(TYPE, pre.type || 'reel7')}</select></label>
-    <label for="cr-obj">Objetivo<select id="cr-obj">${optList(OBJ, pre.objective || 'crescimento')}</select></label></div>
+    <label for="cr-obj">Objetivo<select id="cr-obj">${optList(GOALS, pre.goal || 'alcance')}</select></label></div>
     <div class="grid2"><label for="cr-serie">Série<select id="cr-serie"><option value="">Nenhuma</option>${active.map(s => `<option value="${s.id}">${esc(s.nome)}</option>`).join('')}</select></label>
     <label for="cr-style">Estilo visual<select id="cr-style"><option value="auto">Automático (varia)</option>${optList(STYLE_NAME)}</select></label></div>
     <label for="cr-brief">Tema ou ideia (opcional)<textarea id="cr-brief" placeholder="Ex.: a cliente que pergunta se pode mentir no depoimento">${esc(pre.brief || '')}</textarea></label>
     <div class="row"><button class="btn primary" id="cr-ok">Gerar</button><button class="btn ghost" data-close>Cancelar</button></div>
-    <p class="small muted" id="cr-msg">Leva de 20 a 60 segundos. O resultado vai para Aprovar.</p>`, (el) => {
+    <p class="small muted" id="cr-msg">Leva de 30 a 90 segundos: a proposta passa pelo filtro anti-genérico e é reescrita se precisar. Se continuar genérica, é descartada.</p>`, (el) => {
     $('#cr-ok', el).addEventListener('click', async (ev) => {
       const btn = ev.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Gerando';
       try {
-        const c = await generate({ type: $('#cr-type', el).value, objective: $('#cr-obj', el).value, series: $('#cr-serie', el).value || null, style: $('#cr-style', el).value, brief: $('#cr-brief', el).value.trim() });
+        const c = await generate({ type: $('#cr-type', el).value, goal: $('#cr-obj', el).value, series: $('#cr-serie', el).value || null, style: $('#cr-style', el).value, brief: $('#cr-brief', el).value.trim() });
         if (c) { closeSheet(); location.hash = 'aprovar'; toast('Pronto para aprovar'); }
       } catch (e) { $('#cr-msg', el).textContent = e?.code === 'rate_limited' ? 'Muitas gerações seguidas. Espere um minuto.' : (e.message || 'A geração falhou.'); btn.disabled = false; btn.textContent = 'Gerar'; }
     });
   });
 }
 function openWeek() {
-  openSheet(`<h2>Montar a semana</h2><p class="small muted">A Central propõe 7 publicações respeitando a distribuição (${Object.keys(OBJ).map(k => OBJ[k] + ' ' + brand().mix[k] + '%').join(', ')}) e no máximo uma vez cada série ativa.</p>
+  openSheet(`<h2>Montar a semana</h2><p class="small muted">Primeiro a Central analisa o histórico (desempenho, funil e experimentos) e mostra oportunidades e problemas. Depois propõe 7 publicações, cada uma com objetivo, base nos dados e, quando for o caso, hipótese de melhoria.</p>
     <label for="wk-foco">Algum foco para esta semana? (opcional)<textarea id="wk-foco" placeholder="Ex.: lançamento do workshop dia 15; evitar política"></textarea></label>
-    <div class="row"><button class="btn primary" id="wk-ok">Propor semana</button></div><div id="wk-out" class="stack"></div>`, (el) => {
+    <div class="row"><button class="btn primary" id="wk-ok">Analisar e propor</button></div><div id="wk-out" class="stack"></div>`, (el) => {
     $('#wk-ok', el).addEventListener('click', async (ev) => {
-      const btn = ev.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Planejando';
-      const start = addDays(today(), 1);
-      const active = S.series.filter(s => s.status !== 'pausada').map(s => `${s.id}: ${s.nome} (${s.descricao || ''})`).join('\n');
-      const recent = S.contents.slice(0, 25).map(c => '- ' + plain(c.title)).join('\n');
+      const btn = ev.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Analisando';
+      const start = addDays(today(), 1); const end = addDays(start, 6); const mix = brand().mix;
+      const active = S.series.filter(s => s.status !== 'pausada').map(s => `${s.id}: ${s.nome} (${s.status}; ${s.descricao || ''})`).join('\n');
+      const recent = S.contents.slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 25).map(c => '- ' + plain(c.title)).join('\n');
+      const rodando = S.experiments.filter(e => e.status === 'rodando').map(e => `${e.id}: ${e.hipotese} (variável ${e.variavel}; controle: ${e.controle}; variante: ${e.variante})`).join('\n');
+      const funil = funnelSorted().slice(-4).map(f => ({ semana: f.semana, seguidores: f.seguidores, visitas: f.visitas, cliques: f.cliques, oportunidades: f.leads, vendas: f.vendas }));
       try {
-        const plan = await callAI(`Planeje 7 publicações do Instagram da Núbia Citty (advogada criminalista, empresária, mentora; personalidade antes de aula) de ${start} a ${addDays(start, 6)}, uma por dia.
-Distribuição alvo: crescimento ${brand().mix.crescimento}%, autoridade ${brand().mix.autoridade}%, conversao ${brand().mix.conversao}%. Formatos: reel7, reelFalado, carrossel, stories, estatico (varie; no máximo 2 reelFalado, porque exigem gravação). Cada série no máximo 1 vez na semana. Séries disponíveis:\n${active || '(nenhuma)'}
-Produtos para conversão: ${S.products.map(p => p.nome).join(', ') || 'nenhum cadastrado (então conversão = relacionamento que leva ao direct ou ao link da bio, sem captação)'}.
+        const plan = await callAI(`Você é o diretor de marketing do Instagram da Núbia Citty (advogada criminalista, empresária, mentora; personalidade antes de aula). O objetivo é descobrir o que a faz crescer, ganhar autoridade e vender, preservando a autenticidade. Volume não é meta.
+PASSO 1, DIAGNÓSTICO. Analise os dados e liste oportunidades e problemas observados. Sem dados, diga isso e trate o plano como hipótese.
+DESEMPENHO: ${perfSummary()}
+FUNIL: ${funil.length ? JSON.stringify(funil) : 'sem dados'}
+EXPERIMENTOS APROVADOS EM ANDAMENTO (o plano deve incluir os conteúdos que eles exigem): ${rodando || 'nenhum'}
+PASSO 2, PLANO. 7 publicações de ${start} a ${end}, uma por dia. Objetivo de cada uma: alcance, seguidores, autoridade, relacionamento ou conversao. Pilares: crescimento (alcance + seguidores) ${mix.crescimento}%, autoridade (autoridade + relacionamento) ${mix.autoridade}%, conversão ${mix.conversao}%. Formatos: reel7, reelFalado, carrossel, stories, estatico (no máximo 2 reelFalado, que exigem gravação). Cada série no máximo 1 vez. Séries:\n${active || '(nenhuma)'}
+Produtos: ${S.products.map(p => p.nome).join(', ') || 'nenhum'} (conversão sem captação, respeitando a OAB).
 Foco da Núbia: ${$('#wk-foco', el).value || 'livre'}.
-Evite assuntos recentes:\n${recent || '(nenhum)'}
-Responda só JSON: {"dias":[{"data":"AAAA-MM-DD","type":"reel7","objective":"crescimento","series":"id ou null","tema":"tema concreto em uma frase","porque":"motivo estratégico curto"}]}`);
-        const dias = (plan.dias || []).slice(0, 7);
-        $('#wk-out', el).innerHTML = dias.map((d, i) => `<div class="box"><div class="row"><span class="pill">${fmtDay(d.data)}</span><span class="pill wine">${TYPE[d.type] || d.type}</span><span class="pill">${OBJ[d.objective] || d.objective}</span></div><b>${esc(d.tema)}</b><span class="small muted">${esc(d.porque || '')}</span><div class="row"><button class="btn small" data-wk="${i}">Produzir este</button></div></div>`).join('') +
-          `<button class="btn primary" id="wk-all">Produzir os ${dias.length} (${dias.length} gerações)</button>`;
-        const run = async (d) => generate({ type: TYPE[d.type] ? d.type : 'carrossel', objective: OBJ[d.objective] ? d.objective : 'crescimento', series: S.series.some(s => s.id === d.series) ? d.series : null, style: 'auto', brief: d.tema, date: d.data });
-        el.querySelectorAll('[data-wk]').forEach(b2 => b2.addEventListener('click', async () => { b2.disabled = true; b2.innerHTML = '<span class="spin"></span>'; try { await run(dias[+b2.dataset.wk]); b2.textContent = 'Feito'; } catch (e) { b2.textContent = 'Falhou'; b2.disabled = false; } }));
-        $('#wk-all', el).addEventListener('click', async (e2) => { const b3 = e2.currentTarget; b3.disabled = true; let ok = 0;
-          for (const [i, d] of dias.entries()) { b3.innerHTML = `<span class="spin"></span> ${i + 1} de ${dias.length}`; try { await run(d); ok++; } catch (e) { console.error(e); } }
-          closeSheet(); location.hash = 'aprovar'; toast(`${ok} conteúdo(s) para aprovar`); });
+Assuntos recentes (não repita):\n${recent || '(nenhum)'}
+REGRAS: tendência nunca é copiada, só adaptada à personalidade e experiência dela. Cada tema precisa de ângulo com diferencial (ironia, contradição inesperada, humor ácido, experiência real, opinião marcante, narrativa original). Nada do que está EM OBSERVAÇÃO volta sem "hipoteseMelhoria". Não prometa viralização nem vendas.
+Responda só JSON: {"diagnostico":{"baseDados":"o que foi analisado ou 'sem dados'","oportunidades":["…"],"problemas":["…"]},"dias":[{"data":"AAAA-MM-DD","type":"reel7","goal":"alcance","series":"id ou null","tema":"tema concreto já com o ângulo","diferencial":"…","porque":"motivo estratégico","baseDados":"dado observado que sustenta, ou 'hipótese'","hipoteseMelhoria":"","experimento":"id ou null"}]}`);
+        const dg = plan.diagnostico || {}; const dias = (plan.dias || []).slice(0, 7);
+        const li = (a) => (a || []).length ? `<ul class="small">${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="small muted">Nada apontado.</p>';
+        $('#wk-out', el).innerHTML = `<div class="box"><span class="eyebrow">Diagnóstico · ${esc(dg.baseDados || '')}</span><b class="small">Oportunidades</b>${li(dg.oportunidades)}<b class="small">Problemas</b>${li(dg.problemas)}</div>` +
+          dias.map((d, i) => `<div class="box"><div class="row"><span class="pill">${fmtDay(d.data)}</span><span class="pill wine">${TYPE[d.type] || esc(d.type)}</span><span class="pill">Objetivo: ${GOALS[d.goal] || esc(d.goal)}</span>${/hip/i.test(d.baseDados || '') ? '<span class="pill warn">Hipótese</span>' : ''}${d.experimento ? '<span class="pill ok">Experimento</span>' : ''}</div>
+            <b>${esc(d.tema)}</b>${d.diferencial ? `<span class="small">Diferencial: ${esc(d.diferencial)}</span>` : ''}<span class="small muted">${esc(d.porque || '')}${d.baseDados && !/hip/i.test(d.baseDados) ? ' · Base: ' + esc(d.baseDados) : ''}</span>
+            ${d.hipoteseMelhoria ? `<span class="small"><b>Hipótese de melhoria:</b> ${esc(d.hipoteseMelhoria)}</span>` : ''}<div class="row"><button class="btn small" data-wk="${i}">Produzir este</button></div></div>`).join('') +
+          `<button class="btn primary" id="wk-all">Produzir os ${dias.length} (${dias.length} gerações com filtro)</button>`;
+        const run = async (d) => generate({ type: TYPE[d.type] ? d.type : 'carrossel', goal: GOALS[d.goal] ? d.goal : 'alcance', series: S.series.some(s => s.id === d.series) ? d.series : null, style: 'auto', date: d.data,
+          experimentId: S.experiments.some(e => e.id === d.experimento) ? d.experimento : null,
+          brief: d.tema + (d.diferencial ? `. Diferencial pretendido: ${d.diferencial}` : '') + (d.hipoteseMelhoria ? `. Hipótese de melhoria: ${d.hipoteseMelhoria}` : '') });
+        el.querySelectorAll('[data-wk]').forEach(b2 => b2.addEventListener('click', async () => { b2.disabled = true; b2.innerHTML = '<span class="spin"></span>'; try { await run(dias[+b2.dataset.wk]); b2.textContent = 'Feito'; } catch (e) { b2.textContent = 'Descartado ou falhou'; b2.title = e.message || ''; } }));
+        $('#wk-all', el).addEventListener('click', async (e2) => {
+          const b3 = e2.currentTarget; b3.disabled = true; let ok = 0, fora = 0;
+          await col('decisions').add({ at: now(), decididoEm: now(), tipo: 'calendario', descricao: `Semana de ${fmtDay(start)} planejada (${dias.length} publicações)`, motivo: [...(dg.oportunidades || []), ...(dg.problemas || [])].slice(0, 4).join(' | '), status: 'registrada' });
+          for (const [i, d] of dias.entries()) { b3.innerHTML = `<span class="spin"></span> ${i + 1} de ${dias.length}`; try { await run(d); ok++; } catch (e) { fora++; console.error(e); } }
+          closeSheet(); location.hash = 'aprovar'; toast(`${ok} para aprovar${fora ? `, ${fora} descartado(s) pelo filtro ou com falha` : ''}`);
+        });
       } catch (e) { $('#wk-out', el).innerHTML = `<p class="small">${esc(e.message || 'Falhou. Tente de novo.')}</p>`; }
-      btn.disabled = false; btn.textContent = 'Propor de novo';
+      btn.disabled = false; btn.textContent = 'Analisar de novo';
     });
   });
 }
@@ -838,7 +1116,7 @@ function openEdit(c) {
       if (c.type === 'stories') p.stories.forEach((s, i) => { s.texto = v('ed-t' + i); s.apoio = v('ed-b' + i); });
       if (c.type === 'estatico') { p.card.title = v('ed-t0'); p.card.body = v('ed-b0'); }
       p.legenda = v('ed-leg'); p.cta = v('ed-cta');
-      const upd = { title: v('ed-title') || c.title, payload: p, updatedAt: now() };
+      const upd = { title: v('ed-title') || c.title, payload: p, editadoPelaNubia: true, updatedAt: now() };
       if (v('ed-style')) upd.style = v('ed-style');
       if ($('#ed-photo', el)) upd.photoRefId = v('ed-photo') || null;
       await col('contents').doc(c.id).update(upd);
@@ -941,27 +1219,128 @@ function openImport() {
     });
   });
 }
-function openMetric() {
-  const fields = [['date', 'Data', 'date'], ['format', 'Formato'], ['tema', 'Tema'], ['url', 'Link'], ['reach', 'Alcance', 'number'], ['views', 'Visualizações', 'number'], ['likes', 'Curtidas', 'number'], ['comments', 'Comentários', 'number'], ['shares', 'Compartilhamentos', 'number'], ['saves', 'Salvamentos', 'number'], ['profileVisits', 'Visitas ao perfil', 'number'], ['follows', 'Novos seguidores', 'number']];
-  openSheet(`<h2>Adicionar métricas</h2><p class="small muted">Copie os números dos Insights do Instagram. Deixe em branco o que não tiver.</p>
-    <div class="grid2">${fields.map(([k, l, t]) => `<label for="mt-${k}">${l}<input id="mt-${k}" type="${t || 'text'}" ${t === 'number' ? 'inputmode="numeric" min="0"' : ''}></label>`).join('')}</div>
+function openMetric(c) {
+  const fields = [['date', 'Data', 'date'], ['horario', 'Horário', 'time'], ['format', 'Formato'], ['tema', 'Tema'], ['url', 'Link'], ['reach', 'Alcance', 'number'], ['views', 'Visualizações', 'number'], ['likes', 'Curtidas', 'number'], ['comments', 'Comentários', 'number'], ['shares', 'Compartilhamentos', 'number'], ['saves', 'Salvamentos', 'number'], ['profileVisits', 'Visitas ao perfil', 'number'], ['follows', 'Novos seguidores', 'number'], ['linkClicks', 'Cliques no link', 'number'], ['leads', 'Oportunidades comerciais', 'number'], ['vendas', 'Vendas com atribuição', 'number'], ['avgWatch', 'Tempo médio assistido (s)', 'number'], ['duracao', 'Duração do vídeo (s)', 'number']];
+  const pre = c ? { date: (c.publicadoEm || '').slice(0, 10), horario: c.horario || '', format: TYPE[c.type], tema: c.tags?.tema || '', url: c.postUrl || '', duracao: c.payload?.duracao || '' } : {};
+  openSheet(`<h2>${c ? 'Resultado' : 'Adicionar métricas'}</h2>${c ? `<p class="small muted">${esc(plain(c.title))}</p>` : ''}
+    <p class="small muted">Copie dos Insights do Instagram, de 48h a 7 dias após publicar. Deixe em branco o que não tiver. Vendas só com atribuição confiável (link rastreado ou cliente que citou o post).</p>
+    <div class="grid2">${fields.map(([k, l, t]) => `<label for="mt-${k}">${l}<input id="mt-${k}" type="${t || 'text'}" ${t === 'number' ? 'inputmode="numeric" min="0"' : ''} value="${esc(pre[k] ?? '')}"></label>`).join('')}
+    <label for="mt-tipoGancho">Gancho<select id="mt-tipoGancho"><option value="">–</option>${HOOKS.map(h => `<option ${c?.tags?.tipoGancho === h ? 'selected' : ''}>${h}</option>`).join('')}</select></label>
+    <label for="mt-tipoCta">CTA<select id="mt-tipoCta"><option value="">–</option>${CTAS.map(h => `<option ${c?.tags?.tipoCta === h ? 'selected' : ''}>${h}</option>`).join('')}</select></label></div>
     <button class="btn primary" id="mt-ok">Salvar</button>`, (el) => {
-    $('#mt-ok', el).addEventListener('click', async () => { if (!needDb()) return; const o = { source: 'manual', importadoEm: now() }; fields.forEach(([k]) => { const v = $('#mt-' + k, el).value.trim(); if (v) o[k] = v; });
-      await col('metrics').add(o); closeSheet(); toast('Métricas salvas'); });
+    $('#mt-ok', el).addEventListener('click', async () => {
+      if (!needDb()) return; const o = { source: 'manual', importadoEm: now() };
+      if (c) { o.contentId = c.id; o.goal = goalOf(c); }
+      [...fields.map(f => f[0]), 'tipoGancho', 'tipoCta'].forEach(k => { const v = $('#mt-' + k, el).value.trim(); if (v) o[k] = v; });
+      await col('metrics').add(o); log('registrou resultado', o.tema || ''); closeSheet(); toast('Resultado salvo');
+    });
   });
 }
+async function classify() {
+  if (!needDb()) return;
+  const todo = S.metrics.filter(m => !m.tema && !m.contentId && m.caption).slice(0, 40);
+  if (!todo.length) { toast('Nada para classificar: as publicações precisam ter o texto da legenda.'); return; }
+  toast(`Classificando ${todo.length} publicações…`);
+  const out = await callAI(`Classifique cada publicação do Instagram da Núbia Citty pelo texto da legenda. Temas: ${brand().temas.join(', ')}. Ganchos: ${HOOKS.join(', ')}. CTAs: ${CTAS.join(', ')}. Objetivo provável: ${Object.keys(GOALS).join(', ')}. Se não der para saber, use "".
+Publicações: ${JSON.stringify(todo.map((m, i) => ({ i, formato: m.format || '', texto: String(m.caption).slice(0, 300) })))}
+Responda só JSON: {"itens":[{"i":0,"tema":"","tipoGancho":"","tipoCta":"","goal":""}]}`);
+  let n = 0;
+  for (const it of (out.itens || [])) {
+    const m = todo[it.i]; if (!m) continue; const upd = {};
+    if (brand().temas.includes(it.tema)) upd.tema = it.tema; if (HOOKS.includes(it.tipoGancho)) upd.tipoGancho = it.tipoGancho;
+    if (CTAS.includes(it.tipoCta)) upd.tipoCta = it.tipoCta; if (GOALS[it.goal]) upd.goal = it.goal;
+    if (Object.keys(upd).length) { upd.classificadoPorIA = true; await col('metrics').doc(m.id).update(upd); n++; }
+  }
+  log('classificou métricas', String(n)); toast(`${n} publicações classificadas pela IA (revise se algo parecer errado)`);
+}
+const pickExp = (e) => ({ hipotese: String(e.hipotese || ''), variavel: String(e.variavel || ''), controle: String(e.controle || ''), variante: String(e.variante || ''), metrica: String(e.metrica || ''), duracao: String(e.duracao || '') });
 async function weeklyReport() {
-  const A = analyze(); if (!A.rows.length) return;
-  toast('Gerando relatório…');
-  const data = { formatos: A.formats.map(f => ({ formato: f.format, posts: f.n, alcanceMedio: f.reach, taxaCompartilhamento: f.shareRate, taxaSalvamento: f.saveRate, taxaEngajamento: f.engRate })),
-    melhores: A.top.map(r => ({ data: r.date, formato: r.format, texto: (r.caption || r.tema || '').slice(0, 120), alcance: r.reach ?? r.views, compart: r.shares, salvos: r.saves })),
-    piores: A.bottom.map(r => ({ data: r.date, formato: r.format, texto: (r.caption || r.tema || '').slice(0, 120), alcance: r.reach ?? r.views })),
-    distribuicaoAlvo: brand().mix };
-  const out = await S.sample(`Você é analista de crescimento do Instagram da Núbia Citty (advogada criminalista e empresária). Escreva o relatório semanal em português, direto, sem travessões, em até 250 palavras, com: 1) o que funcionou, 2) o que não funcionou, 3) três experimentos específicos para a próxima semana (mude uma variável por vez), 4) ajuste sugerido na distribuição, se os dados justificarem.
-Regras: use SOMENTE os números abaixo; não invente métricas; diga quando a amostra é pequena; separe correlação de causalidade; não atribua vendas a posts. Não diga que encontrou fórmula de viralização.
-DADOS: ${JSON.stringify(data)}`, { modelTier: 'complex' });
-  countUsage();
-  await col('reports').add({ at: now(), texto: out.text, base: A.rows.length }); log('relatório semanal', A.rows.length + ' posts');
+  if (!needDb()) return;
+  const rows = rowsWithTags(); const F = funnelSorted();
+  if (!rows.length && !F.length) { toast('Sem dados: importe métricas ou registre a semana do funil primeiro.'); return; }
+  toast('Analisando a semana…');
+  const lim = new Date(); lim.setDate(lim.getDate() - 14);
+  const pubs = rows.filter(r => !r.d || r.d >= lim).slice(0, 40).map(r => ({ data: r.date, formato: r.format, objetivo: r.goal, tema: r.tema, gancho: r.tipoGancho, cta: r.tipoCta, duracao: r.duracaoFaixa, horario: r.turno, titulo: (r.titulo || '').slice(0, 90), alcance: r.reach, compart: r.shares, salvos: r.saves, comentarios: r.comments, novosSeguidores: r.follows, visitasPerfil: r.profileVisits, cliques: r.linkClicks, oportunidades: r.leads, vendas: r.vendas }));
+  const comparativos = {};
+  Object.keys(DIMS).forEach(d => { const cmp = compare(rows, d); if (cmp.length) comparativos[DIMS[d]] = cmp.map(x => ({ grupo: x.k, n: x.n, pctCompart: x.share == null ? null : +x.share.toFixed(2), pctSalv: x.save == null ? null : +x.save.toFixed(2), seguidoresPorPost: x.follows == null ? null : +x.follows.toFixed(1), oportunidades: x.leads })); });
+  const data = { periodo: `${addDays(today(), -7)} a ${today()}`, publicacoes: pubs, comparativos, funil: F.slice(-6).map(f => ({ semana: f.semana, seguidores: f.seguidores, visitas: f.visitas, cliques: f.cliques, oportunidades: f.leads, vendas: f.vendas })),
+    metas: (S.goals?.metas || []).map(m => ({ indicador: INDICADORES[m.indicador], alvo: m.alvo, atual: indicador(m.indicador) })),
+    experimentos: S.experiments.filter(e => e.status !== 'descartado').map(e => ({ hipotese: e.hipotese, status: e.status, resultado: e.resultado || null })),
+    emObservacao: underperformers(rows), distribuicaoAlvo: brand().mix, totalMedidas: rows.length };
+  const R = await callAI(`Você é o diretor de marketing do Instagram da Núbia Citty (advogada criminalista, empresária, mentora). Escreva o relatório semanal em português, direto, sem travessões.
+REGRAS: 1) "observado" só com fatos dos DADOS, citando números. Sem dado para a pergunta: escreva "Sem dados suficientes" e diga qual dado falta. 2) "hipoteses" são interpretações. 3) Separe correlação de causalidade. 4) Não atribua venda a uma publicação sem dado de atribuição. 5) Nunca garanta viralização ou vendas. 6) Cada experimento muda UMA variável e tem métrica de sucesso. 7) Conteúdo com desempenho ruim só continua com hipótese de melhoria. 8) Mudanças relevantes de distribuição, séries ou posicionamento vão em "mudancasPropostas" para a Núbia aprovar. 9) Não sugira copiar tendências.
+DADOS: ${JSON.stringify(data)}
+Responda só JSON: {"observado":{"cresceu":"","seguidores":"","compartilhamentos":"","autoridade":"","oportunidades":"","perdaConversao":""},"hipoteses":[""],"recomendacoes":{"parar":[""],"continuar":[""],"comecar":[""]},"experimentos":[{"hipotese":"","variavel":"formato|tema|horario|gancho|cta|duracao","controle":"","variante":"","metrica":"","duracao":""}],"mudancasPropostas":[{"tipo":"mix|serie|posicionamento","descricao":"","motivo":"","payload":{}}],"limitacoes":""}
+Para "mix", payload = {"crescimento":n,"autoridade":n,"conversao":n} somando 100. Para "serie", payload = {"id":"…","status":"ativa|teste|pausada"} (séries: ${S.series.map(s => s.id + ' = ' + s.nome).join('; ')}).`);
+  const at = now();
+  await col('reports').add({ at, estruturado: R, base: rows.length });
+  for (const e of (R.experimentos || []).slice(0, 3)) await col('experiments').add(Object.assign({ status: 'proposto', criado: at, origem: 'relatorio' }, pickExp(e)));
+  for (const m of (R.mudancasPropostas || []).slice(0, 4)) if (['mix', 'serie', 'posicionamento'].includes(m.tipo)) await col('decisions').add({ at, tipo: m.tipo, descricao: String(m.descricao || ''), motivo: String(m.motivo || ''), payload: m.payload || {}, status: 'pendente', origem: 'relatorio' });
+  log('relatório semanal', rows.length + ' publicações'); toast('Relatório pronto');
+}
+async function applyDecision(d) {
+  const p = d.payload || {};
+  if (d.tipo === 'mix') {
+    const m = { crescimento: +p.crescimento || 0, autoridade: +p.autoridade || 0, conversao: +p.conversao || 0 };
+    if (m.crescimento + m.autoridade + m.conversao !== 100) throw new Error('A proposta não soma 100%. Recuse e ajuste em Minha marca.');
+    await col('settings').doc('brand').set(Object.assign({}, brand(), { mix: m, atualizado: now() }));
+  }
+  if (d.tipo === 'serie' && S.series.some(s => s.id === p.id) && ['ativa', 'teste', 'pausada'].includes(p.status)) await col('series').doc(p.id).update({ status: p.status });
+  if (d.tipo === 'posicionamento') await col('settings').doc('brand').set(Object.assign({}, brand(), { aprendidas: [...(brand().aprendidas || []), d.descricao], atualizado: now() }));
+}
+function openGoals() {
+  const cur = Object.fromEntries((S.goals?.metas || []).map(m => [m.indicador, m]));
+  openSheet(`<h2>Metas</h2><p class="small muted">Preencha só as que importam agora. Em branco, não é acompanhada.</p>
+    ${Object.entries(INDICADORES).map(([k, l]) => `<div class="grid2"><label for="gl-${k}">${l}<input id="gl-${k}" inputmode="decimal" placeholder="alvo" value="${esc(cur[k]?.alvo || '')}"></label><label for="gp-${k}">Prazo<input id="gp-${k}" type="date" value="${esc(cur[k]?.prazo || '')}"></label></div>`).join('')}
+    <button class="btn primary" id="gl-ok">Salvar metas</button>`, (el) => {
+    $('#gl-ok', el).addEventListener('click', async () => {
+      if (!needDb()) return;
+      const metas = Object.keys(INDICADORES).map(k => ({ indicador: k, alvo: $('#gl-' + k, el).value.trim(), prazo: $('#gp-' + k, el).value })).filter(m => m.alvo);
+      await col('settings').doc('goals').set({ metas, atualizado: now() });
+      await col('decisions').add({ at: now(), decididoEm: now(), tipo: 'metas', descricao: 'Metas definidas: ' + (metas.map(m => `${INDICADORES[m.indicador]} ${m.alvo}`).join('; ') || 'nenhuma'), status: 'registrada' });
+      closeSheet(); toast('Metas salvas');
+    });
+  });
+}
+function openFunnel() {
+  const f = [['seguidores', 'Seguidores no fim da semana'], ['visitas', 'Visitas ao perfil'], ['cliques', 'Cliques no link da bio'], ['leads', 'Oportunidades comerciais (conversas ou leads qualificados)'], ['vendas', 'Vendas'], ['faturamento', 'Faturamento (R$, opcional)']];
+  openSheet(`<h2>Registrar semana</h2><p class="small muted">Números dos Insights do Instagram, da Kiwify e do seu atendimento. Deixe em branco o que não tiver.</p>
+    <label for="fn-sem">Semana que começa em<input type="date" id="fn-sem" value="${weekStart()}"></label>
+    <div class="grid2">${f.map(([k, l]) => `<label for="fn-${k}">${l}<input id="fn-${k}" inputmode="decimal"></label>`).join('')}</div>
+    <label for="fn-fonte">Fonte dos números<input id="fn-fonte" placeholder="Insights, Kiwify, WhatsApp"></label><button class="btn primary" id="fn-ok">Salvar</button>`, (el) => {
+    $('#fn-ok', el).addEventListener('click', async () => {
+      if (!needDb()) return; const sem = $('#fn-sem', el).value; if (!sem) return;
+      const o = { semana: sem, fonte: $('#fn-fonte', el).value.trim(), registrado: now() };
+      f.forEach(([k]) => { const v = $('#fn-' + k, el).value.trim(); if (v) o[k] = v; });
+      await col('funnel').doc(sem).set(o); log('registrou funil', sem); closeSheet(); toast('Semana registrada');
+    });
+  });
+}
+function openExperiment() {
+  openSheet(`<h2>Novo experimento</h2><label for="ex-h">Hipótese<textarea id="ex-h" rows="2" placeholder="Reels de opinião com gancho de contradição trazem mais seguidores que os explicativos"></textarea></label>
+    <label for="ex-v">Variável testada (só uma)<select id="ex-v">${['formato', 'tema', 'horario', 'gancho', 'cta', 'duracao'].map(x => `<option>${x}</option>`).join('')}</select></label>
+    <div class="grid2"><label for="ex-c">Controle<input id="ex-c"></label><label for="ex-va">Variante<input id="ex-va"></label><label for="ex-m">Métrica de sucesso<input id="ex-m" placeholder="novos seguidores por post"></label><label for="ex-d">Duração<input id="ex-d" placeholder="2 semanas"></label></div>
+    <button class="btn primary" id="ex-ok">Criar como proposto</button>`, (el) => {
+    $('#ex-ok', el).addEventListener('click', async () => {
+      if (!needDb()) return; const h = $('#ex-h', el).value.trim(); if (!h) return;
+      await col('experiments').add({ hipotese: h, variavel: $('#ex-v', el).value, controle: $('#ex-c', el).value.trim(), variante: $('#ex-va', el).value.trim(), metrica: $('#ex-m', el).value.trim(), duracao: $('#ex-d', el).value.trim(), status: 'proposto', criado: now(), origem: 'manual' });
+      closeSheet(); toast('Experimento criado. Aprove para rodar.');
+    });
+  });
+}
+function openExpResult(e) {
+  if (!e) return;
+  openSheet(`<h2>Resultado do experimento</h2><p class="small">${esc(e.hipotese)}</p>
+    <label for="er-r">O que foi observado (com números)<textarea id="er-r" rows="3"></textarea></label>
+    <label for="er-d">Decisão<select id="er-d"><option>adotar a variante</option><option>manter o controle</option><option>continuar testando</option><option>inconclusivo</option></select></label>
+    <button class="btn primary" id="er-ok">Concluir</button>`, (el) => {
+    $('#er-ok', el).addEventListener('click', async () => {
+      if (!needDb()) return; const r = $('#er-r', el).value.trim(); const d = $('#er-d', el).value;
+      await col('experiments').doc(e.id).update({ resultado: r, decisao: d, status: d === 'continuar testando' ? 'rodando' : 'concluido', fim: d === 'continuar testando' ? null : today() });
+      await col('decisions').add({ at: now(), decididoEm: now(), tipo: 'experimento', descricao: `Experimento (${d}): ${e.hipotese}`, motivo: r, status: 'registrada' });
+      closeSheet(); toast('Registrado');
+    });
+  });
 }
 
 // ================= vendas =================
@@ -982,9 +1361,9 @@ function openCampaign(p) {
     <label for="cp-obs">Observações (datas, oferta, foco)<textarea id="cp-obs"></textarea></label><button class="btn primary" id="cp-ok">Criar campanha (5 gerações)</button><p class="small" id="cp-msg"></p>`, (el) => {
     $('#cp-ok', el).addEventListener('click', async (ev) => {
       const btn = ev.currentTarget; btn.disabled = true; const obs = $('#cp-obs', el).value.trim();
-      const steps = [['carrossel', 'autoridade', 'Conteúdo educativo sobre o problema que o produto resolve, sem vender.'], ['reelFalado', 'crescimento', 'Storytelling: por que este problema importa. Peça a história real da Núbia via marcador, não invente.'], ['reel7', 'crescimento', 'Demonstração provocativa do problema, frase de identificação.'], ['carrossel', 'conversao', 'Apresentação da solução: o que tem no produto e para quem é (e para quem não é).'], ['stories', 'conversao', 'Sequência de stories com CTA para o link, enquete de interesse e resposta a objeções.']];
+      const steps = [['carrossel', 'autoridade', 'Conteúdo educativo sobre o problema que o produto resolve, sem vender.'], ['reelFalado', 'relacionamento', 'Storytelling: por que este problema importa. Peça a história real da Núbia via marcador, não invente.'], ['reel7', 'alcance', 'Demonstração provocativa do problema, frase de identificação.'], ['carrossel', 'conversao', 'Apresentação da solução: o que tem no produto e para quem é (e para quem não é).'], ['stories', 'conversao', 'Sequência de stories com CTA para o link, enquete de interesse e resposta a objeções.']];
       let ok = 0;
-      for (const [i, [type, objective, brief]] of steps.entries()) { $('#cp-msg', el).innerHTML = `<span class="spin"></span> Peça ${i + 1} de 5`; try { await generate({ type, objective, style: 'auto', brief: brief + (obs ? ' ' + obs : ''), product: p }); ok++; } catch (e) { console.error(e); } }
+      for (const [i, [type, objective, brief]] of steps.entries()) { $('#cp-msg', el).innerHTML = `<span class="spin"></span> Peça ${i + 1} de 5`; try { await generate({ type, goal: objective, style: 'auto', brief: brief + (obs ? ' ' + obs : ''), product: p }); ok++; } catch (e) { console.error(e); } }
       log('campanha', p.nome); closeSheet(); location.hash = 'aprovar'; toast(`${ok} peça(s) da campanha para aprovar`);
     });
   });
@@ -1029,24 +1408,43 @@ function openMix() {
 }
 function openReference() {
   const sel = (id, label, opts) => `<label for="${id}">${label}<select id="${id}"><option value="">–</option>${opts.map(o => `<option>${o}</option>`).join('')}</select></label>`;
-  openSheet(`<h2>Nova referência</h2><label for="rf-file">Imagem<input type="file" id="rf-file" accept="image/*"></label>
-    <div class="grid2">${sel('rf-estilo', 'Estilo', Object.values(STYLE_NAME).concat('Outro'))}${sel('rf-tipo', 'Tipografia', ['Serifada', 'Sem serifa', 'Condensada', 'Manuscrita', 'Mista'])}
-    ${sel('rf-comp', 'Composição', ['Texto central', 'Foto e texto', 'Colagem', 'Grid', 'Minimal', 'Jornal'])}${sel('rf-fin', 'Finalidade', ['carrossel', 'story', 'capa de reel', 'post', 'foto própria autorizada'])}</div>
-    <label for="rf-nota">Nota (o que te chamou atenção)<input id="rf-nota"></label><label for="rf-orig">Origem ou crédito<input id="rf-orig"></label>
+  openSheet(`<h2>Nova referência</h2>
+    <div class="chips" id="rf-tipos"><button type="button" data-t="texto" aria-pressed="true">Texto</button><button type="button" data-t="imagem" aria-pressed="false">Imagem</button></div>
+    <div id="rf-box-texto" class="stack"><label for="rf-texto">Cole o roteiro, legenda ou frase<textarea id="rf-texto" rows="5"></textarea></label>
+      <label for="rf-func">O que funciona nele (linguagem, ritmo, construção, impacto)<input id="rf-func" placeholder="frases curtas, ironia no fim, fala como conversa"></label></div>
+    <div id="rf-box-imagem" class="stack" hidden><label for="rf-file">Imagem<input type="file" id="rf-file" accept="image/*"></label>
+      <div class="grid2">${sel('rf-estilo', 'Estilo', Object.values(STYLE_NAME).concat('Outro'))}${sel('rf-tipo', 'Tipografia', ['Serifada', 'Sem serifa', 'Condensada', 'Manuscrita', 'Mista'])}
+      ${sel('rf-comp', 'Composição', ['Texto central', 'Foto e texto', 'Colagem', 'Grid', 'Minimal', 'Jornal'])}${sel('rf-fin', 'Finalidade', ['carrossel', 'story', 'capa de reel', 'post', 'foto própria autorizada'])}</div></div>
+    <label for="rf-nota">Nota<input id="rf-nota"></label><label for="rf-orig">Origem ou crédito<input id="rf-orig" placeholder="@perfil, ou meu post de março"></label>
+    <p class="small muted">Referência ensina linguagem e ritmo. Texto, foto e layout de outros criadores nunca são copiados.</p>
     <button class="btn primary" id="rf-ok">Salvar referência</button><p class="small" id="rf-msg"></p>`, (el) => {
+    let tipo = 'texto';
+    el.querySelectorAll('#rf-tipos button').forEach(bt => bt.addEventListener('click', () => {
+      tipo = bt.dataset.t; el.querySelectorAll('#rf-tipos button').forEach(x => x.setAttribute('aria-pressed', String(x === bt)));
+      $('#rf-box-texto', el).hidden = tipo !== 'texto'; $('#rf-box-imagem', el).hidden = tipo !== 'imagem';
+    }));
     $('#rf-ok', el).addEventListener('click', async (ev) => {
-      const f = $('#rf-file', el).files[0]; if (!f) { $('#rf-msg', el).textContent = 'Escolha a imagem.'; return; }
-      if (!S.assets || !needDb()) return; ev.currentTarget.disabled = true; $('#rf-msg', el).innerHTML = '<span class="spin"></span> Enviando…';
-      try { const up = await S.assets.upload(f);
-        await col('references').doc(uid()).set({ assetId: up.id, url: up.url, estilo: $('#rf-estilo', el).value, tipografia: $('#rf-tipo', el).value, composicao: $('#rf-comp', el).value, finalidade: $('#rf-fin', el).value, nota: $('#rf-nota', el).value.trim(), origem: $('#rf-orig', el).value.trim(), criado: now() });
-        log('adicionou referência'); closeSheet(); toast('Referência salva'); } catch (e) { $('#rf-msg', el).textContent = e.message || 'Falhou o envio.'; ev.currentTarget.disabled = false; }
+      if (!needDb()) return; const msg = $('#rf-msg', el);
+      const base = { tipo, nota: $('#rf-nota', el).value.trim(), origem: $('#rf-orig', el).value.trim(), criado: now() };
+      if (tipo === 'texto') {
+        const t = $('#rf-texto', el).value.trim(); if (!t) { msg.textContent = 'Cole o texto.'; return; }
+        await col('references').doc(uid()).set(Object.assign(base, { texto: t, funciona: $('#rf-func', el).value.trim() }));
+        log('adicionou referência de texto'); closeSheet(); toast('Referência salva'); return;
+      }
+      const f = $('#rf-file', el).files[0]; if (!f) { msg.textContent = 'Escolha a imagem.'; return; }
+      if (!S.assets) { msg.textContent = 'Envio de imagem disponível apenas pelo claude.ai.'; return; }
+      ev.currentTarget.disabled = true; msg.innerHTML = '<span class="spin"></span> Enviando…';
+      try {
+        const up = await S.assets.upload(f);
+        await col('references').doc(uid()).set(Object.assign(base, { assetId: up.id, url: up.url, estilo: $('#rf-estilo', el).value, tipografia: $('#rf-tipo', el).value, composicao: $('#rf-comp', el).value, finalidade: $('#rf-fin', el).value }));
+        log('adicionou referência'); closeSheet(); toast('Referência salva');
+      } catch (e) { msg.textContent = e.message || 'Falhou o envio.'; ev.currentTarget.disabled = false; }
     });
   });
 }
-
 // ================= governança =================
 async function backup() {
-  const data = { exportadoEm: now(), brand: S.brand, contents: S.contents, products: S.products, references: S.references, metrics: S.metrics, series: S.series, learning: S.learning, reports: S.reports, radar: S.radar };
+  const data = { exportadoEm: now(), brand: S.brand, goals: S.goals, experiments: S.experiments, decisions: S.decisions, funnel: S.funnel, contents: S.contents, products: S.products, references: S.references, metrics: S.metrics, series: S.series, learning: S.learning, reports: S.reports, radar: S.radar };
   if (await save(`central-nubia-citty-backup-${today()}.json`, JSON.stringify(data, null, 2))) { log('baixou backup'); toast('Backup enviado'); }
 }
 function wipe() {
@@ -1055,7 +1453,7 @@ function wipe() {
     $('#wp-ok', el).addEventListener('click', async () => {
       if ($('#wp-c', el).value.trim() !== 'EXCLUIR' || !needDb()) { $('#wp-msg', el).textContent = 'Digite EXCLUIR exatamente.'; return; }
       $('#wp-msg', el).innerHTML = '<span class="spin"></span> Excluindo…';
-      const sets = { contents: S.contents, products: S.products, references: S.references, metrics: S.metrics, series: S.series, learning: S.learning, reports: S.reports, radar: S.radar, log: S.log };
+      const sets = { contents: S.contents, products: S.products, references: S.references, metrics: S.metrics, series: S.series, learning: S.learning, reports: S.reports, radar: S.radar, log: S.log, experiments: S.experiments, decisions: S.decisions, funnel: S.funnel };
       for (const [n, arr] of Object.entries(sets)) for (const d of arr) await col(n).doc(d.id).delete().catch(() => null);
       if (S.assets) { const l = await S.assets.list().catch(() => ({ assets: [] })); for (const a of l.assets) await S.assets.delete(a.id).catch(() => null); }
       closeSheet(); toast('Dados excluídos');

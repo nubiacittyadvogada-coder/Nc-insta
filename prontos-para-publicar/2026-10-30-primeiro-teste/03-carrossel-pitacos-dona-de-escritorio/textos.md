@@ -2,15 +2,15 @@
 
 Formato: carrossel · Objetivo: crescimento · Série: Pitacos que ninguém me pediu
 
-> Validar: As opiniões dos cards 2 a 5 estão atribuídas a você. Aprove só se concordar com cada uma.
+> Validar: As opiniões dos cards 2 a 5 estão atribuídas a você, inclusive a do honorário (card 5). Aprove só se concordar com cada uma.
 
 ## Cards
 1. Pitacos que você não me pediu, mas vou te dar mesmo assim. | Versão dona de escritório.
-2. Contrate devagar. Demita rápido. | A maioria faz o contrário e chama de "dar mais uma chance". A conta chega no caixa e no clima da equipe.
-3. Se o escritório para quando você tira férias, você não tem um escritório. | Tem um emprego com CNPJ. E com o chefe mais exigente que existe: você.
-4. Processo que só existe na sua cabeça não é processo. É risco. | Se não está escrito, ninguém consegue repetir, cobrar ou melhorar.
-5. Preço não se defende na reunião. Se defende antes dela. | Quando o cliente chega sabendo quem você é, a conversa é sobre o caso. Não sobre desconto.
-6. Pitaco não pedido também é conselho. Só que de graça. | Qual desses doeu mais? Me conta nos comentários.
+2. Você não precisa de mais clientes. Precisa parar de atender cliente que te custa dinheiro. | Aquele que liga às 23h, pede desconto e some na hora do boleto. Isso não é cliente. É hobby caro.
+3. Ninguém te contratou pela sua gravata. Mas muita gente desistiu pelo seu WhatsApp. | Áudio de 4 minutos, resposta três dias depois. O cliente julga o escritório antes de ler a petição.
+4. Se o estagiário sabe a senha do sistema e você não, quem é o dono do escritório? | Delegar não é sumir. É saber exatamente o que foi entregue.
+5. Honorário baixo não fideliza. Só te cansa mais rápido. | Quem escolhe advogada pelo preço troca de advogada pelo preço.
+6. Pitaco não pedido também é conselho. Só que de graça. | E conselho de graça, a gente sabe: ninguém segue. Qual desses você vai ignorar primeiro?
 
 ## Legenda
 Ninguém pediu. Eu dei mesmo assim. Porque alguém precisava te falar isso antes de você aprender do jeito caro.
@@ -18,7 +18,7 @@ Ninguém pediu. Eu dei mesmo assim. Porque alguém precisava te falar isso antes
 Qual pitaco doeu mais: 2, 3, 4 ou 5?
 
 ## CTA
-Salva para reler na próxima vez que pensar em dar mais uma chance.
+Comenta o número do pitaco que doeu. E segue se quiser mais desses.
 
 ## Objetivo estratégico
-Personalidade e autoridade em gestão. Público: advogadas e advogados donos de escritório. Métricas: salvamentos, comentários e visitas ao perfil.
+Seguidores qualificados entre advogadas e advogados donos de escritório, pela personalidade ácida. Métricas: novos seguidores por post, comentários e salvamentos.
