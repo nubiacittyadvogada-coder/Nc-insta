@@ -420,7 +420,9 @@ function rowsWithTags() {
     const hm = m.horario || (String(m.date || '').match(/\b(\d{1,2}):\d{2}/) || [])[1];
     const hora = hm == null ? null : parseInt(hm, 10);
     return Object.assign({}, m, {
-      reach, views: num(m.views), likes: num(m.likes), comments: num(m.comments), shares: num(m.shares), saves: num(m.saves), follows: num(m.follows),
+      reach, views: num(m.views), likes: num(m.likes), comments: num(m.comments), saves: num(m.saves), follows: num(m.follows),
+      // compartilhamento = envios + reposts (o Instagram mostra separado)
+      shares: num(m.shares) == null && num(m.reposts) == null ? null : (num(m.shares) || 0) + (num(m.reposts) || 0),
       profileVisits: num(m.profileVisits), linkClicks: num(m.linkClicks), leads: num(m.leads), vendas: num(m.vendas), d: parseDate(m.date),
       format: m.format || (c ? TYPE[c.type] : ''), tema: m.tema || c?.tags?.tema || '', tipoGancho: m.tipoGancho || c?.tags?.tipoGancho || '', tipoCta: m.tipoCta || c?.tags?.tipoCta || '',
       goal: GOALS[m.goal] || (c ? GOALS[goalOf(c)] : ''), titulo: m.caption || m.tema || (c ? plain(c.title) : ''),
@@ -538,7 +540,7 @@ function funilCard(F) {
   const st = [['visitas', 'Visitas ao perfil'], ['cliques', 'Cliques no link'], ['leads', 'Oportunidades'], ['vendas', 'Vendas']].map(([k, l]) => ({ k, l, v: num(last[k]) }));
   const conv = []; for (let i = 1; i < st.length; i++) if (st[i - 1].v && st[i].v != null) conv.push({ de: st[i - 1].l, para: st[i].l, t: st[i].v / st[i - 1].v * 100 });
   const pior = conv.length > 1 ? conv.slice().sort((a, b) => a.t - b.t)[0] : null;
-  return `<div class="card"><span class="eyebrow">Semana de ${fmtDay(last.semana)}</span>
+  return `<div class="card"><span class="eyebrow">${last.periodo ? esc(last.periodo) : 'Semana de ' + fmtDay(last.semana)}</span>
     <div class="tiles" style="grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">${st.map(s => `<div class="tile" style="cursor:default;padding:10px 8px;min-width:0;overflow-wrap:anywhere"><b style="font-size:20px">${s.v == null ? '–' : f1(s.v)}</b><span class="small muted">${s.l}</span></div>`).join('')}</div>
     ${conv.length ? `<div class="stack" style="gap:4px">${conv.map(c => `<div class="row between small"><span>${c.de} → ${c.para}</span><b style="font-variant-numeric:tabular-nums">${f1(c.t)}%</b></div>`).join('')}</div>` : ''}
     ${pior ? `<p class="small"><span class="pill warn">Maior perda observada</span> ${pior.de} → ${pior.para} (${f1(pior.t)}%). Isso é observação de uma semana, não diagnóstico de causa.</p>` : '<p class="small muted">Preencha pelo menos três etapas para comparar conversões.</p>'}
@@ -1189,7 +1191,7 @@ const MAP = {
   date: ['data', 'date', 'fecha', 'publicado', 'published', 'created'], format: ['tipo', 'type', 'formato', 'format', 'media type'],
   caption: ['texto', 'text', 'legenda', 'caption', 'descrição', 'description', 'content'], url: ['link', 'url', 'permalink'],
   reach: ['alcance', 'reach'], views: ['visualizações', 'visualizacoes', 'views', 'plays', 'reproduções', 'impressões', 'impressions'],
-  likes: ['curtidas', 'likes', 'me gusta'], comments: ['comentários', 'comentarios', 'comments'], shares: ['compartilhamentos', 'compartilhados', 'shares', 'envios'],
+  likes: ['curtidas', 'likes', 'me gusta'], comments: ['comentários', 'comentarios', 'comments'], shares: ['compartilhamentos', 'compartilhados', 'shares', 'envios'], reposts: ['reposts', 'republicações'],
   saves: ['salvos', 'salvamentos', 'saved', 'saves', 'guardados'], follows: ['seguidores', 'follows', 'novos seguidores', 'follower'], profileVisits: ['visitas ao perfil', 'profile visits', 'visitas']
 };
 function parseCSV(text) {
