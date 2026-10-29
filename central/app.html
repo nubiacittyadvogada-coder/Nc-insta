@@ -595,7 +595,8 @@ function vMarca() {
   <div class="card"><div class="row between"><h2>Voz</h2><button class="btn" data-act="editarVoz">Editar</button></div>
     <ul>${b.voz.map(v => `<li>${esc(v)}</li>`).join('')}</ul><h3>Evitar</h3><ul>${b.evitar.map(v => `<li>${esc(v)}</li>`).join('')}</ul>
     ${b.aprendidas?.length ? `<h3>Aprendidas com você</h3><ul>${b.aprendidas.map(v => `<li>${esc(v)}</li>`).join('')}</ul>` : ''}
-    <p class="small"><b>Regra principal:</b> ${esc(b.regraPrincipal)}</p></div>
+    <p class="small"><b>Regra principal:</b> ${esc(b.regraPrincipal)}</p>
+    ${b.perfisModelo?.length ? `<p class="small"><b>Perfis-modelo:</b> ${b.perfisModelo.map(esc).join(', ')}</p>` : ''}</div>
   <div class="card"><div class="row between"><h2>Aprendizado</h2><span class="small muted">${S.learning.length} registro(s)</span></div>
     <div class="tiles">${['aprovado', 'editado', 'rejeitado'].map(k => `<div class="tile" style="cursor:default"><b>${S.learning.filter(l => l.action === k).length}</b><span class="small muted">${k}s</span></div>`).join('')}</div>
     <p class="small muted">Cada aprovação, edição e rejeição entra no contexto das próximas gerações. Mudanças na personalidade viram sugestões para você aprovar.</p>
@@ -821,6 +822,7 @@ VOZ: ${b.voz.join(' ')}
 EVITAR: ${b.evitar.join(' ')}
 ${b.aprendidas?.length ? 'REGRAS APRENDIDAS COM A NÚBIA: ' + b.aprendidas.join(' ') : ''}
 REGRA PRINCIPAL: ${b.regraPrincipal}
+${b.perfisModelo?.length ? 'PERFIS QUE A NÚBIA ADMIRA (aprenda formato, ritmo e ousadia; nunca copie frases): ' + b.perfisModelo.join(', ') : ''}
 ÉTICA: ${b.oab}
 NUNCA invente histórias pessoais, números, depoimentos, decisões judiciais ou leis. Se o conteúdo pedir experiência pessoal, deixe um marcador [SUA HISTÓRIA: o que precisa] e preencha "precisaInputPessoal": true com a pergunta em "perguntaPessoal". Opiniões fortes atribuídas à Núbia: descreva em "validarOpiniao" quais ela precisa confirmar. Fatos jurídicos só com certeza. Não use travessões.
 
@@ -868,7 +870,8 @@ async function callAI(prompt) {
 
 // ================= filtro anti-genérico =================
 // referências de texto que ensinam a linguagem: as próprias da Núbia primeiro, sem as marcadas como negativas
-const refsTexto = (n) => S.references.filter(r => r.texto && !r.negativa).sort((a, b) => (/própria/.test(b.origem || '') ? 1 : 0) - (/própria/.test(a.origem || '') ? 1 : 0)).slice(0, n);
+const refPeso = (r) => (/própria/.test(r.origem || '') ? 2 : 0) + (r.perfilModelo ? 1 : 0);
+const refsTexto = (n) => S.references.filter(r => r.texto && !r.negativa).sort((a, b) => refPeso(b) - refPeso(a)).slice(0, n);
 function fullText(c) {
   const p = c.payload || {}; const t = [c.title];
   if (c.type === 'reel7') t.push(p.frase, ...(p.alternativas || []), p.cena);

@@ -34,3 +34,9 @@ Novas estruturas:
 8. **Educada que vira ácida** ("prezo pela empatia, mas...")
 
 Novo estilo visual derivado: **Agenda sobre foto** (`agenda` em `renderer.js`).
+
+### Perfis-modelo (30/10/2026)
+
+@dra.chiquetti, @__luana_ferreira__ e @vitoriaxavierb.adv. Mais 14 referências cadastradas (9 da Luana, 5 da Vitória), com prioridade no filtro logo depois dos textos da própria Núbia.
+
+Estruturas novas: **"Sim, você que..."** (derruba mito penal popular), **ironia contra o estigma "criminalista defende bandido"**, **sarcasmo que finge concordar**, **Reel respondendo comentário de crítico**.
