@@ -1,0 +1,233 @@
+[
+  {
+    "id": "s01-reel7-primo",
+    "type": "reel7",
+    "title": "Defendo gente acusada de crime",
+    "slug": "reel7-seu-primo-inocente",
+    "goal": "alcance",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "",
+    "style": "editorial",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "opinião polêmica",
+      "tipoCta": "compartilhar"
+    },
+    "payload": {
+      "duracao": 7,
+      "frase": "Sim, eu defendo gente acusada de crime. *Inclusive aquele seu primo que você jura que é inocente.*",
+      "alternativas": [
+        "Criminalista defende bandido? *Defende até você provar que é. Esse é o combinado, uai.*"
+      ],
+      "cena": "Você dirigindo, óculos escuros, olhar firme pra frente. No último segundo, vira o rosto pra câmera.",
+      "posicaoTexto": "centro",
+      "estiloTexto": "creme",
+      "estiloVisual": "Serifa creme sem caixa, centralizada sobre a cena real (padrão das referências).",
+      "trilha": "Áudio em alta da biblioteca do Instagram com clima de deboche ou confiança. Escolha no app, onde é licenciado.",
+      "legenda": "Todo mundo é contra advogado criminal. Até precisar de um.",
+      "cta": "Marca aquele parente que precisa ver isso.",
+      "objetivoEstrategico": "Alcance pelo estigma da criminalista com deboche (trilha a). Métrica: compartilhamentos."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "humor ácido",
+      "explicacao": "Vira o preconceito contra quem julga: todo mundo tem alguém que 'jura que é inocente'.",
+      "comparacao": "Passa no teste do estranho (entende sem contexto) e no teste do envio (dá pra mandar pra alguém). Mesma mecânica das referências de 7s, sem copiar frase.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T03:10:00Z"
+    }
+  },
+  {
+    "id": "s02-reel7-presidio",
+    "type": "reel7",
+    "title": "Você não tem medo de presídio?",
+    "slug": "reel7-medo-de-presidio",
+    "goal": "seguidores",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "",
+    "style": "editorial",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "opinião polêmica",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "duracao": 7,
+      "frase": "\"Você não tem medo de entrar em presídio?\" *Medo eu tenho é de cliente que some na hora de pagar, uai.*",
+      "alternativas": [
+        "\"Nossa, você é muito brava.\" *Brava não, meu bem. Criminalista.*"
+      ],
+      "cena": "Você andando no corredor do fórum ou saindo do carro de bolsa no ombro, sem olhar pra câmera. Olha no último segundo.",
+      "posicaoTexto": "centro",
+      "estiloTexto": "creme",
+      "estiloVisual": "Serifa creme sem caixa, centralizada sobre a cena real (padrão das referências).",
+      "trilha": "Áudio em alta da biblioteca do Instagram com clima de deboche ou confiança. Escolha no app, onde é licenciado.",
+      "legenda": "As perguntas que toda criminalista ouve. E as respostas que a gente não fala alto.",
+      "cta": "Advogada, qual pergunta você mais ouve? Conta aqui.",
+      "objetivoEstrategico": "Seguidores entre advogadas (público da mentoria) pela trilha c: frase ouvida + resposta. Métricas: comentários e seguidores."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "humor ácido",
+      "explicacao": "Troca o medo esperado (presídio) por um medo que todo advogado conhece (inadimplência).",
+      "comparacao": "Passa no teste do estranho (entende sem contexto) e no teste do envio (dá pra mandar pra alguém). Mesma mecânica das referências de 7s, sem copiar frase.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T03:10:00Z"
+    }
+  },
+  {
+    "id": "s03-reel7-desacelerar",
+    "type": "reel7",
+    "title": "Me pediram pra desacelerar",
+    "slug": "reel7-desacelerar",
+    "goal": "alcance",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "",
+    "style": "editorial",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "tags": {
+      "tema": "Liderança feminina",
+      "tipoGancho": "confissão",
+      "tipoCta": "compartilhar"
+    },
+    "payload": {
+      "duracao": 7,
+      "frase": "Me pediram pra desacelerar. *Anotei na agenda, entre o júri e a audiência.*",
+      "alternativas": [
+        "Minha calma existe. *Só não tem horário livre essa semana.*"
+      ],
+      "cena": "Você na mesa do escritório digitando rápido, celular tocando, café do lado. No último segundo, olha pra câmera e volta a digitar.",
+      "posicaoTexto": "centro",
+      "estiloTexto": "creme",
+      "estiloVisual": "Serifa creme sem caixa, centralizada sobre a cena real (padrão das referências).",
+      "trilha": "Áudio em alta da biblioteca do Instagram com clima de deboche ou confiança. Escolha no app, onde é licenciado.",
+      "legenda": "Prometo desacelerar. Em fevereiro. Talvez.",
+      "cta": "Manda pra amiga que também anotou isso na agenda.",
+      "objetivoEstrategico": "Alcance pela identidade-ponte (trilha b: mulher que trabalha demais). Métrica: compartilhamentos."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "ironia",
+      "explicacao": "Autoironia sobre não parar, reconhecível por qualquer mulher que trabalha muito.",
+      "comparacao": "Passa no teste do estranho (entende sem contexto) e no teste do envio (dá pra mandar pra alguém). Mesma mecânica das referências de 7s, sem copiar frase.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T03:10:00Z"
+    }
+  },
+  {
+    "id": "s04-reel7-calado",
+    "type": "reel7",
+    "title": "Ficar calado não é confissão",
+    "slug": "reel7-calado-nao-e-confissao",
+    "goal": "seguidores",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "",
+    "style": "editorial",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "tags": {
+      "tema": "Direitos e garantias",
+      "tipoGancho": "contradição",
+      "tipoCta": "seguir"
+    },
+    "payload": {
+      "duracao": 7,
+      "frase": "Ficar calado na delegacia não é confissão. *É a Constituição funcionando, uai.*",
+      "alternativas": [
+        "Sim, você que acha que quem fica calado é culpado: *a Constituição discorda de você.*"
+      ],
+      "cena": "Você na porta de uma delegacia (ou dentro do carro estacionado em frente), ajeitando os óculos escuros. Calma.",
+      "posicaoTexto": "centro",
+      "estiloTexto": "creme",
+      "estiloVisual": "Serifa creme sem caixa, centralizada sobre a cena real (padrão das referências).",
+      "trilha": "Áudio em alta da biblioteca do Instagram com clima de deboche ou confiança. Escolha no app, onde é licenciado.",
+      "legenda": "Silêncio é direito, não confissão. E não pode ser usado contra ninguém.\n\nConteúdo informativo.",
+      "cta": "Segue pra mais mitos penais que todo mundo repete.",
+      "objetivoEstrategico": "Seguidores pela trilha d: mito penal popular em uma linha. Métrica: seguidores por post e salvamentos."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "contradição inesperada",
+      "explicacao": "Derruba a crença popular de que silêncio é confissão, em uma linha.",
+      "comparacao": "Passa no teste do estranho (entende sem contexto) e no teste do envio (dá pra mandar pra alguém). Mesma mecânica das referências de 7s, sem copiar frase.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T03:10:00Z"
+    },
+    "riscos": "Fundamento: Constituição, art. 5º, LXIII, e Código de Processo Penal, art. 186, parágrafo único."
+  },
+  {
+    "id": "s05-reel7-dormir",
+    "type": "reel7",
+    "title": "Como eu durmo defendendo quem eu defendo",
+    "slug": "reel7-como-eu-durmo",
+    "goal": "alcance",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "",
+    "style": "editorial",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "opinião polêmica",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "duracao": 7,
+      "frase": "Me perguntam como eu durmo defendendo quem eu defendo. *Durmo pouco. Mas a culpa é dos prazos.*",
+      "alternativas": [
+        "Advogada criminal não tem crise de consciência. *Tem crise de prazo.*"
+      ],
+      "cena": "Você de beca ou blazer, à noite no escritório com o notebook aberto, tomando café. Olha pra câmera e dá um gole.",
+      "posicaoTexto": "centro",
+      "estiloTexto": "creme",
+      "estiloVisual": "Serifa creme sem caixa, centralizada sobre a cena real (padrão das referências).",
+      "trilha": "Áudio em alta da biblioteca do Instagram com clima de deboche ou confiança. Escolha no app, onde é licenciado.",
+      "legenda": "A pergunta é sempre a mesma. A resposta também.",
+      "cta": "Comenta 'prazo' se você também dorme pouco por isso.",
+      "objetivoEstrategico": "Alcance pelo estigma da criminalista (trilha a) com virada inesperada. Métrica: compartilhamentos e comentários."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "contradição inesperada",
+      "explicacao": "A pergunta moral esperada recebe uma resposta prática e engraçada.",
+      "comparacao": "Passa no teste do estranho (entende sem contexto) e no teste do envio (dá pra mandar pra alguém). Mesma mecânica das referências de 7s, sem copiar frase.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T03:10:00Z"
+    }
+  }
+]
