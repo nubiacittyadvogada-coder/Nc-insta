@@ -1,0 +1,127 @@
+[
+  {
+    "id": "t01-reel7-lideranca",
+    "type": "reel7",
+    "title": "Ninguém pergunta ao dono do escritório",
+    "slug": "reel7-lideranca-feminina",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "",
+    "style": "editorial",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "payload": {
+      "duracao": 7,
+      "frase": "Ninguém pergunta ao dono do escritório *com quem ficam os filhos dele.*",
+      "alternativas": [
+        "Liderança feminina não é ser amada pela equipe. É *pagar a folha no dia 5.*",
+        "Quando ela cobra, é *emocional.* Quando ele cobra, é *gestão.*"
+      ],
+      "cena": "Você na sua mesa do escritório, revisando um processo ou assinando documentos. Câmera fixa, enquadramento médio, celular na vertical. Nos últimos 2 segundos, levante os olhos para a câmera, séria. Luz natural de janela pela lateral.",
+      "posicaoTexto": "topo",
+      "estiloTexto": "caixa",
+      "estiloVisual": "Editorial sofisticado: caixa off-white com destaque em vinho sobre cena real.",
+      "trilha": "Escolha o áudio dentro da biblioteca do próprio Instagram (licenciado no app). Busque algo instrumental, tenso e elegante, como piano grave ou batida lenta. Não usar música baixada fora do app.",
+      "legenda": "Se perguntassem, ele ia estranhar a pergunta. É exatamente esse o ponto.",
+      "cta": "Manda para uma mulher que lidera e já ouviu essa pergunta.",
+      "objetivoEstrategico": "Crescimento por identificação. Público: mulheres empreendedoras e advogadas. Métrica principal: compartilhamentos e novos seguidores vindos do Reel."
+    }
+  },
+  {
+    "id": "t02-reelfalado-prisao",
+    "type": "reelFalado",
+    "title": "Prenderam alguém da sua família. E agora?",
+    "slug": "reel-falado-prisao-em-flagrante",
+    "objective": "autoridade",
+    "series": "advogada-avisa",
+    "seriesName": "A advogada te avisa",
+    "style": "jornalistico",
+    "status": "aprovar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": true,
+    "perguntaPessoal": "Opcional: quer contar, em uma frase, um caso real seu desse tipo, sem identificar ninguém? Se sim, eu encaixo no bloco 2. Se não, o roteiro funciona sem isso. Eu não invento essa parte.",
+    "payload": {
+      "duracao": 60,
+      "gancho": "Se um dia ligarem dizendo que prenderam alguém da sua família, as primeiras 24 horas decidem muita coisa. Presta atenção.",
+      "roteiro": [
+        { "inicio": 0, "fim": 4, "fala": "Se um dia ligarem dizendo que prenderam alguém da sua família, as primeiras 24 horas decidem muita coisa. Presta atenção." },
+        { "inicio": 4, "fim": 15, "fala": "Essa ligação chega em escritório criminal o tempo todo. E quase sempre a família faz a mesma coisa: entra em pânico e começa a falar demais. Com o delegado, com o vizinho, no grupo da família." },
+        { "inicio": 15, "fim": 27, "fala": "Primeiro: quem foi preso tem o direito de ficar em silêncio. Isso não é confissão. É garantia da Constituição. Nada de depoimento sem advogado." },
+        { "inicio": 27, "fim": 40, "fala": "Segundo: em regra, quem é preso em flagrante tem que ser levado a um juiz em até 24 horas. É a audiência de custódia. Ali se discute se a pessoa responde em liberdade. Chegar preparado faz diferença." },
+        { "inicio": 40, "fim": 50, "fala": "Terceiro: separa documento, comprovante de endereço, de trabalho, de estudo. Isso mostra que a pessoa tem vínculo e pesa no pedido de liberdade." },
+        { "inicio": 50, "fim": 60, "fala": "E pelo amor de Deus: não posta nada. Print de rede social vira prova. Salva esse vídeo. Você não precisa dele hoje. Mas alguém que você ama pode precisar." }
+      ],
+      "orientacoes": [
+        "Grave no escritório, sentada ou em pé, olhando para a lente e não para a tela.",
+        "Leia um bloco, olhe para a câmera e fale com as suas palavras. Não precisa ser idêntico ao texto.",
+        "Grave um bloco por vez. A edição junta os cortes.",
+        "Celular na vertical, na altura dos olhos, com luz de frente (janela ou ring light atrás do celular).",
+        "Tom: firme e calmo, como quem atende uma família assustada."
+      ],
+      "textoCapa": "Prenderam alguém da sua família. *E agora?*",
+      "temaCapa": "escuro",
+      "legenda": "As primeiras 24 horas depois de uma prisão em flagrante pedem cabeça fria e informação certa. Salva e manda no grupo da família.\n\nConteúdo informativo. Cada caso concreto precisa da análise de um advogado.",
+      "cta": "Salva e manda no grupo da família.",
+      "cortes": [
+        "Corte seco na entrada de cada tópico (Primeiro, Segundo, Terceiro).",
+        "Zoom leve (110%) nas frases \"direito de ficar em silêncio\" e \"em até 24 horas\".",
+        "Texto na tela por tópico: 1. Silêncio  2. Custódia em 24h  3. Documentos  4. Não postar.",
+        "Versão de 30s para Stories com o gancho e os tópicos 1 e 2."
+      ],
+      "fundamentos": "CF, art. 5º, LXIII (direito ao silêncio); CPP, art. 310, e Resolução CNJ 213/2015 (audiência de custódia em até 24 horas).",
+      "objetivoEstrategico": "Autoridade com utilidade real. Alto potencial de salvamento e envio. Métrica principal: salvamentos e compartilhamentos."
+    }
+  },
+  {
+    "id": "t03-carrossel-pitacos",
+    "type": "carrossel",
+    "title": "Pitacos que você não me pediu, mas vou te dar mesmo assim. Versão dona de escritório.",
+    "slug": "carrossel-pitacos-dona-de-escritorio",
+    "objective": "crescimento",
+    "series": "pitacos",
+    "seriesName": "Pitacos que ninguém me pediu",
+    "style": "editorial",
+    "status": "aprovar",
+    "precisaGravacao": false,
+    "precisaInputPessoal": false,
+    "validarOpiniao": "As opiniões dos cards 2 a 5 estão atribuídas a você. Aprove só se concordar com cada uma.",
+    "payload": {
+      "cards": [
+        { "title": "Pitacos que você não me pediu, mas vou te dar *mesmo assim.*", "body": "Versão dona de escritório." },
+        { "title": "Contrate devagar. *Demita rápido.*", "body": "A maioria faz o contrário e chama de \"dar mais uma chance\". A conta chega no caixa e no clima da equipe." },
+        { "title": "Se o escritório para quando você tira férias, *você não tem um escritório.*", "body": "Tem um emprego com CNPJ. E com o chefe mais exigente que existe: você." },
+        { "title": "Processo que só existe na sua cabeça *não é processo. É risco.*", "body": "Se não está escrito, ninguém consegue repetir, cobrar ou melhorar." },
+        { "title": "Preço não se defende na reunião. *Se defende antes dela.*", "body": "Quando o cliente chega sabendo quem você é, a conversa é sobre o caso. Não sobre desconto." },
+        { "title": "Pitaco não pedido também é conselho. *Só que de graça.*", "body": "Qual desses doeu mais? Me conta nos comentários." }
+      ],
+      "legenda": "Ninguém pediu. Eu dei mesmo assim. Porque alguém precisava te falar isso antes de você aprender do jeito caro.\n\nQual pitaco doeu mais: 2, 3, 4 ou 5?",
+      "cta": "Salva para reler na próxima vez que pensar em dar mais uma chance.",
+      "objetivoEstrategico": "Personalidade e autoridade em gestão. Público: advogadas e advogados donos de escritório. Métricas: salvamentos, comentários e visitas ao perfil."
+    }
+  },
+  {
+    "id": "t04-stories-relacionamento",
+    "type": "stories",
+    "title": "Sequência de relacionamento: quem me segue e por quê",
+    "slug": "stories-relacionamento",
+    "objective": "autoridade",
+    "series": null,
+    "seriesName": "",
+    "style": "minimal",
+    "status": "aprovar",
+    "precisaGravacao": false,
+    "precisaInputPessoal": false,
+    "payload": {
+      "objetivo": "Relacionamento: abrir conversa, coletar perguntas reais do público para pautas futuras.",
+      "stories": [
+        { "style": "minimal", "theme": "claro", "kicker": "Pergunta sincera", "texto": "Você me segue *por causa do Direito* ou apesar dele?", "sticker": { "tipo": "enquete", "pergunta": "", "opcoes": ["Pelo Direito", "Pela Núbia mesmo"] }, "orientacao": "Adicione a figurinha Enquete no espaço livre de baixo." },
+        { "style": "colagem", "kicker": "Sua vez", "texto": "Hoje quem pergunta *sou eu.*", "apoio": "O que você queria que uma advogada criminalista te explicasse sem juridiquês?", "sticker": { "tipo": "perguntas", "pergunta": "Me pergunta aqui" }, "orientacao": "Adicione a figurinha Perguntas no espaço livre de baixo. As respostas viram pauta da série A advogada te avisa." },
+        { "style": "minimal", "theme": "vinho", "kicker": "Combinado", "texto": "Prometo responder as melhores aqui nos stories.", "apoio": "As piores também. *Só que com mais ironia.*", "sticker": { "tipo": "slider", "pergunta": "Quanto você quer ver isso?" }, "orientacao": "Adicione a figurinha Slider de emoji no espaço livre de baixo." }
+      ],
+      "legenda": "",
+      "cta": "Responder a enquete e enviar perguntas.",
+      "objetivoEstrategico": "Relacionamento e pesquisa de pauta. Métricas: respostas, toques na enquete e mensagens recebidas."
+    }
+  }
+]

@@ -1,0 +1,1068 @@
+<title>Central Núbia Citty</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Bodoni+Moda:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap">
+<style>
+/* Layout: app de uma coluna para iPhone, barra inferior fixa, folhas (sheets) para criar e editar. */
+:root {
+  --bg: #F5F0EA; --surface: #FFFFFF; --surface2: #EFE7DD; --ink: #1B1416; --muted: #74676A; --line: #E3D8CC;
+  --wine: #6B1E2E; --wine-ink: #FFFFFF; --gold: #A27C45; --ok: #2F6B4A; --warn: #9A6412; --bad: #A2322F;
+  --serif: "Bodoni Moda", "Didot", Georgia, serif; --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141011; --surface: #1E1819; --surface2: #2A2223; --ink: #F2EAE4; --muted: #A8999C; --line: #352B2D;
+  --wine: #B8495F; --wine-ink: #FFFFFF; --gold: #C9A46A; --ok: #6DBB8E; --warn: #E0A84E; --bad: #E27671; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141011; --surface: #1E1819; --surface2: #2A2223; --ink: #F2EAE4; --muted: #A8999C; --line: #352B2D;
+  --wine: #B8495F; --wine-ink: #FFFFFF; --gold: #C9A46A; --ok: #6DBB8E; --warn: #E0A84E; --bad: #E27671; color-scheme: dark }
+* { box-sizing: border-box }
+html, body { background: var(--bg); color: var(--ink) }
+body { font: 15px/1.45 var(--sans); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 calc(84px + env(safe-area-inset-bottom, 0px)); -webkit-font-smoothing: antialiased }
+main { max-width: 760px; margin: 0 auto; padding-block: 18px 24px; display: grid; gap: 22px }
+h1, h2, h3 { margin: 0; text-wrap: balance }
+h1 { font: 600 30px/1.1 var(--serif); letter-spacing: -.01em }
+h1 em, h2 em { color: var(--wine); font-style: italic }
+h2 { font: 600 21px/1.2 var(--serif) }
+h3 { font: 700 15px/1.3 var(--sans) }
+p { margin: 0 }
+.eyebrow { font: 700 11px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted) }
+.muted { color: var(--muted) }
+.small { font-size: 13px }
+.stack { display: grid; gap: 12px }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+.between { justify-content: space-between }
+.head { display: grid; gap: 6px }
+section { display: grid; gap: 12px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 12px; min-width: 0 }
+.card > .pill { justify-self: start }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: grid; gap: 2px; text-align: left; color: inherit; font: inherit; cursor: pointer }
+.tile b { font: 600 28px/1 var(--serif); font-variant-numeric: tabular-nums }
+.btn { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 9px 15px; font: 600 14px/1.1 var(--sans); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; min-height: 40px }
+.btn.primary { background: var(--wine); border-color: var(--wine); color: var(--wine-ink) }
+.btn.ghost { background: transparent }
+.btn.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--line)) }
+.btn:disabled { opacity: .5; cursor: default }
+.btn:focus-visible, .tile:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, .nav a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
+.pill { display: inline-flex; align-items: center; gap: 5px; font: 600 11px/1 var(--sans); letter-spacing: .04em; padding: 5px 9px; border-radius: 999px; background: var(--surface2); color: var(--ink); white-space: nowrap }
+.pill.wine { background: color-mix(in srgb, var(--wine) 14%, transparent); color: var(--wine) }
+.pill.ok { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok) }
+.pill.warn { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn) }
+.pill.bad { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad) }
+.strip { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; -webkit-overflow-scrolling: touch }
+.strip img, .strip .ph { scroll-snap-align: start; flex: 0 0 auto; height: 220px; width: auto; border-radius: 8px; border: 1px solid var(--line); background: var(--surface2) }
+.strip .ov { position: relative; flex: 0 0 auto; height: 220px; aspect-ratio: 9/16; border-radius: 8px; overflow: hidden; background: repeating-conic-gradient(#3a3033 0 25%, #2a2224 0 50%) 0 0/20px 20px }
+.strip .ov img { height: 100%; border: 0; border-radius: 0; background: transparent }
+.strip video { height: 220px; border-radius: 8px; flex: 0 0 auto; background: #000 }
+.quote { font: 600 19px/1.3 var(--serif) }
+.quote em { color: var(--wine) }
+.box { background: var(--surface2); border-radius: 10px; padding: 12px; display: grid; gap: 6px; min-width: 0 }
+.box p, .card p { overflow-wrap: anywhere }
+details > summary { cursor: pointer; font-weight: 600; list-style: none }
+details > summary::-webkit-details-marker { display: none }
+details > summary::after { content: " +"; color: var(--muted) }
+details[open] > summary::after { content: " −" }
+.script { display: grid; gap: 8px }
+.script div { display: grid; grid-template-columns: 52px 1fr; gap: 8px }
+.script span { font: 600 12px/1.6 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums }
+label { display: grid; gap: 5px; font: 600 13px/1.2 var(--sans) }
+input, textarea, select { width: 100%; font: 15px/1.4 var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px }
+textarea { min-height: 84px; resize: vertical }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.empty { border: 1px dashed var(--line); border-radius: var(--r); padding: 22px 16px; text-align: center; color: var(--muted); display: grid; gap: 10px; justify-items: center }
+.bar { height: 8px; border-radius: 99px; background: var(--surface2); overflow: hidden; display: flex }
+.bar i { display: block; height: 100% }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted) }
+.legend b { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px; vertical-align: -1px }
+.table-wrap { overflow-x: auto }
+table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap }
+th { font: 700 11px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+td.t { white-space: normal; min-width: 160px }
+.swatches { display: flex; gap: 8px; flex-wrap: wrap }
+.swatches span { width: 46px; height: 46px; border-radius: 10px; border: 1px solid var(--line) }
+.refs { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px }
+.refs figure { margin: 0; display: grid; gap: 6px }
+.refs img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 10px; border: 1px solid var(--line) }
+.day { display: grid; grid-template-columns: 58px 1fr; gap: 10px; padding-block: 10px; border-bottom: 1px solid var(--line) }
+.day:last-child { border-bottom: 0 }
+.day .d { font: 600 22px/1 var(--serif); font-variant-numeric: tabular-nums }
+.day .d small { display: block; font: 700 10px/1.4 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)) }
+.nav a { display: grid; justify-items: center; gap: 3px; padding: 6px 0; color: var(--muted); text-decoration: none; font: 600 10.5px/1 var(--sans); letter-spacing: .04em; position: relative }
+.nav a svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 1.7 }
+.nav a[aria-current="page"] { color: var(--wine) }
+.nav .badge { position: absolute; top: 0; left: calc(50% + 6px); background: var(--wine); color: var(--wine-ink); font: 700 10px/16px var(--sans); min-width: 16px; height: 16px; border-radius: 99px; padding: 0 4px; text-align: center }
+.sheet-bg { position: fixed; inset: 0; z-index: 40; background: rgba(10, 6, 7, .45) }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-height: 92%; overflow-y: auto; background: var(--bg); border-radius: 20px 20px 0 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); box-shadow: 0 -10px 40px rgba(0,0,0,.25) }
+.sheet .inner { max-width: 720px; margin: 0 auto; display: grid; gap: 16px }
+.sheet .grab { width: 40px; height: 5px; border-radius: 9px; background: var(--line); margin: 0 auto 4px }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 60; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font: 600 14px/1.2 var(--sans); max-width: calc(100% - 32px); box-shadow: 0 6px 24px rgba(0,0,0,.25) }
+.more { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.more a { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; color: var(--ink); text-decoration: none; display: grid; gap: 4px }
+.more a b { font: 600 18px/1.2 var(--serif) }
+.chips { display: flex; gap: 6px; flex-wrap: wrap }
+.chips button { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 12px; font: 600 13px/1 var(--sans); cursor: pointer }
+.chips button[aria-pressed="true"] { background: var(--wine); color: var(--wine-ink); border-color: var(--wine) }
+.spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: sp .8s linear infinite }
+@keyframes sp { to { transform: rotate(360deg) } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none } }
+@media (max-width: 420px) { .grid2 { grid-template-columns: 1fr } h1 { font-size: 27px } }
+</style>
+
+<main id="app" aria-live="polite">
+  <div class="head"><span class="eyebrow">Central Núbia Citty</span><h1>Carregando sua central…</h1></div>
+</main>
+<nav class="nav" id="nav" aria-label="Menu principal"></nav>
+<div id="layer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="renderer.js"></script>
+<script>
+(() => {
+'use strict';
+// ================= estado =================
+const S = {
+  db: null, assets: null, sample: null, downloads: null, user: null,
+  contents: [], products: [], references: [], metrics: [], learning: [], series: [], reports: [], radar: [], log: [],
+  brand: null, usage: null, rotina: null, loaded: false, offline: false, busy: {}
+};
+const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'resultados', 'vendas', 'marca'];
+const TYPE = { reel7: 'Reel 7s', reelFalado: 'Reel falado', carrossel: 'Carrossel', stories: 'Stories', estatico: 'Post' };
+const OBJ = { crescimento: 'Crescimento', autoridade: 'Autoridade', conversao: 'Conversão' };
+const OBJ_COLOR = { crescimento: 'var(--wine)', autoridade: 'var(--gold)', conversao: 'var(--ok)' };
+const STATUS = { aprovar: ['Aguardando aprovação', 'warn'], gravar: ['Gravar', 'wine'], pronto: ['Pronto', 'ok'], agendado: ['Agendado', 'ok'], publicado: ['Publicado', ''], rejeitado: ['Rejeitado', 'bad'] };
+const STYLE_NAME = { editorial: 'Editorial sofisticado', lifestyle: 'Lifestyle com foto', colagem: 'Colagem criativa', jornalistico: 'Jornalístico provocativo', minimal: 'Minimalismo tipográfico' };
+const REJECT_REASONS = ['Não é a minha voz', 'Gancho fraco', 'Tema repetido', 'Risco jurídico ou ético', 'Muito comercial', 'Parece texto de IA', 'Opinião que não é minha'];
+
+const DEFAULT_BRAND = {
+  voz: ['Autêntica, inteligente e direta.', 'Provocativa e bem-humorada, ocasionalmente ácida.', 'Sofisticada e conversacional, como quem fala com uma amiga inteligente.', 'Emocional só quando existe uma história verdadeira.', 'Juridicamente responsável.', 'Personalidade antes de aula: nem todo post é sobre Direito.'],
+  evitar: ['Frases motivacionais genéricas.', 'Juridiquês.', 'Texto com cara de IA (listas mornas, "neste post", "é importante ressaltar").', 'Travessões.', 'Ganchos fracos e elogios vazios.', 'Conteúdo excessivamente comercial.', 'Histórias pessoais inventadas.', 'Opiniões atribuídas à Núbia sem validação.'],
+  regraPrincipal: 'Se a Núbia não falaria aquilo naturalmente, reescreva.',
+  aprendidas: [],
+  mix: { crescimento: 50, autoridade: 30, conversao: 20 },
+  paleta: ['#6B1E2E', '#0F0D0D', '#FFFFFF', '#F6F1EA', '#E4D6C3', '#B08D57'],
+  temas: ['Advocacia criminal', 'Direitos e garantias', 'Gestão de escritórios', 'Empreendedorismo', 'Liderança feminina', 'Marketing jurídico', 'IA no trabalho', 'Maternidade', 'Casamento', 'Vida pessoal e viagens', 'Opiniões sociais e políticas'],
+  oab: 'Respeitar o Código de Ética da OAB e o Provimento 205/2021: caráter informativo, sem promessa de resultado, sem captação ou mercantilização, sem preço de serviços advocatícios em publicidade, sem expor clientes ou casos identificáveis.'
+};
+
+// ================= utilidades =================
+const $ = (sel, el = document) => el.querySelector(sel);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const rich = (s) => esc(s).replace(/\*([^*]+)\*/g, '<em>$1</em>').replace(/\n/g, '<br>');
+const plain = (s) => String(s || '').replace(/\*/g, '');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const now = () => new Date().toISOString();
+const ymd = (d) => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
+const today = () => ymd(new Date());
+const fmtDay = (s) => new Date(s + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+const weekStart = (d = new Date()) => { const x = new Date(d); const k = (x.getDay() + 6) % 7; x.setDate(x.getDate() - k); return ymd(x); };
+const addDays = (s, n) => { const x = new Date(s + 'T12:00:00'); x.setDate(x.getDate() + n); return ymd(x); };
+const num = (v) => { if (v == null || v === '') return null; const n = Number(String(v).replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')); return Number.isFinite(n) ? n : null; };
+const pct = (a, b) => (a != null && b) ? (a / b * 100) : null;
+const f1 = (n) => n == null ? '–' : n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+const brand = () => S.brand || DEFAULT_BRAND;
+const view = () => { const h = location.hash.replace('#', ''); return VIEWS.includes(h) ? h : 'hoje'; };
+const col = (n) => S.db.collection(n);
+
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; t.setAttribute('role', 'status');
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+function needDb() { if (!S.db) { toast('Abra pelo claude.ai com sua conta para salvar.'); return false; } return true; }
+async function log(acao, alvo) { if (S.db) try { await col('log').add({ at: now(), acao, alvo: alvo || '' }); } catch (e) { /* registro é melhor esforço */ } }
+async function countUsage() {
+  if (!S.db) return;
+  const mes = today().slice(0, 7); const u = S.usage && S.usage.mes === mes ? S.usage : { mes, chamadas: 0 };
+  try { await col('settings').doc('usage').set({ mes, chamadas: (u.chamadas || 0) + 1, atualizado: now() }); } catch (e) { }
+}
+
+// ================= conexão =================
+async function boot() {
+  route();
+  window.addEventListener('hashchange', route);
+  NCRender.ready().then(() => { S.fontsReady = true; render(); });
+  const c = window.claude;
+  if (!c || !c.use) { S.offline = true; S.loaded = true; render(); return; }
+  const [db, assets, sample, downloads, user] = await Promise.all(['db', 'assets', 'sample', 'downloads', 'user'].map(n => c.use(n).catch(() => null)));
+  Object.assign(S, { db, assets, sample, downloads, user });
+  if (!db) { S.offline = true; S.loaded = true; render(); return; }
+  const sub = (name, key, q) => (q || col(name)).onSnapshot(snap => { S[key] = snap.docs.map(d => Object.assign({ id: d.id }, d.data())); S.loaded = true; render(); }, () => { S.loaded = true; render(); });
+  sub('contents', 'contents'); sub('products', 'products'); sub('references', 'references'); sub('metrics', 'metrics');
+  sub('series', 'series'); sub('reports', 'reports'); sub('radar', 'radar');
+  sub('learning', 'learning', col('learning').orderBy('at', 'desc').limit(150));
+  sub('log', 'log', col('log').orderBy('at', 'desc').limit(40));
+  col('settings').doc('brand').onSnapshot(d => { S.brand = d.exists ? d.data() : null; render(); });
+  col('settings').doc('usage').onSnapshot(d => { S.usage = d.exists ? d.data() : null; render(); });
+  col('settings').doc('rotina').onSnapshot(d => { S.rotina = d.exists ? d.data() : null; render(); });
+  setTimeout(() => { S.loaded = true; render(); }, 2500);
+}
+
+function route() { renderNav(); render(); window.scrollTo(0, 0); }
+
+// ================= navegação =================
+const ICON = {
+  hoje: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>',
+  gravar: '<svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="13.5" height="12" rx="2.5"/><path d="M16 10.2l5.5-3v9.6l-5.5-3z"/></svg>',
+  aprovar: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7.5 12.3l3 3 6-6.3"/></svg>',
+  prontos: '<svg viewBox="0 0 24 24"><path d="M12 3.5v11M7.5 10.5l4.5 4.5 4.5-4.5M4 17.5v1.5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5"/></svg>',
+  mais: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg>'
+};
+function renderNav() {
+  const v = view(); const n = (st) => S.contents.filter(c => c.status === st).length;
+  const items = [['hoje', 'Hoje'], ['gravar', 'Gravar', n('gravar')], ['aprovar', 'Aprovar', n('aprovar')], ['prontos', 'Prontos'], ['mais', 'Mais']];
+  $('#nav').innerHTML = items.map(([k, label, badge]) => {
+    const cur = k === v || (k === 'mais' && ['calendario', 'resultados', 'vendas', 'marca'].includes(v));
+    return `<a href="${k === 'mais' ? '#' : '#' + k}" data-nav="${k}" ${cur ? 'aria-current="page"' : ''}>${ICON[k]}<span>${label}</span>${badge ? `<span class="badge">${badge}</span>` : ''}</a>`;
+  }).join('');
+}
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('[data-nav="mais"]');
+  if (a) { e.preventDefault(); openSheet(`<h2>Mais</h2><div class="more">
+    <a href="#calendario" data-close><b>Calendário</b><span class="small muted">Programação das publicações</span></a>
+    <a href="#resultados" data-close><b>Resultados</b><span class="small muted">Métricas e relatórios</span></a>
+    <a href="#vendas" data-close><b>Vendas</b><span class="small muted">Produtos e campanhas</span></a>
+    <a href="#marca" data-close><b>Minha marca</b><span class="small muted">Voz, séries, referências</span></a></div>`); }
+});
+
+// ================= folhas e camadas =================
+function openSheet(html, mount) {
+  const layer = $('#layer');
+  layer.innerHTML = `<div class="sheet-bg" data-close></div><div class="sheet" role="dialog" aria-modal="true"><div class="inner"><div class="grab"></div>${html}</div></div>`;
+  document.body.style.overflow = 'hidden';
+  const el = $('.sheet .inner', layer);
+  if (mount) mount(el);
+  const first = el.querySelector('input, textarea, select, button'); if (first && !('ontouchstart' in window)) first.focus();
+  return el;
+}
+function closeSheet() { $('#layer').innerHTML = ''; document.body.style.overflow = ''; }
+document.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeSheet(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+// ================= pré-visualização das artes =================
+const previewCache = new Map();
+function previewSrc(c, item) {
+  const file = (c.files || []).find(f => f.name === item.name && f.url);
+  if (file) return file.url;
+  const key = c.id + '|' + (c.updatedAt || '') + '|' + item.name + '|' + (S.fontsReady ? 1 : 0);
+  if (!previewCache.has(key)) {
+    try { previewCache.set(key, NCRender.render(item.spec).toDataURL('image/jpeg', 0.82)); } catch (e) { previewCache.set(key, ''); }
+  }
+  return previewCache.get(key);
+}
+function strip(c) {
+  const items = NCRender.specsFor(c);
+  const vids = (c.files || []).filter(f => f.kind === 'video' && f.url);
+  if (!items.length && !vids.length) return '';
+  return `<div class="strip">${items.map(it => it.spec.format === 'overlay'
+    ? `<div class="ov"><img src="${previewSrc(c, it)}" alt="Texto na tela do Reel"></div>`
+    : `<img src="${previewSrc(c, it)}" alt="${esc(it.name)}" loading="lazy">`).join('')}
+    ${vids.map(v => `<video src="${esc(v.url)}" controls playsinline preload="metadata"></video>`).join('')}</div>`;
+}
+
+// ================= cartão de conteúdo =================
+function meta(c) {
+  const [label, tone] = STATUS[c.status] || ['', ''];
+  return `<div class="row"><span class="pill wine">${TYPE[c.type] || c.type}</span><span class="pill">${OBJ[c.objective] || ''}</span>
+    ${c.seriesName ? `<span class="pill">${esc(c.seriesName)}</span>` : ''}<span class="pill ${tone}">${label}</span>
+    ${c.scheduledFor ? `<span class="pill">${fmtDay(c.scheduledFor)}</span>` : ''}</div>`;
+}
+function detail(c) {
+  const p = c.payload || {}; const out = [];
+  if (c.type === 'reel7') {
+    out.push(`<p class="quote">${rich(p.frase)}</p>`);
+    if (p.alternativas?.length) out.push(`<details><summary>Versões alternativas</summary><div class="stack" style="margin-top:8px">${p.alternativas.map(a => `<p class="quote" style="font-size:16px">${rich(a)}</p>`).join('')}</div></details>`);
+    out.push(`<div class="box"><span class="eyebrow">Cena</span><p>${esc(p.cena)}</p></div>`);
+    out.push(`<div class="grid2"><div class="box"><span class="eyebrow">Texto</span><p class="small">${esc(p.posicaoTexto || 'topo')} · ${esc(p.estiloVisual || '')}</p></div><div class="box"><span class="eyebrow">Trilha</span><p class="small">${esc(p.trilha)}</p></div></div>`);
+  }
+  if (c.type === 'reelFalado') {
+    out.push(`<div class="box"><span class="eyebrow">Gancho · 3 primeiros segundos</span><p class="quote" style="font-size:17px">${esc(p.gancho)}</p></div>`);
+    out.push(`<details><summary>Roteiro completo (${p.duracao || 60}s)</summary><div class="script" style="margin-top:10px">${(p.roteiro || []).map(b => `<div><span>${b.inicio}–${b.fim}s</span><p>${esc(b.fala)}</p></div>`).join('')}</div></details>`);
+    if (p.orientacoes?.length) out.push(`<details><summary>Como gravar</summary><ul>${p.orientacoes.map(o => `<li>${esc(o)}</li>`).join('')}</ul></details>`);
+    if (p.cortes?.length) out.push(`<details><summary>Cortes sugeridos</summary><ul>${p.cortes.map(o => `<li>${esc(o)}</li>`).join('')}</ul></details>`);
+    if (p.fundamentos) out.push(`<p class="small muted">Fundamentos: ${esc(p.fundamentos)}</p>`);
+  }
+  if (c.type === 'carrossel') out.push(`<details><summary>Texto dos ${(p.cards || []).length} cards</summary><ol>${(p.cards || []).map(cd => `<li><b>${esc(plain(cd.title))}</b>${cd.body ? `<br><span class="muted">${esc(plain(cd.body))}</span>` : ''}</li>`).join('')}</ol></details>`);
+  if (c.type === 'stories') out.push(`<div class="stack">${(p.stories || []).map((s, i) => `<div class="box"><span class="eyebrow">Story ${i + 1}${s.sticker?.tipo && s.sticker.tipo !== 'nenhum' ? ' · figurinha ' + esc(s.sticker.tipo) : ''}</span><p>${esc(plain(s.texto))}${s.apoio ? ' ' + esc(plain(s.apoio)) : ''}</p>${s.sticker?.opcoes?.length ? `<p class="small muted">Opções: ${s.sticker.opcoes.map(esc).join(' / ')}</p>` : ''}${s.orientacao ? `<p class="small muted">${esc(s.orientacao)}</p>` : ''}</div>`).join('')}</div>`);
+  if (c.type === 'estatico' && p.card) out.push(`<p class="quote">${rich(p.card.title)}</p>`);
+  if (p.legenda) out.push(`<div class="box"><div class="row between"><span class="eyebrow">Legenda</span><button class="btn ghost small" data-copy="${esc(c.id)}">Copiar legenda</button></div><p>${rich(p.legenda)}</p>${p.cta ? `<p><b>CTA:</b> ${esc(p.cta)}</p>` : ''}</div>`);
+  else if (p.cta) out.push(`<p><b>CTA:</b> ${esc(p.cta)}</p>`);
+  if (p.objetivoEstrategico) out.push(`<p class="small muted"><b>Estratégia:</b> ${esc(p.objetivoEstrategico)}</p>`);
+  if (c.riscos) out.push(`<p class="small"><span class="pill warn">Atenção</span> ${esc(c.riscos)}</p>`);
+  return out.join('');
+}
+function alerts(c) {
+  const a = [];
+  if (c.validarOpiniao) a.push(`<div class="box"><span class="eyebrow">Validar opinião</span><p class="small">${esc(c.validarOpiniao)}</p></div>`);
+  if (c.precisaInputPessoal && !c.respostaPessoal) a.push(`<div class="box"><span class="eyebrow">Preciso de você</span><p class="small">${esc(c.perguntaPessoal || 'Este conteúdo depende de uma experiência real sua.')}</p><button class="btn small" data-act="responder" data-id="${c.id}">Responder</button></div>`);
+  if (c.respostaPessoal) a.push(`<div class="box"><span class="eyebrow">Sua resposta</span><p class="small">${esc(c.respostaPessoal)}</p></div>`);
+  return a.join('');
+}
+function contentCard(c, mode) {
+  const busy = S.busy[c.id];
+  const acts = {
+    aprovar: `<button class="btn primary" data-act="aprovar" data-id="${c.id}">Aprovar</button><button class="btn" data-act="editar" data-id="${c.id}">Editar</button><button class="btn" data-act="versao" data-id="${c.id}">Nova versão</button><button class="btn ghost danger" data-act="rejeitar" data-id="${c.id}">Rejeitar</button>`,
+    gravar: `<button class="btn primary" data-act="video" data-id="${c.id}">Enviar vídeo gravado</button><button class="btn" data-act="gravei" data-id="${c.id}">Já editei por fora</button>`,
+    pronto: `<button class="btn primary" data-act="baixar" data-id="${c.id}">Baixar tudo</button><button class="btn" data-act="agendar" data-id="${c.id}">${c.scheduledFor ? 'Mudar data' : 'Agendar'}</button><button class="btn" data-act="publicado" data-id="${c.id}">Marcar publicado</button>`,
+    lista: ''
+  };
+  return `<article class="card">
+    ${meta(c)}
+    <h3>${esc(plain(c.title))}</h3>
+    ${strip(c)}
+    ${mode !== 'lista' ? alerts(c) : ''}
+    ${mode === 'lista' ? '' : detail(c)}
+    ${busy ? `<p class="row small muted"><span class="spin"></span>${esc(busy)}</p>` : `<div class="row">${acts[mode] || ''}</div>`}
+  </article>`;
+}
+
+// ================= telas =================
+function empty(title, text, btn) { return `<div class="empty"><b style="color:var(--ink)">${title}</b><span class="small">${text}</span>${btn || ''}</div>`; }
+function offlineNote() {
+  return S.offline ? `<div class="card"><span class="pill warn">Modo visualização</span><p class="small">Esta página precisa ser aberta pelo claude.ai, logada na sua conta, para salvar, gerar e baixar conteúdos.</p></div>` : '';
+}
+function header(eyebrow, title, extra) { return `<div class="head"><span class="eyebrow">${eyebrow}</span><h1>${title}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
+
+function vHoje() {
+  const d = new Date(); const h = d.getHours(); const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  const n = (st) => S.contents.filter(c => c.status === st).length;
+  const hoje = S.contents.filter(c => c.scheduledFor === today() && c.status !== 'rejeitado');
+  const pessoal = S.contents.filter(c => c.precisaInputPessoal && !c.respostaPessoal && ['aprovar', 'gravar'].includes(c.status));
+  const rot = S.rotina;
+  return `${header(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }), `${saud}, <em>Núbia.</em>`)}
+  ${offlineNote()}
+  <div class="tiles">
+    <button class="tile" data-act="ir" data-to="gravar"><b>${n('gravar')}</b><span class="small muted">para gravar</span></button>
+    <button class="tile" data-act="ir" data-to="aprovar"><b>${n('aprovar')}</b><span class="small muted">para aprovar</span></button>
+    <button class="tile" data-act="ir" data-to="prontos"><b>${n('pronto') + n('agendado')}</b><span class="small muted">prontos</span></button>
+  </div>
+  <div class="row"><button class="btn primary" data-act="criar">Criar conteúdo</button><button class="btn" data-act="semana">Montar a semana</button></div>
+  ${pessoal.length ? `<section><h2>Preciso de você</h2>${pessoal.map(c => `<div class="card"><span class="pill wine">${TYPE[c.type]}</span><h3>${esc(plain(c.title))}</h3><p class="small">${esc(c.perguntaPessoal || '')}</p><div class="row"><button class="btn" data-act="responder" data-id="${c.id}">Responder</button></div></div>`).join('')}</section>` : ''}
+  <section><h2>Publicar hoje</h2>${hoje.length ? hoje.map(c => contentCard(c, c.status === 'aprovar' ? 'aprovar' : c.status === 'gravar' ? 'gravar' : 'pronto')).join('') : empty('Nada agendado para hoje', 'Agende conteúdos prontos no Calendário ou crie um novo agora.')}</section>
+  ${mixCard()}
+  <section><h2>Radar de pautas</h2>${S.radar.length ? S.radar.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 6).map(radarCard).join('') : empty('Nenhuma pauta no radar ainda', 'A pesquisa diária de notícias e tendências alimenta esta lista quando a rotina automática estiver ativada.')}</section>
+  <div class="card"><span class="eyebrow">Rotina automática</span>${rot ? `<p class="small">Última execução: <b>${new Date(rot.ultimaExecucao).toLocaleString('pt-BR')}</b>. ${esc(rot.resumo || '')}</p>` : `<p class="small">Ainda não ativada. Quando você autorizar, uma rotina diária pesquisa pautas, prepara propostas e deixa tudo aqui em Aprovar.</p>`}</div>`;
+}
+function radarCard(r) {
+  return `<div class="card"><div class="row"><span class="pill ${r.tipo === 'fato' ? 'ok' : r.tipo === 'opiniao' ? 'wine' : ''}">${esc(r.tipo === 'fato' ? 'Fato verificado' : r.tipo === 'opiniao' ? 'Opinião' : 'Interpretação')}</span>${r.potencial ? `<span class="pill">Potencial ${esc(r.potencial)}</span>` : ''}<span class="small muted">${esc(r.data || '')}</span></div>
+  <h3>${esc(r.tema)}</h3>${r.oportunidade ? `<p class="small">${esc(r.oportunidade)}</p>` : ''}${r.riscos ? `<p class="small muted">Riscos: ${esc(r.riscos)}</p>` : ''}
+  <div class="row between"><span class="small muted">${r.fonte ? `Fonte: ${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.fonte)}</a>` : esc(r.fonte)}` : ''}</span><button class="btn small" data-act="criar" data-brief="${esc(r.tema + (r.oportunidade ? '. ' + r.oportunidade : ''))}">Transformar em conteúdo</button></div></div>`;
+}
+function mixCard() {
+  const ws = weekStart(); const we = addDays(ws, 6);
+  const wk = S.contents.filter(c => c.scheduledFor && c.scheduledFor >= ws && c.scheduledFor <= we && c.status !== 'rejeitado');
+  const tot = wk.length || 1; const m = brand().mix;
+  const seg = (k) => `<i style="width:${(wk.filter(c => c.objective === k).length / tot) * 100}%;background:${OBJ_COLOR[k]}"></i>`;
+  const seriesDup = Object.entries(wk.reduce((a, c) => { if (c.series) a[c.seriesName || c.series] = (a[c.seriesName || c.series] || 0) + 1; return a; }, {})).filter(([, n]) => n > 1);
+  return `<div class="card"><div class="row between"><h3>Equilíbrio da semana</h3><span class="small muted">${wk.length} agendado(s)</span></div>
+    <div class="bar">${wk.length ? seg('crescimento') + seg('autoridade') + seg('conversao') : ''}</div>
+    <div class="legend">${Object.keys(OBJ).map(k => `<span><b style="background:${OBJ_COLOR[k]}"></b>${OBJ[k]} ${wk.filter(c => c.objective === k).length}/${wk.length} · meta ${m[k]}%</span>`).join('')}</div>
+    ${seriesDup.length ? `<p class="small"><span class="pill warn">Série repetida</span> ${seriesDup.map(([s, n]) => `${esc(s)} aparece ${n}x nesta semana. O limite é 1.`).join(' ')}</p>` : ''}</div>`;
+}
+
+function vLista(status, eyebrow, title, sub, emptyT, emptyX) {
+  const list = S.contents.filter(c => status.includes(c.status)).sort((a, b) => (a.scheduledFor || '9').localeCompare(b.scheduledFor || '9') || (b.createdAt || '').localeCompare(a.createdAt || ''));
+  const mode = status[0] === 'pronto' ? 'pronto' : status[0];
+  return `${header(eyebrow, title, sub)}${offlineNote()}${list.length ? `<div class="stack">${list.map(c => contentCard(c, mode)).join('')}</div>` : empty(emptyT, emptyX, `<button class="btn primary" data-act="criar">Criar conteúdo</button>`)}`;
+}
+
+function vCalendario() {
+  const start = today(); const days = Array.from({ length: 14 }, (_, i) => addDays(start, i));
+  const sched = S.contents.filter(c => c.scheduledFor && c.status !== 'rejeitado');
+  const semData = S.contents.filter(c => !c.scheduledFor && ['pronto', 'gravar', 'aprovar'].includes(c.status));
+  return `${header('Calendário', 'Próximos <em>14 dias</em>', 'Conteúdos agendados aparecem aqui. Toque em um dia vazio para ver o que pode entrar.')}
+  ${mixCard()}
+  <div class="card" style="gap:0">${days.map(d => { const items = sched.filter(c => c.scheduledFor === d); const dt = new Date(d + 'T12:00:00');
+    return `<div class="day"><div class="d"><small>${dt.toLocaleDateString('pt-BR', { weekday: 'short' })}</small>${dt.getDate()}</div><div class="stack" style="gap:6px">${items.length ? items.map(c => `<div class="row"><span class="pill ${(STATUS[c.status] || [])[1] || ''}">${TYPE[c.type]}</span><span class="small">${esc(plain(c.title))}</span></div>`).join('') : `<span class="small muted">Livre</span>`}</div></div>`; }).join('')}</div>
+  <section><h2>Sem data</h2>${semData.length ? semData.map(c => `<div class="card"><div class="row between"><div class="stack" style="gap:4px;min-width:0"><span class="small muted">${TYPE[c.type]} · ${(STATUS[c.status] || [''])[0]}</span><b>${esc(plain(c.title))}</b></div><button class="btn" data-act="agendar" data-id="${c.id}">Definir data</button></div></div>`).join('') : empty('Tudo com data', 'Nenhum conteúdo esperando agendamento.')}</section>
+  <p class="small muted">Publicação automática no Instagram ainda não está conectada. Hoje o fluxo é: você baixa em Prontos e publica pelo app do Instagram (ou pelo Metricool, se usar).</p>`;
+}
+
+// ---------- resultados ----------
+function analyze() {
+  const rows = S.metrics.map(m => Object.assign({}, m, { reach: num(m.reach), views: num(m.views), likes: num(m.likes), comments: num(m.comments), shares: num(m.shares), saves: num(m.saves), follows: num(m.follows), profileVisits: num(m.profileVisits) }));
+  const by = {};
+  rows.forEach(r => { const k = r.format || 'Sem formato'; (by[k] = by[k] || []).push(r); });
+  const avg = (arr, f) => { const v = arr.map(f).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+  const formats = Object.entries(by).map(([k, arr]) => ({ format: k, n: arr.length, reach: avg(arr, r => r.reach ?? r.views), shareRate: avg(arr, r => pct(r.shares, r.reach ?? r.views)), saveRate: avg(arr, r => pct(r.saves, r.reach ?? r.views)), engRate: avg(arr, r => pct((r.likes || 0) + (r.comments || 0) + (r.shares || 0) + (r.saves || 0), r.reach ?? r.views)), follows: avg(arr, r => r.follows) }));
+  const score = (r) => pct((r.shares || 0) + (r.saves || 0), r.reach ?? r.views);
+  const ranked = rows.filter(r => score(r) != null).sort((a, b) => score(b) - score(a));
+  return { rows, formats, top: ranked.slice(0, 5), bottom: ranked.slice(-5).reverse(), score };
+}
+function vResultados() {
+  const A = analyze(); const rep = S.reports.slice().sort((a, b) => (b.at || '').localeCompare(a.at || ''))[0];
+  return `${header('Resultados', 'O que os <em>números</em> dizem', 'Só aparecem dados reais importados ou digitados por você. Nada aqui é estimado.')}
+  <div class="row"><button class="btn primary" data-act="importar">Importar CSV (Metricool ou Instagram)</button><button class="btn" data-act="metrica">Adicionar manualmente</button></div>
+  ${!A.rows.length ? empty('Sem métricas ainda', 'Exporte o relatório de publicações do Metricool (ou do Meta Business Suite) em CSV e importe aqui. A Central calcula formatos vencedores, taxas de compartilhamento e salvamento, e gera o relatório semanal.') : `
+  <div class="card"><h3>Por formato</h3><div class="table-wrap"><table><thead><tr><th>Formato</th><th>Posts</th><th>Alcance médio</th><th>% compart.</th><th>% salvam.</th><th>% engaj.</th></tr></thead><tbody>
+  ${A.formats.map(f => `<tr><td>${esc(f.format)}</td><td>${f.n}</td><td>${f1(f.reach)}</td><td>${f1(f.shareRate)}</td><td>${f1(f.saveRate)}</td><td>${f1(f.engRate)}</td></tr>`).join('')}</tbody></table></div>
+  <p class="small muted">Amostras pequenas (menos de 5 posts por formato) indicam tendência, não conclusão.</p></div>
+  <div class="card"><h3>Melhores publicações</h3><p class="small muted">Critério: compartilhamentos + salvamentos sobre alcance. Curtida sozinha não decide.</p>${postTable(A.top, A.score)}</div>
+  <div class="card"><h3>Piores publicações</h3>${postTable(A.bottom, A.score)}</div>
+  <div class="row"><button class="btn primary" data-act="relatorio">Gerar relatório semanal</button></div>`}
+  ${rep ? `<div class="card"><span class="eyebrow">Relatório de ${new Date(rep.at).toLocaleDateString('pt-BR')}</span><div>${rich(rep.texto)}</div></div>` : ''}
+  <p class="small muted">Conexão direta com Metricool ou com a API oficial da Meta: Fase 2. Depende da sua autorização e, no caso do Metricool, de plano com acesso à API.</p>`;
+}
+function postTable(rows, score) {
+  return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Formato</th><th>Publicação</th><th>Alcance</th><th>Índice</th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r.date || '')}</td><td>${esc(r.format || '')}</td><td class="t">${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc((r.caption || r.tema || 'abrir').slice(0, 70))}</a>` : esc((r.caption || r.tema || '').slice(0, 70))}</td><td>${f1(r.reach ?? r.views)}</td><td>${f1(score(r))}%</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+// ---------- vendas ----------
+function vVendas() {
+  return `${header('Vendas orgânicas', 'Produtos e <em>campanhas</em>', 'Cadastre o produto uma vez. A Central cria campanhas com conteúdo educativo, storytelling, problema, solução e CTA.')}
+  <div class="row"><button class="btn primary" data-act="produto">Cadastrar produto</button></div>
+  ${S.products.length ? S.products.map(p => `<div class="card"><div class="row between"><h2>${esc(p.nome)}</h2>${p.preco ? `<span class="pill">${esc(p.preco)}</span>` : '<span class="pill warn">Sem preço</span>'}</div>
+    ${p.publico ? `<p class="small"><b>Público:</b> ${esc(p.publico)}</p>` : ''}${p.beneficios ? `<p class="small"><b>Benefícios:</b> ${esc(p.beneficios)}</p>` : ''}
+    ${p.objecoes ? `<p class="small"><b>Objeções:</b> ${esc(p.objecoes)}</p>` : ''}${p.provas ? `<p class="small"><b>Provas autorizadas:</b> ${esc(p.provas)}</p>` : '<p class="small muted">Sem provas cadastradas. A Central não cria depoimentos nem números.</p>'}
+    ${p.link ? `<p class="small"><a href="${esc(p.link)}" target="_blank" rel="noopener">Link de venda</a></p>` : '<p class="small muted">Sem link de venda.</p>'}
+    <p class="small muted">${S.contents.filter(c => c.productId === p.id).length} conteúdo(s) de campanha</p>
+    <div class="row"><button class="btn primary" data-act="campanha" data-id="${p.id}">Criar campanha orgânica</button><button class="btn" data-act="produto" data-id="${p.id}">Editar</button></div></div>`).join('') : empty('Nenhum produto cadastrado', 'Comece pelo Kit Escritório Blindado: público, benefícios, preço, link, objeções e provas reais.')}
+  <p class="small muted">Integração com a Kiwify para acompanhar vendas: Fase 2. Até lá, nenhuma venda é atribuída a uma publicação.</p>`;
+}
+
+// ---------- minha marca ----------
+function vMarca() {
+  const b = brand(); const sug = S.brand?.sugestoes || [];
+  const used = S.usage && S.usage.mes === today().slice(0, 7) ? S.usage.chamadas : 0;
+  return `${header('Minha marca', 'Identidade e <em>preferências</em>', 'Tudo que a Central usa para escrever como você. Nada muda aqui sem a sua aprovação.')}
+  ${!S.brand && S.db ? `<div class="card"><p class="small">O manual ainda não foi salvo no seu banco.</p><button class="btn primary" data-act="salvarManualPadrao">Salvar manual padrão</button></div>` : ''}
+  <div class="card"><div class="row between"><h2>Voz</h2><button class="btn" data-act="editarVoz">Editar</button></div>
+    <ul>${b.voz.map(v => `<li>${esc(v)}</li>`).join('')}</ul><h3>Evitar</h3><ul>${b.evitar.map(v => `<li>${esc(v)}</li>`).join('')}</ul>
+    ${b.aprendidas?.length ? `<h3>Aprendidas com você</h3><ul>${b.aprendidas.map(v => `<li>${esc(v)}</li>`).join('')}</ul>` : ''}
+    <p class="small"><b>Regra principal:</b> ${esc(b.regraPrincipal)}</p></div>
+  <div class="card"><div class="row between"><h2>Aprendizado</h2><span class="small muted">${S.learning.length} registro(s)</span></div>
+    <div class="tiles">${['aprovado', 'editado', 'rejeitado'].map(k => `<div class="tile" style="cursor:default"><b>${S.learning.filter(l => l.action === k).length}</b><span class="small muted">${k}s</span></div>`).join('')}</div>
+    <p class="small muted">Cada aprovação, edição e rejeição entra no contexto das próximas gerações. Mudanças na personalidade viram sugestões para você aprovar.</p>
+    <div class="row"><button class="btn" data-act="sugerirVoz" ${S.learning.length < 3 ? 'disabled' : ''}>Analisar meu aprendizado</button></div>
+    ${sug.length ? sug.map((s, i) => `<div class="box"><p class="small">${esc(s)}</p><div class="row"><button class="btn small" data-act="aceitarSug" data-i="${i}">Adicionar ao manual</button><button class="btn ghost small" data-act="descartarSug" data-i="${i}">Descartar</button></div></div>`).join('') : ''}</div>
+  <div class="card"><h2>Identidade visual</h2><div class="swatches">${b.paleta.map(c => `<span style="background:${esc(c)}" title="${esc(c)}"></span>`).join('')}</div>
+    <div class="chips">${NCRender.STYLES.map(s => `<span class="pill">${STYLE_NAME[s]}</span>`).join('')}</div>
+    <p class="small muted">Fotos reais da Núbia só entram quando cadastradas na biblioteca como "foto própria autorizada". Rosto e corpo nunca são alterados.</p></div>
+  <div class="card"><div class="row between"><h2>Séries</h2><button class="btn" data-act="serie">Nova série</button></div>
+    ${S.series.length ? S.series.map(s => `<div class="row between"><div class="stack" style="gap:2px;min-width:0"><b>${esc(s.nome)}</b><span class="small muted">${esc(s.descricao || '')}</span></div>
+      <select data-serie="${s.id}" aria-label="Status da série ${esc(s.nome)}" style="width:auto">${['ativa', 'teste', 'pausada'].map(o => `<option ${s.status === o ? 'selected' : ''}>${o}</option>`).join('')}</select></div>`).join('') : '<p class="small muted">Nenhuma série cadastrada.</p>'}
+    <p class="small muted">Cada série ativa aparece no máximo uma vez por semana.</p></div>
+  <div class="card"><div class="row between"><h2>Distribuição</h2><button class="btn" data-act="mix">Ajustar</button></div>
+    <div class="legend">${Object.keys(OBJ).map(k => `<span><b style="background:${OBJ_COLOR[k]}"></b>${OBJ[k]} ${b.mix[k]}%</span>`).join('')}</div>
+    <p class="small muted">Hipótese inicial. Ajuste quando os resultados mostrarem outra coisa.</p></div>
+  <div class="card"><div class="row between"><h2>Biblioteca de referências</h2><button class="btn" data-act="referencia" ${S.assets ? '' : 'disabled'}>Adicionar</button></div>
+    ${S.references.length ? `<div class="refs">${S.references.map(r => `<figure>${r.url ? `<img src="${esc(r.url)}" alt="${esc(r.nota || 'Referência')}" loading="lazy">` : ''}<figcaption class="small"><div class="chips">${['estilo', 'tipografia', 'composicao', 'finalidade'].map(k => r[k] ? `<span class="pill">${esc(r[k])}</span>` : '').join('')}</div>${r.nota ? `<span class="muted">${esc(r.nota)}</span>` : ''}</figcaption><button class="btn ghost small danger" data-act="apagarRef" data-id="${r.id}">Remover</button></figure>`).join('')}</div>` : '<p class="small muted">Envie prints e fotos de referência com etiquetas de estilo, tipografia, composição e finalidade. Referências servem de inspiração: textos, fotos e layouts de outros criadores não são copiados.</p>'}</div>
+  <div class="card"><h2>Segurança e dados</h2>
+    <p class="small">Acesso: só pela sua conta do claude.ai. A página é privada até você compartilhar. Nenhuma senha ou token fica no código.</p>
+    <p class="small">Uso de IA neste mês: <b>${used}</b> geração(ões).</p>
+    <div class="row"><button class="btn" data-act="backup">Baixar backup (JSON)</button><button class="btn danger" data-act="apagarTudo">Excluir todos os dados</button></div>
+    <details><summary>Registro de ações</summary><ul class="small">${S.log.map(l => `<li>${new Date(l.at).toLocaleString('pt-BR')} · ${esc(l.acao)} ${esc(l.alvo)}</li>`).join('') || '<li>Sem registros.</li>'}</ul></details></div>`;
+}
+
+function render() {
+  const v = view(); renderNav();
+  if (!S.loaded) return;
+  const html = {
+    hoje: vHoje,
+    gravar: () => vLista(['gravar'], 'Gravar', 'Roteiros para <em>gravar</em>', 'Grave, envie o vídeo e a Central prepara o restante do que já está integrado.', 'Nada para gravar', 'Quando você aprovar um Reel, ele aparece aqui com cena e roteiro.'),
+    aprovar: () => vLista(['aprovar'], 'Aprovar', 'Esperando seu <em>sim</em>', 'Nada é publicado sem a sua aprovação expressa.', 'Nada aguardando', 'Crie um conteúdo ou monte a semana para receber propostas.'),
+    prontos: () => vLista(['pronto', 'agendado'], 'Prontos', 'Arquivos para <em>publicar</em>', 'Baixe os arquivos, copie a legenda e publique.', 'Nenhum arquivo pronto', 'Aprove conteúdos para que as artes finais apareçam aqui.'),
+    calendario: vCalendario, resultados: vResultados, vendas: vVendas, marca: vMarca
+  }[v]();
+  $('#app').innerHTML = html;
+  $('#app').querySelectorAll('select[data-serie]').forEach(sel => sel.addEventListener('change', async () => {
+    const s = S.series.find(x => x.id === sel.dataset.serie); if (!s || !needDb()) return;
+    await col('series').doc(s.id).update({ status: sel.value }); log('série ' + sel.value, s.nome); toast('Série atualizada');
+  }));
+}
+
+// ================= ações =================
+document.addEventListener('click', async (e) => {
+  const cp = e.target.closest('[data-copy]');
+  if (cp) { const c = S.contents.find(x => x.id === cp.dataset.copy); const t = plain(c?.payload?.legenda || '') + (c?.payload?.cta ? '\n\n' + c.payload.cta : '');
+    try { await navigator.clipboard.writeText(t); toast('Legenda copiada'); } catch (err) { openSheet(`<h2>Legenda</h2><textarea id="cp-legenda" rows="8">${esc(t)}</textarea><p class="small muted">Selecione e copie.</p>`, el => $('#cp-legenda', el).select()); } return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act; const c = b.dataset.id ? S.contents.find(x => x.id === b.dataset.id) : null;
+  const fn = ACTIONS[act]; if (fn) { e.preventDefault(); try { await fn(c, b); } catch (err) { console.error(err); toast(err?.message || 'Algo falhou. Tente de novo.'); } }
+});
+
+async function setBusy(id, msg) { if (msg) S.busy[id] = msg; else delete S.busy[id]; render(); }
+async function learn(action, c, extra) {
+  if (!S.db) return;
+  await col('learning').add(Object.assign({ at: now(), action, contentId: c.id, type: c.type, objective: c.objective, series: c.series || null, title: plain(c.title), texto: mainText(c) }, extra || {}));
+}
+function mainText(c) {
+  const p = c.payload || {};
+  if (c.type === 'reel7') return plain(p.frase);
+  if (c.type === 'reelFalado') return plain(p.gancho) + ' | ' + (p.roteiro || []).map(b => b.fala).join(' ').slice(0, 500);
+  if (c.type === 'carrossel') return (p.cards || []).map(cd => plain(cd.title)).join(' | ');
+  if (c.type === 'stories') return (p.stories || []).map(s => plain(s.texto)).join(' | ');
+  if (c.type === 'estatico') return plain(p.card?.title);
+  return '';
+}
+
+const ACTIONS = {
+  ir: (c, b) => { location.hash = b.dataset.to; },
+  criar: (c, b) => openCreate({ brief: b.dataset.brief || '' }),
+  semana: () => openWeek(),
+  async aprovar(c) {
+    if (!needDb()) return;
+    const next = c.precisaGravacao ? 'gravar' : 'pronto';
+    await col('contents').doc(c.id).update({ status: next, aprovadoEm: now(), updatedAt: now() });
+    await learn('aprovado', c); log('aprovou', plain(c.title));
+    toast(next === 'gravar' ? 'Aprovado. Está em Gravar.' : 'Aprovado. Arquivos em Prontos.');
+    if (!(c.files || []).some(f => f.kind === 'arte') && S.assets) produzirArquivos(Object.assign({}, c, { status: next }));
+  },
+  rejeitar(c) {
+    openSheet(`<h2>Rejeitar</h2><p class="small muted">O motivo ensina a Central a não repetir o erro.</p>
+      <div class="chips" id="rj-chips">${REJECT_REASONS.map(r => `<button type="button" aria-pressed="false">${r}</button>`).join('')}</div>
+      <label for="rj-texto">Comentário (opcional)<textarea id="rj-texto" placeholder="Ex.: eu nunca falaria 'amiga', prefiro 'mulher'"></textarea></label>
+      <div class="row"><button class="btn danger" id="rj-ok">Rejeitar</button><button class="btn ghost" data-close>Cancelar</button></div>`, (el) => {
+      el.querySelectorAll('#rj-chips button').forEach(x => x.addEventListener('click', () => x.setAttribute('aria-pressed', x.getAttribute('aria-pressed') === 'true' ? 'false' : 'true')));
+      $('#rj-ok', el).addEventListener('click', async () => {
+        if (!needDb()) return;
+        const motivos = [...el.querySelectorAll('#rj-chips [aria-pressed="true"]')].map(x => x.textContent);
+        const reason = [motivos.join(', '), $('#rj-texto', el).value.trim()].filter(Boolean).join('. ');
+        await col('contents').doc(c.id).update({ status: 'rejeitado', motivoRejeicao: reason, updatedAt: now() });
+        await learn('rejeitado', c, { reason }); log('rejeitou', plain(c.title)); closeSheet(); toast('Rejeitado e registrado');
+      });
+    });
+  },
+  editar: (c) => openEdit(c),
+  versao(c) {
+    openSheet(`<h2>Nova versão</h2><p class="small muted">Diga o que mudar. A versão anterior fica guardada.</p>
+      <label for="nv-texto">O que você quer diferente?<textarea id="nv-texto" placeholder="Ex.: gancho mais ácido, menos explicação, tom mais pessoal"></textarea></label>
+      <div class="row"><button class="btn primary" id="nv-ok">Gerar nova versão</button><button class="btn ghost" data-close>Cancelar</button></div>`, (el) => {
+      $('#nv-ok', el).addEventListener('click', async () => {
+        const fb = $('#nv-texto', el).value.trim(); closeSheet();
+        await regenerate(c, fb);
+      });
+    });
+  },
+  responder(c) {
+    openSheet(`<h2>Preciso de você</h2><p>${esc(c.perguntaPessoal || '')}</p>
+      <label for="rp-texto">Sua resposta<textarea id="rp-texto" rows="5" placeholder="Conte do seu jeito. Sem nomes de clientes."></textarea></label>
+      <div class="row"><button class="btn primary" id="rp-ok">Salvar e reescrever com isso</button><button class="btn" id="rp-skip">Seguir sem história pessoal</button></div>`, (el) => {
+      $('#rp-ok', el).addEventListener('click', async () => {
+        const r = $('#rp-texto', el).value.trim(); if (!r) { toast('Escreva a resposta ou escolha seguir sem.'); return; }
+        if (!needDb()) return;
+        await col('contents').doc(c.id).update({ respostaPessoal: r, updatedAt: now() }); closeSheet();
+        await regenerate(Object.assign({}, c, { respostaPessoal: r }), 'Incorpore a experiência real que a Núbia contou, com as palavras dela, sem exagerar nem acrescentar detalhes: ' + r);
+      });
+      $('#rp-skip', el).addEventListener('click', async () => { if (!needDb()) return; await col('contents').doc(c.id).update({ respostaPessoal: '(sem história pessoal)', updatedAt: now() }); closeSheet(); });
+    });
+  },
+  video: (c) => openVideo(c),
+  async gravei(c) { if (!needDb()) return; await col('contents').doc(c.id).update({ status: 'pronto', updatedAt: now() }); log('gravado (edição externa)', plain(c.title)); toast('Movido para Prontos'); },
+  baixar: (c) => baixar(c),
+  agendar(c) {
+    openSheet(`<h2>Agendar</h2><p class="small muted">${esc(plain(c.title))}</p><label for="ag-data">Data de publicação<input type="date" id="ag-data" value="${c.scheduledFor || today()}" min="${today()}"></label>
+      <div class="row"><button class="btn primary" id="ag-ok">Salvar data</button>${c.scheduledFor ? '<button class="btn" id="ag-rm">Tirar data</button>' : ''}</div>`, (el) => {
+      $('#ag-ok', el).addEventListener('click', async () => { if (!needDb()) return; const d = $('#ag-data', el).value; if (!d) return;
+        const st = c.status === 'pronto' ? 'agendado' : c.status;
+        await col('contents').doc(c.id).update({ scheduledFor: d, status: st, updatedAt: now() }); log('agendou ' + d, plain(c.title)); closeSheet(); toast('Agendado para ' + fmtDay(d)); });
+      const rm = $('#ag-rm', el); if (rm) rm.addEventListener('click', async () => { await col('contents').doc(c.id).update({ scheduledFor: null, status: c.status === 'agendado' ? 'pronto' : c.status, updatedAt: now() }); closeSheet(); });
+    });
+  },
+  async publicado(c) { if (!needDb()) return; await col('contents').doc(c.id).update({ status: 'publicado', publicadoEm: now(), updatedAt: now() }); log('publicado', plain(c.title)); toast('Marcado como publicado. Importe as métricas depois.'); },
+  importar: () => openImport(),
+  metrica: () => openMetric(),
+  relatorio: () => weeklyReport(),
+  produto: (c, b) => openProduct(S.products.find(p => p.id === b.dataset.id)),
+  campanha: (c, b) => openCampaign(S.products.find(p => p.id === b.dataset.id)),
+  async salvarManualPadrao() { if (!needDb()) return; await col('settings').doc('brand').set(Object.assign({}, DEFAULT_BRAND, { atualizado: now() })); toast('Manual salvo'); },
+  editarVoz: () => openVoice(),
+  sugerirVoz: () => suggestVoice(),
+  async aceitarSug(c, b) { const i = +b.dataset.i; const br = Object.assign({}, brand()); const sug = (br.sugestoes || []).slice(); const [item] = sug.splice(i, 1);
+    await col('settings').doc('brand').set(Object.assign(br, { aprendidas: [...(br.aprendidas || []), item], sugestoes: sug, atualizado: now() })); log('aprovou regra de voz', item); toast('Adicionado ao manual'); },
+  async descartarSug(c, b) { const br = Object.assign({}, brand()); const sug = (br.sugestoes || []).slice(); sug.splice(+b.dataset.i, 1); await col('settings').doc('brand').set(Object.assign(br, { sugestoes: sug })); },
+  serie: () => openSeries(),
+  mix: () => openMix(),
+  referencia: () => openReference(),
+  async apagarRef(c, b) { const r = S.references.find(x => x.id === b.dataset.id); if (!r) return;
+    if (b.dataset.confirm !== '1') { b.dataset.confirm = '1'; b.textContent = 'Toque de novo para remover'; return; }
+    if (r.assetId && S.assets) await S.assets.delete(r.assetId).catch(() => null); await col('references').doc(r.id).delete(); log('removeu referência', r.nota || ''); },
+  backup: () => backup(),
+  apagarTudo: () => wipe()
+};
+
+// ================= geração com IA =================
+function examples() {
+  const L = S.learning;
+  const ap = L.filter(l => l.action === 'aprovado').slice(0, 6).map(l => `- [${l.type}] ${l.texto}`).join('\n');
+  const rj = L.filter(l => l.action === 'rejeitado').slice(0, 6).map(l => `- [${l.type}] ${l.texto} → motivo: ${l.reason || 'não informado'}`).join('\n');
+  const ed = L.filter(l => l.action === 'editado').slice(0, 5).map(l => `- antes: ${String(l.before || '').slice(0, 220)}\n  depois: ${String(l.after || '').slice(0, 220)}`).join('\n');
+  return { ap, rj, ed };
+}
+const SCHEMAS = {
+  reel7: '{"title":"…","style":"…","payload":{"frase":"frase forte com *ênfase*, até 18 palavras","alternativas":["…","…"],"cena":"cena simples que a Núbia grava sozinha","posicaoTexto":"topo|centro","estiloTexto":"caixa|serif|sombra","estiloVisual":"…","trilha":"orientação de áudio da biblioteca licenciada do Instagram","legenda":"curta","cta":"…","objetivoEstrategico":"…"}}',
+  reelFalado: '{"title":"…","style":"…","payload":{"duracao":60,"gancho":"primeiros 3 segundos","roteiro":[{"inicio":0,"fim":4,"fala":"…"}],"orientacoes":["…"],"textoCapa":"com *ênfase*, até 9 palavras","legenda":"…","cta":"…","cortes":["…"],"fundamentos":"leis citadas, só se tiver certeza, ou vazio","objetivoEstrategico":"…"}}',
+  carrossel: '{"title":"…","style":"…","payload":{"cards":[{"title":"com *ênfase*","body":"curto ou vazio"}],"legenda":"…","cta":"…","objetivoEstrategico":"…"}}',
+  stories: '{"title":"…","style":"…","payload":{"stories":[{"kicker":"…","texto":"com *ênfase*","apoio":"opcional","sticker":{"tipo":"enquete|perguntas|slider|quiz|nenhum","pergunta":"…","opcoes":["…"]},"orientacao":"…"}],"cta":"…","objetivoEstrategico":"…"}}',
+  estatico: '{"title":"…","style":"…","payload":{"card":{"kicker":"…","title":"com *ênfase*","body":"opcional"},"legenda":"…","cta":"…","objetivoEstrategico":"…"}}'
+};
+const RULES_FORMAT = {
+  reel7: 'Reel de 7 segundos, vertical, SEM fala: uma cena simples e uma frase forte na tela. Priorize contradições, humor ácido, opinião sincera, identificação, provocação inteligente. Dê 2 alternativas.',
+  reelFalado: 'Reel falado de 40 a 80 segundos (padrão 60). Gancho forte nos 3 primeiros segundos. Roteiro em blocos com tempo, linguagem de conversa e não de teleprompter.',
+  carrossel: 'Carrossel de 4 a 7 cards (1080x1350). Card 1: capa com gancho forte. Meio: valor real com progressão que faz querer continuar. Último: encerramento memorável. Pouco texto por card (título até 16 palavras, apoio até 28).',
+  stories: 'Sequência de 3 a 5 stories (1080x1920). Use figurinhas nativas (enquete, perguntas, slider, quiz) quando fizer sentido. Texto curto.',
+  estatico: 'Post estático (1080x1350) com frase forte, reflexão, opinião ou conteúdo jornalístico verificado.'
+};
+function buildPrompt(o) {
+  const b = brand(); const ex = examples();
+  const serie = o.series ? S.series.find(s => s.id === o.series) : null;
+  const prod = o.product;
+  const recent = S.contents.slice().sort((x, y) => (y.createdAt || '').localeCompare(x.createdAt || '')).slice(0, 25).map(c => '- ' + plain(c.title)).join('\n');
+  const lastStyles = S.contents.slice().sort((x, y) => (y.createdAt || '').localeCompare(x.createdAt || '')).slice(0, 3).map(c => c.style).join(', ');
+  return `Você é a equipe de conteúdo da Núbia Citty (@nubiacitty): advogada criminalista em Itabira/MG com posicionamento nacional, empresária, fundadora de escritório, mentora e criadora de produtos digitais. Ela quer ser reconhecida pela própria personalidade, não parecer professora de Direito em todo post.
+Temas da marca: ${b.temas.join(', ')}.
+
+VOZ: ${b.voz.join(' ')}
+EVITAR: ${b.evitar.join(' ')}
+${b.aprendidas?.length ? 'REGRAS APRENDIDAS COM A NÚBIA: ' + b.aprendidas.join(' ') : ''}
+REGRA PRINCIPAL: ${b.regraPrincipal}
+ÉTICA: ${b.oab}
+NUNCA invente histórias pessoais, números, depoimentos, decisões judiciais ou leis. Se o conteúdo pedir experiência pessoal, deixe um marcador [SUA HISTÓRIA: o que precisa] e preencha "precisaInputPessoal": true com a pergunta em "perguntaPessoal". Opiniões fortes atribuídas à Núbia: descreva em "validarOpiniao" quais ela precisa confirmar. Fatos jurídicos só com certeza. Não use travessões.
+
+FORMATO: ${RULES_FORMAT[o.type]}
+OBJETIVO: ${OBJ[o.objective]}${serie ? `\nSÉRIE: "${serie.nome}". ${serie.descricao || ''}` : ''}
+ESTILO VISUAL: ${o.style === 'auto' ? `escolha entre editorial, lifestyle, colagem, jornalistico, minimal. Varie em relação aos últimos usados (${lastStyles || 'nenhum'}).` : o.style}
+${prod ? `PRODUTO (campanha orgânica): ${prod.nome}. Público: ${prod.publico || '-'}. Benefícios: ${prod.beneficios || '-'}. Preço: ${prod.preco || 'não informar'}. Objeções: ${prod.objecoes || '-'}. Provas autorizadas: ${prod.provas || 'nenhuma, então não cite resultados'}. Restrições: ${prod.restricoes || '-'}. Link: ${prod.link || '-'}.` : ''}
+PEDIDO DA NÚBIA: ${o.brief || 'Proponha o tema mais forte para este formato e objetivo.'}
+${o.feedback ? `ESTA É UMA NOVA VERSÃO. Versão anterior: ${o.previous}\nO que ela quer diferente: ${o.feedback}` : ''}
+
+APROVADOS POR ELA (imite o tom):\n${ex.ap || '(ainda nenhum)'}
+REJEITADOS (não repita):\n${ex.rj || '(ainda nenhum)'}
+EDIÇÕES QUE ELA FEZ (aprenda com a diferença):\n${ex.ed || '(ainda nenhuma)'}
+TÍTULOS RECENTES (não repita o assunto):\n${recent || '(nenhum)'}
+
+Responda SOMENTE com um JSON válido neste formato:
+${SCHEMAS[o.type]}
+Inclua também no nível raiz: "precisaInputPessoal": false, "perguntaPessoal": "", "validarOpiniao": "", "riscos": "riscos jurídicos, éticos ou de reputação, ou vazio".
+Use *asteriscos* para marcar a ênfase visual (1 trecho por frase).`;
+}
+function normalize(type, raw) {
+  const r = raw && typeof raw === 'object' ? raw : {}; const p = r.payload || {};
+  if (type === 'carrossel') { p.cards = (p.cards || []).filter(x => x && x.title).slice(0, 7); if (p.cards.length < 4) throw new Error('A IA devolveu menos de 4 cards. Gere de novo.'); }
+  if (type === 'stories') { p.stories = (p.stories || []).filter(x => x && x.texto).slice(0, 6); if (!p.stories.length) throw new Error('A IA não devolveu stories. Gere de novo.'); }
+  if (type === 'reel7' && !p.frase) throw new Error('A IA não devolveu a frase. Gere de novo.');
+  if (type === 'reelFalado') { if (!p.roteiro?.length) throw new Error('A IA não devolveu roteiro. Gere de novo.'); p.duracao = p.duracao || p.roteiro[p.roteiro.length - 1].fim || 60; }
+  if (type === 'estatico' && !p.card?.title) throw new Error('A IA não devolveu o texto do post. Gere de novo.');
+  if (type === 'reel7') p.duracao = 7;
+  const style = NCRender.STYLES.includes(r.style) ? r.style : 'editorial';
+  return { title: plain(r.title) || 'Sem título', style, payload: p, precisaInputPessoal: !!r.precisaInputPessoal, perguntaPessoal: r.perguntaPessoal || '', validarOpiniao: r.validarOpiniao || '', riscos: r.riscos || '' };
+}
+async function callAI(prompt) {
+  if (!S.sample) throw new Error('A geração por IA precisa ser aberta pelo claude.ai e autorizada.');
+  const out = await S.sample.json(prompt, { modelTier: 'complex' });
+  countUsage();
+  return out;
+}
+
+async function generate(o) {
+  if (!needDb()) return null;
+  const tmpId = 'novo-' + uid(); S.busy[tmpId] = 'Gerando…';
+  const raw = await callAI(buildPrompt(o));
+  delete S.busy[tmpId];
+  const n = normalize(o.type, raw); const serie = o.series ? S.series.find(s => s.id === o.series) : null;
+  const c = Object.assign({ id: uid(), type: o.type, objective: o.objective, series: o.series || null, seriesName: serie ? serie.nome : '', status: 'aprovar', createdAt: now(), updatedAt: now(), version: 1, origem: 'app', precisaGravacao: o.type === 'reel7' || o.type === 'reelFalado', productId: o.product ? o.product.id : null, scheduledFor: o.date || null, files: [] }, n);
+  c.slug = NCRender.slug(c.title);
+  await col('contents').doc(c.id).set(c);
+  log('gerou', c.title);
+  if (S.assets) produzirArquivos(c);
+  return c;
+}
+async function regenerate(c, feedback) {
+  if (!needDb()) return;
+  await setBusy(c.id, 'Gerando nova versão…');
+  try {
+    const raw = await callAI(buildPrompt({ type: c.type, objective: c.objective, series: c.series, style: c.style, brief: plain(c.title), feedback, previous: JSON.stringify(c.payload).slice(0, 2500), product: S.products.find(p => p.id === c.productId) }));
+    const n = normalize(c.type, raw);
+    const versions = [...(c.versions || []), { at: now(), title: c.title, payload: c.payload }].slice(-3);
+    await learn('nova_versao', c, { reason: feedback });
+    const upd = Object.assign({}, n, { versions, version: (c.version || 1) + 1, status: 'aprovar', updatedAt: now() });
+    await col('contents').doc(c.id).update(upd);
+    log('nova versão', n.title);
+    produzirArquivos(Object.assign({}, c, upd));
+  } finally { setBusy(c.id); }
+}
+
+// ================= produção das artes =================
+function loadImg(url) { return new Promise((res, rej) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => res(i); i.onerror = rej; i.src = url; }); }
+async function produzirArquivos(c) {
+  if (!S.assets || !S.db) return;
+  S.busy[c.id] = 'Produzindo artes…'; render();
+  try {
+    await NCRender.ready();
+    const photoRef = c.photoRefId ? S.references.find(r => r.id === c.photoRefId) : null;
+    const photo = photoRef?.url ? await loadImg(photoRef.url).catch(() => null) : null;
+    const old = (c.files || []).filter(f => f.kind === 'arte');
+    const files = (c.files || []).filter(f => f.kind !== 'arte');
+    for (const it of NCRender.specsFor(c)) {
+      if (photo && it.spec.style === 'lifestyle') it.spec.photo = photo;
+      const cv = NCRender.render(it.spec);
+      const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+      const up = await S.assets.upload(blob, { type: 'image/png' });
+      files.unshift({ name: it.name, url: up.url, assetId: up.id, w: cv.width, h: cv.height, kind: 'arte' });
+    }
+    files.sort((a, b) => a.name.localeCompare(b.name));
+    await col('contents').doc(c.id).update({ files, updatedAt: now() });
+    for (const f of old) if (f.assetId) S.assets.delete(f.assetId).catch(() => null);
+  } catch (e) { console.error(e); toast('Não consegui salvar as artes: ' + (e.message || e.code || 'erro')); }
+  finally { delete S.busy[c.id]; render(); }
+}
+
+// ================= downloads =================
+async function fileBlob(c, it) {
+  const f = (c.files || []).find(x => x.name === it.name && x.url);
+  if (f) { try { const r = await fetch(f.url); if (r.ok) return await r.blob(); } catch (e) { } }
+  await NCRender.ready(); const cv = NCRender.render(it.spec); return await new Promise(r => cv.toBlob(r, 'image/png'));
+}
+function textos(c) {
+  const p = c.payload || {}; const L = [plain(c.title), `${TYPE[c.type]} · ${OBJ[c.objective]}${c.seriesName ? ' · ' + c.seriesName : ''}`, ''];
+  if (c.type === 'reel7') L.push('FRASE NA TELA', plain(p.frase), '', 'ALTERNATIVAS', ...(p.alternativas || []).map(a => '- ' + plain(a)), '', 'CENA', p.cena || '', '', 'TRILHA', p.trilha || '', '');
+  if (c.type === 'reelFalado') L.push('GANCHO', p.gancho || '', '', 'ROTEIRO', ...(p.roteiro || []).map(b => `[${b.inicio}s-${b.fim}s] ${b.fala}`), '', 'COMO GRAVAR', ...(p.orientacoes || []).map(o => '- ' + o), '', 'CORTES', ...(p.cortes || []).map(o => '- ' + o), '');
+  if (c.type === 'carrossel') L.push('CARDS', ...(p.cards || []).map((cd, i) => `${i + 1}. ${plain(cd.title)}${cd.body ? ' | ' + plain(cd.body) : ''}`), '');
+  if (c.type === 'stories') L.push('STORIES', ...(p.stories || []).map((s, i) => `${i + 1}. ${plain(s.texto)}${s.apoio ? ' | ' + plain(s.apoio) : ''} (figurinha: ${s.sticker?.tipo || 'nenhuma'}${s.sticker?.opcoes?.length ? ': ' + s.sticker.opcoes.join(' / ') : ''})`), '');
+  if (p.legenda) L.push('LEGENDA', plain(p.legenda), '');
+  if (p.cta) L.push('CTA', p.cta, '');
+  return L.join('\n');
+}
+function srt(c) {
+  const t = (s) => `00:${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')},000`;
+  return (c.payload?.roteiro || []).map((b, i) => `${i + 1}\n${t(b.inicio)} --> ${t(b.fim)}\n${b.fala}\n`).join('\n');
+}
+async function save(filename, data) {
+  if (!S.downloads) { toast('Downloads funcionam quando a página é aberta pelo claude.ai.'); return false; }
+  try { await S.downloads.save({ filename, data }); return true; }
+  catch (e) { if (e && e.code === 'declined') return false; toast('Download não concluído: ' + (e.message || e.code)); return false; }
+}
+async function baixar(c) {
+  const items = NCRender.specsFor(c); const vids = (c.files || []).filter(f => f.kind === 'video' && f.url);
+  openSheet(`<h2>Baixar</h2><p class="small muted">${esc(plain(c.title))}</p>
+    <button class="btn primary" id="dl-zip">Tudo em um .zip</button>
+    <div class="stack">${items.map((it, i) => `<button class="btn" data-dl="${i}">${esc(it.name)}</button>`).join('')}
+    ${vids.map((v, i) => `<button class="btn" data-dlv="${i}">${esc(v.name)}</button>`).join('')}
+    <button class="btn" id="dl-txt">Textos e legenda (.txt)</button>${c.type === 'reelFalado' ? '<button class="btn" id="dl-srt">Legendas do vídeo (.srt revisável)</button>' : ''}</div>
+    <p class="small muted">No iPhone, imagens baixadas vão para Arquivos. Para mandar para Fotos, abra a imagem e toque em Compartilhar e depois Salvar imagem.</p>`, (el) => {
+    el.querySelectorAll('[data-dl]').forEach(btn => btn.addEventListener('click', async () => { const it = items[+btn.dataset.dl]; if (await save(it.name, await fileBlob(c, it))) toast('Arquivo enviado'); }));
+    el.querySelectorAll('[data-dlv]').forEach(btn => btn.addEventListener('click', async () => { const v = vids[+btn.dataset.dlv]; const r = await fetch(v.url); if (await save(v.name, await r.blob())) toast('Vídeo enviado'); }));
+    $('#dl-txt', el).addEventListener('click', () => save(`${c.slug || 'conteudo'}-textos.txt`, textos(c)));
+    const s = $('#dl-srt', el); if (s) s.addEventListener('click', () => save(`${c.slug || 'reel'}-legendas.srt`, srt(c)));
+    $('#dl-zip', el).addEventListener('click', async (ev) => {
+      if (!window.JSZip) { toast('O pacote .zip não carregou. Baixe os arquivos um a um.'); return; }
+      const btn = ev.currentTarget; btn.disabled = true; btn.textContent = 'Montando…';
+      try {
+        const zip = new JSZip();
+        for (const it of items) zip.file(it.name, await fileBlob(c, it));
+        for (const v of vids) { try { const r = await fetch(v.url); zip.file(v.name, await r.blob()); } catch (e) { } }
+        zip.file(`${c.slug || 'conteudo'}-textos.txt`, textos(c));
+        if (c.type === 'reelFalado') zip.file(`${c.slug}-legendas.srt`, srt(c));
+        const blob = await zip.generateAsync({ type: 'blob' });
+        if (await save(`${c.slug || 'conteudo'}.zip`, blob)) toast('Pacote enviado');
+      } finally { btn.disabled = false; btn.textContent = 'Tudo em um .zip'; }
+    });
+  });
+}
+
+// ================= folhas: criar, semana, editar =================
+function optList(obj, sel) { return Object.entries(obj).map(([k, v]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${v}</option>`).join(''); }
+function openCreate(pre) {
+  const active = S.series.filter(s => s.status !== 'pausada');
+  openSheet(`<h2>Criar conteúdo</h2>
+    <div class="grid2"><label for="cr-type">Formato<select id="cr-type">${optList(TYPE, pre.type || 'reel7')}</select></label>
+    <label for="cr-obj">Objetivo<select id="cr-obj">${optList(OBJ, pre.objective || 'crescimento')}</select></label></div>
+    <div class="grid2"><label for="cr-serie">Série<select id="cr-serie"><option value="">Nenhuma</option>${active.map(s => `<option value="${s.id}">${esc(s.nome)}</option>`).join('')}</select></label>
+    <label for="cr-style">Estilo visual<select id="cr-style"><option value="auto">Automático (varia)</option>${optList(STYLE_NAME)}</select></label></div>
+    <label for="cr-brief">Tema ou ideia (opcional)<textarea id="cr-brief" placeholder="Ex.: a cliente que pergunta se pode mentir no depoimento">${esc(pre.brief || '')}</textarea></label>
+    <div class="row"><button class="btn primary" id="cr-ok">Gerar</button><button class="btn ghost" data-close>Cancelar</button></div>
+    <p class="small muted" id="cr-msg">Leva de 20 a 60 segundos. O resultado vai para Aprovar.</p>`, (el) => {
+    $('#cr-ok', el).addEventListener('click', async (ev) => {
+      const btn = ev.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Gerando';
+      try {
+        const c = await generate({ type: $('#cr-type', el).value, objective: $('#cr-obj', el).value, series: $('#cr-serie', el).value || null, style: $('#cr-style', el).value, brief: $('#cr-brief', el).value.trim() });
+        if (c) { closeSheet(); location.hash = 'aprovar'; toast('Pronto para aprovar'); }
+      } catch (e) { $('#cr-msg', el).textContent = e?.code === 'rate_limited' ? 'Muitas gerações seguidas. Espere um minuto.' : (e.message || 'A geração falhou.'); btn.disabled = false; btn.textContent = 'Gerar'; }
+    });
+  });
+}
+function openWeek() {
+  openSheet(`<h2>Montar a semana</h2><p class="small muted">A Central propõe 7 publicações respeitando a distribuição (${Object.keys(OBJ).map(k => OBJ[k] + ' ' + brand().mix[k] + '%').join(', ')}) e no máximo uma vez cada série ativa.</p>
+    <label for="wk-foco">Algum foco para esta semana? (opcional)<textarea id="wk-foco" placeholder="Ex.: lançamento do workshop dia 15; evitar política"></textarea></label>
+    <div class="row"><button class="btn primary" id="wk-ok">Propor semana</button></div><div id="wk-out" class="stack"></div>`, (el) => {
+    $('#wk-ok', el).addEventListener('click', async (ev) => {
+      const btn = ev.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Planejando';
+      const start = addDays(today(), 1);
+      const active = S.series.filter(s => s.status !== 'pausada').map(s => `${s.id}: ${s.nome} (${s.descricao || ''})`).join('\n');
+      const recent = S.contents.slice(0, 25).map(c => '- ' + plain(c.title)).join('\n');
+      try {
+        const plan = await callAI(`Planeje 7 publicações do Instagram da Núbia Citty (advogada criminalista, empresária, mentora; personalidade antes de aula) de ${start} a ${addDays(start, 6)}, uma por dia.
+Distribuição alvo: crescimento ${brand().mix.crescimento}%, autoridade ${brand().mix.autoridade}%, conversao ${brand().mix.conversao}%. Formatos: reel7, reelFalado, carrossel, stories, estatico (varie; no máximo 2 reelFalado, porque exigem gravação). Cada série no máximo 1 vez na semana. Séries disponíveis:\n${active || '(nenhuma)'}
+Produtos para conversão: ${S.products.map(p => p.nome).join(', ') || 'nenhum cadastrado (então conversão = relacionamento que leva ao direct ou ao link da bio, sem captação)'}.
+Foco da Núbia: ${$('#wk-foco', el).value || 'livre'}.
+Evite assuntos recentes:\n${recent || '(nenhum)'}
+Responda só JSON: {"dias":[{"data":"AAAA-MM-DD","type":"reel7","objective":"crescimento","series":"id ou null","tema":"tema concreto em uma frase","porque":"motivo estratégico curto"}]}`);
+        const dias = (plan.dias || []).slice(0, 7);
+        $('#wk-out', el).innerHTML = dias.map((d, i) => `<div class="box"><div class="row"><span class="pill">${fmtDay(d.data)}</span><span class="pill wine">${TYPE[d.type] || d.type}</span><span class="pill">${OBJ[d.objective] || d.objective}</span></div><b>${esc(d.tema)}</b><span class="small muted">${esc(d.porque || '')}</span><div class="row"><button class="btn small" data-wk="${i}">Produzir este</button></div></div>`).join('') +
+          `<button class="btn primary" id="wk-all">Produzir os ${dias.length} (${dias.length} gerações)</button>`;
+        const run = async (d) => generate({ type: TYPE[d.type] ? d.type : 'carrossel', objective: OBJ[d.objective] ? d.objective : 'crescimento', series: S.series.some(s => s.id === d.series) ? d.series : null, style: 'auto', brief: d.tema, date: d.data });
+        el.querySelectorAll('[data-wk]').forEach(b2 => b2.addEventListener('click', async () => { b2.disabled = true; b2.innerHTML = '<span class="spin"></span>'; try { await run(dias[+b2.dataset.wk]); b2.textContent = 'Feito'; } catch (e) { b2.textContent = 'Falhou'; b2.disabled = false; } }));
+        $('#wk-all', el).addEventListener('click', async (e2) => { const b3 = e2.currentTarget; b3.disabled = true; let ok = 0;
+          for (const [i, d] of dias.entries()) { b3.innerHTML = `<span class="spin"></span> ${i + 1} de ${dias.length}`; try { await run(d); ok++; } catch (e) { console.error(e); } }
+          closeSheet(); location.hash = 'aprovar'; toast(`${ok} conteúdo(s) para aprovar`); });
+      } catch (e) { $('#wk-out', el).innerHTML = `<p class="small">${esc(e.message || 'Falhou. Tente de novo.')}</p>`; }
+      btn.disabled = false; btn.textContent = 'Propor de novo';
+    });
+  });
+}
+function openEdit(c) {
+  const p = JSON.parse(JSON.stringify(c.payload || {}));
+  const ta = (id, label, v, rows) => `<label for="${id}">${label}<textarea id="${id}" rows="${rows || 3}">${esc(v || '')}</textarea></label>`;
+  let fields = '';
+  if (c.type === 'reel7') fields = ta('ed-frase', 'Frase na tela (use *asteriscos* para destacar)', p.frase) + ta('ed-cena', 'Cena', p.cena) + `<label for="ed-pos">Posição do texto<select id="ed-pos">${['topo', 'centro', 'base'].map(o => `<option ${p.posicaoTexto === o ? 'selected' : ''}>${o}</option>`).join('')}</select></label><label for="ed-est">Estilo do texto<select id="ed-est">${[['caixa', 'Caixa clara'], ['serif', 'Caixa vinho serifada'], ['sombra', 'Texto com sombra']].map(([k, v]) => `<option value="${k}" ${p.estiloTexto === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>`;
+  if (c.type === 'reelFalado') fields = ta('ed-gancho', 'Gancho', p.gancho) + (p.roteiro || []).map((b, i) => ta('ed-r' + i, `Bloco ${b.inicio} a ${b.fim}s`, b.fala)).join('') + ta('ed-capa', 'Texto da capa', p.textoCapa, 2);
+  if (c.type === 'carrossel') fields = (p.cards || []).map((cd, i) => `<div class="box"><span class="eyebrow">Card ${i + 1}</span>${ta('ed-t' + i, 'Título', cd.title, 2)}${ta('ed-b' + i, 'Apoio', cd.body, 2)}</div>`).join('');
+  if (c.type === 'stories') fields = (p.stories || []).map((s, i) => `<div class="box"><span class="eyebrow">Story ${i + 1}</span>${ta('ed-t' + i, 'Texto', s.texto, 2)}${ta('ed-b' + i, 'Apoio', s.apoio, 2)}</div>`).join('');
+  if (c.type === 'estatico') fields = ta('ed-t0', 'Título', p.card?.title, 2) + ta('ed-b0', 'Apoio', p.card?.body, 2);
+  const photos = S.references.filter(r => r.finalidade === 'foto própria autorizada' && r.url);
+  openSheet(`<h2>Editar</h2>
+    <label for="ed-title">Título interno<input id="ed-title" value="${esc(plain(c.title))}"></label>
+    ${c.type !== 'reel7' ? `<label for="ed-style">Estilo visual<select id="ed-style">${optList(STYLE_NAME, c.style)}</select></label>` : ''}
+    ${photos.length && c.type !== 'reel7' ? `<label for="ed-photo">Foto (estilo lifestyle)<select id="ed-photo"><option value="">Sem foto</option>${photos.map(r => `<option value="${r.id}" ${c.photoRefId === r.id ? 'selected' : ''}>${esc(r.nota || r.id)}</option>`).join('')}</select></label>` : ''}
+    ${fields}${ta('ed-leg', 'Legenda', p.legenda, 4)}<label for="ed-cta">CTA<input id="ed-cta" value="${esc(p.cta || '')}"></label>
+    <div class="row"><button class="btn primary" id="ed-ok">Salvar edição</button><button class="btn ghost" data-close>Cancelar</button></div>`, (el) => {
+    $('#ed-ok', el).addEventListener('click', async () => {
+      if (!needDb()) return;
+      const v = (id) => { const x = $('#' + id, el); return x ? x.value.trim() : undefined; };
+      const before = mainText(c);
+      if (c.type === 'reel7') Object.assign(p, { frase: v('ed-frase'), cena: v('ed-cena'), posicaoTexto: v('ed-pos'), estiloTexto: v('ed-est') });
+      if (c.type === 'reelFalado') { p.gancho = v('ed-gancho'); (p.roteiro || []).forEach((b, i) => { b.fala = v('ed-r' + i); }); p.roteiro[0] && (p.roteiro[0].fala = p.roteiro[0].fala || p.gancho); p.textoCapa = v('ed-capa'); }
+      if (c.type === 'carrossel') p.cards.forEach((cd, i) => { cd.title = v('ed-t' + i); cd.body = v('ed-b' + i); });
+      if (c.type === 'stories') p.stories.forEach((s, i) => { s.texto = v('ed-t' + i); s.apoio = v('ed-b' + i); });
+      if (c.type === 'estatico') { p.card.title = v('ed-t0'); p.card.body = v('ed-b0'); }
+      p.legenda = v('ed-leg'); p.cta = v('ed-cta');
+      const upd = { title: v('ed-title') || c.title, payload: p, updatedAt: now() };
+      if (v('ed-style')) upd.style = v('ed-style');
+      if ($('#ed-photo', el)) upd.photoRefId = v('ed-photo') || null;
+      await col('contents').doc(c.id).update(upd);
+      const nc = Object.assign({}, c, upd);
+      await learn('editado', nc, { before, after: mainText(nc) }); log('editou', upd.title);
+      closeSheet(); toast('Edição salva');
+      if ((c.files || []).some(f => f.kind === 'arte') || c.status !== 'aprovar') produzirArquivos(nc);
+    });
+  });
+}
+
+// ================= vídeo =================
+function openVideo(c) {
+  const isReel7 = c.type === 'reel7';
+  openSheet(`<h2>Enviar vídeo</h2><p class="small muted">${esc(plain(c.title))}</p>
+    ${isReel7 ? `<p class="small">A Central monta o Reel final: recorta em 1080x1920, usa os primeiros 7 segundos, aplica a frase com a identidade visual e tira o áudio original (a trilha você escolhe no Instagram, que é licenciada).</p>`
+      : `<p class="small">O vídeo fica guardado junto com o roteiro e a capa. Edição automática de Reel falado (cortes, legendas queimadas, capa) ainda não roda no celular: hoje ela é feita pela produção no servidor. Por enquanto, use o .srt revisável e os cortes sugeridos no seu editor.</p>`}
+    <label for="vd-file">Vídeo vertical<input type="file" id="vd-file" accept="video/*"></label>
+    <p class="small muted">Limite de envio: 20 MB. No iPhone, grave em 1080p (Ajustes, Câmera, Gravar Vídeo) para caber.</p>
+    <div class="row"><button class="btn primary" id="vd-ok">${isReel7 ? 'Montar Reel' : 'Enviar'}</button></div><p class="small" id="vd-msg"></p>`, (el) => {
+    $('#vd-ok', el).addEventListener('click', async (ev) => {
+      const file = $('#vd-file', el).files[0]; const msg = $('#vd-msg', el);
+      if (!file) { msg.textContent = 'Escolha o vídeo primeiro.'; return; }
+      if (!S.assets || !needDb()) { msg.textContent = 'Envio disponível apenas pelo claude.ai.'; return; }
+      const btn = ev.currentTarget; btn.disabled = true;
+      try {
+        let blob = file, name = `${c.slug || 'video'}-bruto.${(file.name.split('.').pop() || 'mp4').toLowerCase()}`;
+        if (isReel7) {
+          msg.innerHTML = '<span class="spin"></span> Montando o Reel (leva uns 10 segundos)…';
+          const r = await montarReel7(file, c);
+          blob = r.blob; name = `${c.slug || 'reel'}-final.${r.ext}`;
+        }
+        if (blob.size > 20 * 1024 * 1024) throw new Error(`O arquivo tem ${(blob.size / 1048576).toFixed(1)} MB. O limite é 20 MB.`);
+        msg.innerHTML = '<span class="spin"></span> Enviando…';
+        const up = await S.assets.upload(blob, { type: blob.type || 'video/mp4' });
+        const files = [...(c.files || []).filter(f => f.name !== name), { name, url: up.url, assetId: up.id, kind: 'video', w: 1080, h: 1920 }];
+        await col('contents').doc(c.id).update({ files, status: isReel7 ? 'pronto' : 'gravar', videoRecebido: now(), updatedAt: now() });
+        log(isReel7 ? 'montou reel' : 'enviou vídeo', plain(c.title));
+        closeSheet(); toast(isReel7 ? 'Reel montado. Está em Prontos.' : 'Vídeo guardado.');
+      } catch (e) { msg.textContent = e.message || 'Não consegui processar este vídeo.'; btn.disabled = false; }
+    });
+  });
+}
+async function montarReel7(file, c) {
+  await NCRender.ready();
+  const overlay = NCRender.render(NCRender.specsFor(c)[0].spec);
+  const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.src = URL.createObjectURL(file);
+  await new Promise((res, rej) => { v.onloadeddata = res; v.onerror = () => rej(new Error('Formato de vídeo não suportado neste aparelho.')); });
+  const cv = document.createElement('canvas'); cv.width = 1080; cv.height = 1920; const ctx = cv.getContext('2d');
+  const types = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
+  const mime = types.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t));
+  if (!mime) throw new Error('Este navegador não grava vídeo. Use o Safari atualizado ou o Chrome.');
+  const stream = cv.captureStream(30); const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8e6 }); const chunks = [];
+  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  const dur = Math.min(7, v.duration || 7);
+  const drawFrame = () => {
+    const r = Math.max(1080 / v.videoWidth, 1920 / v.videoHeight); const w = v.videoWidth * r, h = v.videoHeight * r;
+    ctx.drawImage(v, (1080 - w) / 2, (1920 - h) / 2, w, h);
+    ctx.globalAlpha = Math.min(1, Math.max(0, (v.currentTime - 0.3) / 0.5)); ctx.drawImage(overlay, 0, 0); ctx.globalAlpha = 1;
+  };
+  v.currentTime = 0; await v.play(); rec.start(250);
+  await new Promise((res) => { const tick = () => { drawFrame(); if (v.currentTime >= dur || v.ended) return res(); requestAnimationFrame(tick); }; tick(); });
+  v.pause(); rec.stop(); await new Promise(r => { rec.onstop = r; });
+  URL.revokeObjectURL(v.src);
+  return { blob: new Blob(chunks, { type: mime.split(';')[0] }), ext: mime.includes('mp4') ? 'mp4' : 'webm' };
+}
+
+// ================= métricas =================
+const MAP = {
+  date: ['data', 'date', 'fecha', 'publicado', 'published', 'created'], format: ['tipo', 'type', 'formato', 'format', 'media type'],
+  caption: ['texto', 'text', 'legenda', 'caption', 'descrição', 'description', 'content'], url: ['link', 'url', 'permalink'],
+  reach: ['alcance', 'reach'], views: ['visualizações', 'visualizacoes', 'views', 'plays', 'reproduções', 'impressões', 'impressions'],
+  likes: ['curtidas', 'likes', 'me gusta'], comments: ['comentários', 'comentarios', 'comments'], shares: ['compartilhamentos', 'compartilhados', 'shares', 'envios'],
+  saves: ['salvos', 'salvamentos', 'saved', 'saves', 'guardados'], follows: ['seguidores', 'follows', 'novos seguidores', 'follower'], profileVisits: ['visitas ao perfil', 'profile visits', 'visitas']
+};
+function parseCSV(text) {
+  const first = text.split(/\r?\n/)[0] || ''; const delim = (first.match(/;/g) || []).length > (first.match(/,/g) || []).length ? ';' : (first.includes('\t') ? '\t' : ',');
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) { const ch = text[i];
+    if (q) { if (ch === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (ch === '"') q = false; else cell += ch; continue; }
+    if (ch === '"') q = true; else if (ch === delim) { row.push(cell); cell = ''; } else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; } else cell += ch; }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim()));
+}
+function openImport() {
+  openSheet(`<h2>Importar métricas</h2><p class="small muted">Aceita CSV do Metricool (relatório de publicações do Instagram) ou do Meta Business Suite. As colunas são reconhecidas pelo nome.</p>
+    <label for="im-file">Arquivo CSV<input type="file" id="im-file" accept=".csv,text/csv"></label><div id="im-out" class="stack"></div>`, (el) => {
+    $('#im-file', el).addEventListener('change', async () => {
+      const f = $('#im-file', el).files[0]; if (!f) return;
+      const rows = parseCSV(await f.text()); if (rows.length < 2) { $('#im-out', el).innerHTML = '<p class="small">Arquivo vazio.</p>'; return; }
+      const head = rows[0].map(h => h.trim().toLowerCase()); const idx = {};
+      Object.entries(MAP).forEach(([k, names]) => { const i = head.findIndex(h => names.some(n => h === n || h.includes(n))); if (i >= 0) idx[k] = i; });
+      const unmapped = head.filter((h, i) => !Object.values(idx).includes(i));
+      const data = rows.slice(1).map(r => { const o = { source: 'csv:' + f.name, importadoEm: now() }; Object.entries(idx).forEach(([k, i]) => { o[k] = (r[i] || '').trim(); }); return o; });
+      $('#im-out', el).innerHTML = `<div class="box"><p class="small"><b>${data.length}</b> publicações. Colunas reconhecidas: ${Object.keys(idx).map(k => `<span class="pill">${k}</span>`).join(' ') || 'nenhuma'}</p>${unmapped.length ? `<p class="small muted">Ignoradas: ${unmapped.map(esc).join(', ')}</p>` : ''}</div>
+        <button class="btn primary" id="im-ok" ${Object.keys(idx).length < 2 ? 'disabled' : ''}>Importar ${data.length}</button>`;
+      $('#im-ok', el).addEventListener('click', async (ev) => { if (!needDb()) return; ev.currentTarget.disabled = true;
+        for (const d of data) await col('metrics').add(d);
+        log('importou métricas', f.name + ' (' + data.length + ')'); closeSheet(); toast(data.length + ' publicações importadas'); });
+    });
+  });
+}
+function openMetric() {
+  const fields = [['date', 'Data', 'date'], ['format', 'Formato'], ['tema', 'Tema'], ['url', 'Link'], ['reach', 'Alcance', 'number'], ['views', 'Visualizações', 'number'], ['likes', 'Curtidas', 'number'], ['comments', 'Comentários', 'number'], ['shares', 'Compartilhamentos', 'number'], ['saves', 'Salvamentos', 'number'], ['profileVisits', 'Visitas ao perfil', 'number'], ['follows', 'Novos seguidores', 'number']];
+  openSheet(`<h2>Adicionar métricas</h2><p class="small muted">Copie os números dos Insights do Instagram. Deixe em branco o que não tiver.</p>
+    <div class="grid2">${fields.map(([k, l, t]) => `<label for="mt-${k}">${l}<input id="mt-${k}" type="${t || 'text'}" ${t === 'number' ? 'inputmode="numeric" min="0"' : ''}></label>`).join('')}</div>
+    <button class="btn primary" id="mt-ok">Salvar</button>`, (el) => {
+    $('#mt-ok', el).addEventListener('click', async () => { if (!needDb()) return; const o = { source: 'manual', importadoEm: now() }; fields.forEach(([k]) => { const v = $('#mt-' + k, el).value.trim(); if (v) o[k] = v; });
+      await col('metrics').add(o); closeSheet(); toast('Métricas salvas'); });
+  });
+}
+async function weeklyReport() {
+  const A = analyze(); if (!A.rows.length) return;
+  toast('Gerando relatório…');
+  const data = { formatos: A.formats.map(f => ({ formato: f.format, posts: f.n, alcanceMedio: f.reach, taxaCompartilhamento: f.shareRate, taxaSalvamento: f.saveRate, taxaEngajamento: f.engRate })),
+    melhores: A.top.map(r => ({ data: r.date, formato: r.format, texto: (r.caption || r.tema || '').slice(0, 120), alcance: r.reach ?? r.views, compart: r.shares, salvos: r.saves })),
+    piores: A.bottom.map(r => ({ data: r.date, formato: r.format, texto: (r.caption || r.tema || '').slice(0, 120), alcance: r.reach ?? r.views })),
+    distribuicaoAlvo: brand().mix };
+  const out = await S.sample(`Você é analista de crescimento do Instagram da Núbia Citty (advogada criminalista e empresária). Escreva o relatório semanal em português, direto, sem travessões, em até 250 palavras, com: 1) o que funcionou, 2) o que não funcionou, 3) três experimentos específicos para a próxima semana (mude uma variável por vez), 4) ajuste sugerido na distribuição, se os dados justificarem.
+Regras: use SOMENTE os números abaixo; não invente métricas; diga quando a amostra é pequena; separe correlação de causalidade; não atribua vendas a posts. Não diga que encontrou fórmula de viralização.
+DADOS: ${JSON.stringify(data)}`, { modelTier: 'complex' });
+  countUsage();
+  await col('reports').add({ at: now(), texto: out.text, base: A.rows.length }); log('relatório semanal', A.rows.length + ' posts');
+}
+
+// ================= vendas =================
+function openProduct(p) {
+  p = p || {};
+  const f = [['nome', 'Nome', 'input'], ['publico', 'Público'], ['beneficios', 'Benefícios'], ['preco', 'Preço', 'input'], ['link', 'Link de venda', 'input'], ['objecoes', 'Objeções comuns'], ['provas', 'Provas autorizadas (depoimentos reais com permissão, números verificáveis)'], ['restricoes', 'Restrições jurídicas e éticas']];
+  openSheet(`<h2>${p.id ? 'Editar' : 'Cadastrar'} produto</h2>${f.map(([k, l, t]) => t === 'input' ? `<label for="pd-${k}">${l}<input id="pd-${k}" value="${esc(p[k] || '')}"></label>` : `<label for="pd-${k}">${l}<textarea id="pd-${k}" rows="2">${esc(p[k] || '')}</textarea></label>`).join('')}
+    <div class="row"><button class="btn primary" id="pd-ok">Salvar</button>${p.id ? '<button class="btn danger" id="pd-del">Excluir</button>' : ''}</div>`, (el) => {
+    $('#pd-ok', el).addEventListener('click', async () => { if (!needDb()) return; const o = { atualizado: now() }; f.forEach(([k]) => { o[k] = $('#pd-' + k, el).value.trim(); });
+      if (!o.nome) { toast('Dê um nome ao produto'); return; }
+      await col('products').doc(p.id || uid()).set(Object.assign({}, p, o)); log('salvou produto', o.nome); closeSheet(); toast('Produto salvo'); });
+    const d = $('#pd-del', el); if (d) d.addEventListener('click', async () => { if (d.dataset.c !== '1') { d.dataset.c = '1'; d.textContent = 'Toque de novo para excluir'; return; } await col('products').doc(p.id).delete(); closeSheet(); });
+  });
+}
+function openCampaign(p) {
+  if (!p) return;
+  openSheet(`<h2>Campanha: ${esc(p.nome)}</h2><p class="small muted">5 peças em sequência: educativo, storytelling, problema, solução e CTA. Tudo vai para Aprovar. Nada de depoimento ou número que não esteja nas provas cadastradas.</p>
+    <label for="cp-obs">Observações (datas, oferta, foco)<textarea id="cp-obs"></textarea></label><button class="btn primary" id="cp-ok">Criar campanha (5 gerações)</button><p class="small" id="cp-msg"></p>`, (el) => {
+    $('#cp-ok', el).addEventListener('click', async (ev) => {
+      const btn = ev.currentTarget; btn.disabled = true; const obs = $('#cp-obs', el).value.trim();
+      const steps = [['carrossel', 'autoridade', 'Conteúdo educativo sobre o problema que o produto resolve, sem vender.'], ['reelFalado', 'crescimento', 'Storytelling: por que este problema importa. Peça a história real da Núbia via marcador, não invente.'], ['reel7', 'crescimento', 'Demonstração provocativa do problema, frase de identificação.'], ['carrossel', 'conversao', 'Apresentação da solução: o que tem no produto e para quem é (e para quem não é).'], ['stories', 'conversao', 'Sequência de stories com CTA para o link, enquete de interesse e resposta a objeções.']];
+      let ok = 0;
+      for (const [i, [type, objective, brief]] of steps.entries()) { $('#cp-msg', el).innerHTML = `<span class="spin"></span> Peça ${i + 1} de 5`; try { await generate({ type, objective, style: 'auto', brief: brief + (obs ? ' ' + obs : ''), product: p }); ok++; } catch (e) { console.error(e); } }
+      log('campanha', p.nome); closeSheet(); location.hash = 'aprovar'; toast(`${ok} peça(s) da campanha para aprovar`);
+    });
+  });
+}
+
+// ================= marca =================
+function openVoice() {
+  const b = brand();
+  openSheet(`<h2>Voz da marca</h2><p class="small muted">Uma regra por linha.</p>
+    <label for="vz-voz">Como eu falo<textarea id="vz-voz" rows="7">${esc(b.voz.join('\n'))}</textarea></label>
+    <label for="vz-ev">O que evitar<textarea id="vz-ev" rows="7">${esc(b.evitar.join('\n'))}</textarea></label>
+    <label for="vz-ap">Aprendidas<textarea id="vz-ap" rows="4">${esc((b.aprendidas || []).join('\n'))}</textarea></label>
+    <button class="btn primary" id="vz-ok">Salvar</button>`, (el) => {
+    $('#vz-ok', el).addEventListener('click', async () => { if (!needDb()) return; const lines = (id) => $('#' + id, el).value.split('\n').map(s => s.trim()).filter(Boolean);
+      await col('settings').doc('brand').set(Object.assign({}, b, { voz: lines('vz-voz'), evitar: lines('vz-ev'), aprendidas: lines('vz-ap'), atualizado: now() })); log('editou voz'); closeSheet(); toast('Manual atualizado'); });
+  });
+}
+async function suggestVoice() {
+  if (!needDb()) return; toast('Analisando…');
+  const L = S.learning.slice(0, 60).map(l => ({ acao: l.action, tipo: l.type, texto: (l.texto || '').slice(0, 200), motivo: l.reason || '', antes: (l.before || '').slice(0, 200), depois: (l.after || '').slice(0, 200) }));
+  const out = await callAI(`Analise o histórico de aprovações, rejeições e edições da Núbia Citty e proponha de 2 a 5 regras de voz NOVAS e específicas (não repita as existentes), cada uma com uma frase curta e sem travessões. Só proponha o que os dados sustentam.
+Regras atuais: ${[...brand().voz, ...brand().evitar, ...(brand().aprendidas || [])].join(' | ')}
+Histórico: ${JSON.stringify(L)}
+Responda só JSON: {"sugestoes":["…"]}`);
+  const b = Object.assign({}, brand()); b.sugestoes = [...(b.sugestoes || []), ...((out.sugestoes || []).filter(s => typeof s === 'string'))].slice(-8);
+  await col('settings').doc('brand').set(b); toast('Sugestões prontas para você revisar');
+}
+function openSeries() {
+  openSheet(`<h2>Nova série</h2><label for="sr-nome">Nome<input id="sr-nome"></label><label for="sr-desc">Do que se trata<textarea id="sr-desc" rows="2"></textarea></label>
+    <label for="sr-st">Status<select id="sr-st"><option>teste</option><option>ativa</option><option>pausada</option></select></label><button class="btn primary" id="sr-ok">Criar</button>`, (el) => {
+    $('#sr-ok', el).addEventListener('click', async () => { if (!needDb()) return; const nome = $('#sr-nome', el).value.trim(); if (!nome) return;
+      await col('series').doc(NCRender.slug(nome)).set({ nome, descricao: $('#sr-desc', el).value.trim(), status: $('#sr-st', el).value, criado: now() }); log('criou série', nome); closeSheet(); });
+  });
+}
+function openMix() {
+  const m = brand().mix;
+  openSheet(`<h2>Distribuição editorial</h2><div class="grid2">${Object.keys(OBJ).map(k => `<label for="mx-${k}">${OBJ[k]} (%)<input type="number" id="mx-${k}" min="0" max="100" value="${m[k]}" inputmode="numeric"></label>`).join('')}</div><p class="small" id="mx-msg"></p><button class="btn primary" id="mx-ok">Salvar</button>`, (el) => {
+    $('#mx-ok', el).addEventListener('click', async () => { if (!needDb()) return; const o = {}; Object.keys(OBJ).forEach(k => { o[k] = Math.max(0, +$('#mx-' + k, el).value || 0); });
+      if (o.crescimento + o.autoridade + o.conversao !== 100) { $('#mx-msg', el).textContent = 'A soma precisa dar 100%.'; return; }
+      await col('settings').doc('brand').set(Object.assign({}, brand(), { mix: o, atualizado: now() })); log('ajustou distribuição', JSON.stringify(o)); closeSheet(); });
+  });
+}
+function openReference() {
+  const sel = (id, label, opts) => `<label for="${id}">${label}<select id="${id}"><option value="">–</option>${opts.map(o => `<option>${o}</option>`).join('')}</select></label>`;
+  openSheet(`<h2>Nova referência</h2><label for="rf-file">Imagem<input type="file" id="rf-file" accept="image/*"></label>
+    <div class="grid2">${sel('rf-estilo', 'Estilo', Object.values(STYLE_NAME).concat('Outro'))}${sel('rf-tipo', 'Tipografia', ['Serifada', 'Sem serifa', 'Condensada', 'Manuscrita', 'Mista'])}
+    ${sel('rf-comp', 'Composição', ['Texto central', 'Foto e texto', 'Colagem', 'Grid', 'Minimal', 'Jornal'])}${sel('rf-fin', 'Finalidade', ['carrossel', 'story', 'capa de reel', 'post', 'foto própria autorizada'])}</div>
+    <label for="rf-nota">Nota (o que te chamou atenção)<input id="rf-nota"></label><label for="rf-orig">Origem ou crédito<input id="rf-orig"></label>
+    <button class="btn primary" id="rf-ok">Salvar referência</button><p class="small" id="rf-msg"></p>`, (el) => {
+    $('#rf-ok', el).addEventListener('click', async (ev) => {
+      const f = $('#rf-file', el).files[0]; if (!f) { $('#rf-msg', el).textContent = 'Escolha a imagem.'; return; }
+      if (!S.assets || !needDb()) return; ev.currentTarget.disabled = true; $('#rf-msg', el).innerHTML = '<span class="spin"></span> Enviando…';
+      try { const up = await S.assets.upload(f);
+        await col('references').doc(uid()).set({ assetId: up.id, url: up.url, estilo: $('#rf-estilo', el).value, tipografia: $('#rf-tipo', el).value, composicao: $('#rf-comp', el).value, finalidade: $('#rf-fin', el).value, nota: $('#rf-nota', el).value.trim(), origem: $('#rf-orig', el).value.trim(), criado: now() });
+        log('adicionou referência'); closeSheet(); toast('Referência salva'); } catch (e) { $('#rf-msg', el).textContent = e.message || 'Falhou o envio.'; ev.currentTarget.disabled = false; }
+    });
+  });
+}
+
+// ================= governança =================
+async function backup() {
+  const data = { exportadoEm: now(), brand: S.brand, contents: S.contents, products: S.products, references: S.references, metrics: S.metrics, series: S.series, learning: S.learning, reports: S.reports, radar: S.radar };
+  if (await save(`central-nubia-citty-backup-${today()}.json`, JSON.stringify(data, null, 2))) { log('baixou backup'); toast('Backup enviado'); }
+}
+function wipe() {
+  openSheet(`<h2>Excluir todos os dados</h2><p>Isso apaga conteúdos, métricas, produtos, referências, aprendizado e arquivos da Central. Não dá para desfazer.</p><p class="small muted">Baixe um backup antes.</p>
+    <label for="wp-c">Digite EXCLUIR para confirmar<input id="wp-c" autocomplete="off"></label><button class="btn danger" id="wp-ok">Excluir tudo</button><p class="small" id="wp-msg"></p>`, (el) => {
+    $('#wp-ok', el).addEventListener('click', async () => {
+      if ($('#wp-c', el).value.trim() !== 'EXCLUIR' || !needDb()) { $('#wp-msg', el).textContent = 'Digite EXCLUIR exatamente.'; return; }
+      $('#wp-msg', el).innerHTML = '<span class="spin"></span> Excluindo…';
+      const sets = { contents: S.contents, products: S.products, references: S.references, metrics: S.metrics, series: S.series, learning: S.learning, reports: S.reports, radar: S.radar, log: S.log };
+      for (const [n, arr] of Object.entries(sets)) for (const d of arr) await col(n).doc(d.id).delete().catch(() => null);
+      if (S.assets) { const l = await S.assets.list().catch(() => ({ assets: [] })); for (const a of l.assets) await S.assets.delete(a.id).catch(() => null); }
+      closeSheet(); toast('Dados excluídos');
+    });
+  });
+}
+
+boot();
+})();
+</script>
