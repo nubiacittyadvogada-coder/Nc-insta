@@ -1,0 +1,683 @@
+[
+  {
+    "id": "rio-a-defesa",
+    "type": "reelFalado",
+    "title": "Rio A · Sou advogada de defesa",
+    "slug": "rio-a-sou-advogada-de-defesa",
+    "goal": "alcance",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "CONDPEN Rio",
+    "style": "minimal",
+    "status": "gravar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "scheduledFor": "2026-11-02",
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "contradição",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "duracao": 56,
+      "gancho": "Sou advogada de defesa. E não preciso humilhar uma mulher pra defender um homem.",
+      "roteiro": [
+        {
+          "inicio": 0,
+          "fim": 4,
+          "fala": "Sou advogada de defesa. E não preciso humilhar uma mulher pra defender um homem."
+        },
+        {
+          "inicio": 4,
+          "fim": 18,
+          "fala": "Eu posso questionar uma prova, apontar contradição e mostrar que uma acusação não foi comprovada. Isso é defesa técnica."
+        },
+        {
+          "inicio": 18,
+          "fim": 32,
+          "fala": "Agora, usar roupa, vida sexual ou o fim de um relacionamento pra desacreditar uma mulher não é estratégia. É preconceito fingindo ser tese."
+        },
+        {
+          "inicio": 32,
+          "fim": 48,
+          "fala": "Hoje eu falo no CONDPEN sobre uma falsa escolha: ou você protege a vítima, ou respeita as garantias do acusado. Não, uai. Dá pra exigir as duas coisas."
+        },
+        {
+          "inicio": 48,
+          "fim": 56,
+          "fala": "E uma decisão bem fundamentada é melhor pra todo mundo."
+        }
+      ],
+      "orientacoes": [
+        "GRAVAR SEXTA DE MANHÃ, NO HOTEL. É o único vídeo antes do palco.",
+        "Grave no hotel, luz de janela de frente, celular na vertical na altura dos olhos.",
+        "Lapela ligada. 1 ou 2 takes, sem buscar perfeição.",
+        "Fale olhando pra lente, como conversa."
+      ],
+      "textoCapa": "Sou advogada de defesa. *E não preciso humilhar uma mulher.*",
+      "temaCapa": "escuro",
+      "legenda": "Defesa técnica não é desqualificar a vítima. Foi sobre isso que falei no CONDPEN 2026.",
+      "cta": "A advocacia ainda confunde as duas coisas? Comenta.",
+      "cortes": [
+        "Corte seco entre as frases.",
+        "Legenda na tela em todas as falas.",
+        "Primeiros 2 segundos: só o gancho, sem vinheta."
+      ],
+      "fundamentos": "",
+      "objetivoEstrategico": "Alcance: estigma da criminalista + causa feminina. Formato falado (o que mais alcança no seu perfil)."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "opinião marcante",
+      "explicacao": "Defensora assumindo posição contra a desqualificação da vítima: contradição com o estigma.",
+      "comparacao": "Revisado a partir do plano da Núbia para o CONDPEN.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T00:40:00Z"
+    },
+    "createdAt": "2026-10-30T00:40:00Z",
+    "updatedAt": "2026-10-30T00:40:00Z",
+    "version": 1,
+    "origem": "plano-rio",
+    "files": [],
+    "productId": null,
+    "aprovadoEm": "2026-10-30T00:40:00Z"
+  },
+  {
+    "id": "rio-b-firme",
+    "type": "reelFalado",
+    "title": "Rio B · Mulher firme ou mulher difícil?",
+    "slug": "rio-b-mulher-firme",
+    "goal": "alcance",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "CONDPEN Rio",
+    "style": "minimal",
+    "status": "gravar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "scheduledFor": "2026-11-06",
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "contradição",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "duracao": 44,
+      "gancho": "Mulher competente todo mundo quer contratar. Agora, receber ordem dela…",
+      "roteiro": [
+        {
+          "inicio": 0,
+          "fim": 4,
+          "fala": "Mulher competente todo mundo quer contratar. Agora, receber ordem dela…"
+        },
+        {
+          "inicio": 4,
+          "fim": 18,
+          "fala": "Enquanto a mulher só entrega, ela é ótima. Quando começa a decidir, cobrar e dizer não, vira difícil, arrogante, mandona."
+        },
+        {
+          "inicio": 18,
+          "fim": 32,
+          "fala": "Eu lidero uma empresa e tomo decisão que nem sempre agrada. E eu erro, claro. Mas a pergunta é: estão julgando a decisão ou o fato de ter sido uma mulher que decidiu?"
+        },
+        {
+          "inicio": 32,
+          "fim": 44,
+          "fala": "Na campanha me perguntaram se eu ia dar conta de casar e concorrer ao mesmo tempo. Ninguém faria essa pergunta pro Matheus."
+        }
+      ],
+      "orientacoes": [
+        "GRAVAR SÁBADO NO FIM DA TARDE.",
+        "Confirme se quer citar a campanha e o Matheus.",
+        "Grave no hotel, luz de janela de frente, celular na vertical na altura dos olhos.",
+        "Lapela ligada. 1 ou 2 takes, sem buscar perfeição.",
+        "Fale olhando pra lente, como conversa."
+      ],
+      "textoCapa": "Mulher competente todo mundo quer contratar. *Receber ordem dela…*",
+      "temaCapa": "escuro",
+      "legenda": "Firme ou difícil? Depende de quem decidiu.",
+      "cta": "Mulher firme é julgada igual a homem firme?",
+      "cortes": [
+        "Corte seco entre as frases.",
+        "Legenda na tela em todas as falas.",
+        "Primeiros 2 segundos: só o gancho, sem vinheta."
+      ],
+      "fundamentos": "",
+      "objetivoEstrategico": "Alcance pela identidade-ponte (mulher que lidera). Usa a sua história real da campanha."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "experiência real",
+      "explicacao": "Pergunta da campanha ('ninguém faria essa pergunta pro Matheus') teve 157 compartilhamentos.",
+      "comparacao": "Revisado a partir do plano da Núbia para o CONDPEN.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T00:40:00Z"
+    },
+    "validarOpiniao": "Confirme se quer citar a pergunta da campanha e o Matheus no último bloco.",
+    "createdAt": "2026-10-30T00:40:00Z",
+    "updatedAt": "2026-10-30T00:40:00Z",
+    "version": 1,
+    "origem": "plano-rio",
+    "files": [],
+    "productId": null,
+    "aprovadoEm": "2026-10-30T00:40:00Z"
+  },
+  {
+    "id": "rio-c-prevencao",
+    "type": "reelFalado",
+    "title": "Rio C · Punição não substitui prevenção",
+    "slug": "rio-c-punicao-nao-e-prevencao",
+    "goal": "autoridade",
+    "objective": "autoridade",
+    "series": null,
+    "seriesName": "CONDPEN Rio",
+    "style": "minimal",
+    "status": "gravar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "scheduledFor": "2026-11-04",
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "contradição",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "duracao": 50,
+      "gancho": "Aumentar a pena é fácil de anunciar. Difícil é impedir que a mulher seja morta.",
+      "roteiro": [
+        {
+          "inicio": 0,
+          "fim": 5,
+          "fala": "Aumentar a pena é fácil de anunciar. Difícil é impedir que a mulher seja morta."
+        },
+        {
+          "inicio": 5,
+          "fim": 15,
+          "fala": "Eu não estou dizendo que punir não importa. Estou dizendo que punir depois não substitui proteger antes."
+        },
+        {
+          "inicio": 15,
+          "fim": 27,
+          "fala": "Ameaça, perseguição, descumprimento de medida protetiva: isso mostra uma escalada de risco. A pergunta é o que acontece depois da primeira denúncia."
+        },
+        {
+          "inicio": 27,
+          "fim": 37,
+          "fala": "Alguém acompanha? O descumprimento tem resposta? A vítima sabe a quem recorrer?"
+        },
+        {
+          "inicio": 37,
+          "fim": 50,
+          "fala": "Foi isso que eu levei pro CONDPEN: proteção e garantias processuais não competem. O que falta é fazer funcionar fora do papel."
+        }
+      ],
+      "orientacoes": [
+        "GRAVAR SÁBADO DE MANHÃ.",
+        "Não cite números sem conferir no Anuário Brasileiro de Segurança Pública 2026.",
+        "Grave no hotel, luz de janela de frente, celular na vertical na altura dos olhos.",
+        "Lapela ligada. 1 ou 2 takes, sem buscar perfeição.",
+        "Fale olhando pra lente, como conversa."
+      ],
+      "textoCapa": "Aumentar a pena é fácil. *Difícil é impedir a morte.*",
+      "temaCapa": "escuro",
+      "legenda": "Pena maior não substitui prevenção. O que acontece depois da primeira denúncia também importa.",
+      "cta": "O Brasil discute prevenção com a mesma energia que discute aumento de pena?",
+      "cortes": [
+        "Corte seco entre as frases.",
+        "Legenda na tela em todas as falas.",
+        "Primeiros 2 segundos: só o gancho, sem vinheta."
+      ],
+      "fundamentos": "",
+      "objetivoEstrategico": "Autoridade com o tema da palestra."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "opinião marcante",
+      "explicacao": "Inverte o debate de aumento de pena para a prevenção.",
+      "comparacao": "Revisado a partir do plano da Núbia para o CONDPEN.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T00:40:00Z"
+    },
+    "createdAt": "2026-10-30T00:40:00Z",
+    "updatedAt": "2026-10-30T00:40:00Z",
+    "version": 1,
+    "origem": "plano-rio",
+    "files": [],
+    "productId": null,
+    "aprovadoEm": "2026-10-30T00:40:00Z"
+  },
+  {
+    "id": "rio-d-gente",
+    "type": "reelFalado",
+    "title": "Rio D · O erro mais caro do meu escritório",
+    "slug": "rio-d-erro-mais-caro-foi-gente",
+    "goal": "conversao",
+    "objective": "conversao",
+    "series": null,
+    "seriesName": "CONDPEN Rio",
+    "style": "minimal",
+    "status": "gravar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": true,
+    "scheduledFor": "2026-11-07",
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "contradição",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "duracao": 41,
+      "gancho": "O erro mais caro do meu escritório não foi um processo. Foi gente.",
+      "roteiro": [
+        {
+          "inicio": 0,
+          "fim": 5,
+          "fala": "O erro mais caro do meu escritório não foi um processo. Foi gente."
+        },
+        {
+          "inicio": 5,
+          "fim": 19,
+          "fala": "Eu contratei pessoas que não olhavam na mesma direção. E quando percebi que a admiração tinha acabado, continuei junto. [Diga em 1 frase por que continuou, do seu jeito.]"
+        },
+        {
+          "inicio": 19,
+          "fim": 29,
+          "fala": "Custou dinheiro, clima e energia que deviam estar no cliente."
+        },
+        {
+          "inicio": 29,
+          "fim": 41,
+          "fala": "Hoje eu sei: técnica a gente ensina. Alinhamento e admiração, não. Se eu começasse hoje, aprendia isso antes de abrir a segunda vaga."
+        }
+      ],
+      "orientacoes": [
+        "GRAVAR DOMINGO DE MANHÃ.",
+        "Complete o trecho entre colchetes com o motivo real. Não invente.",
+        "Grave no hotel, luz de janela de frente, celular na vertical na altura dos olhos.",
+        "Lapela ligada. 1 ou 2 takes, sem buscar perfeição.",
+        "Fale olhando pra lente, como conversa."
+      ],
+      "textoCapa": "O erro mais caro do meu escritório *foi gente.*",
+      "temaCapa": "escuro",
+      "legenda": "O prejuízo maior não veio de cliente. Veio de quem eu mantive tempo demais.",
+      "cta": "Você já manteve alguém tempo demais? Na mentoria, a gente começa por aqui.",
+      "cortes": [
+        "Corte seco entre as frases.",
+        "Legenda na tela em todas as falas.",
+        "Primeiros 2 segundos: só o gancho, sem vinheta."
+      ],
+      "fundamentos": "",
+      "objetivoEstrategico": "Conversão para a mentoria com história real de gestão."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "experiência real",
+      "explicacao": "História real contada pela Núbia (contratação e admiração perdida).",
+      "comparacao": "Revisado a partir do plano da Núbia para o CONDPEN.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T00:40:00Z"
+    },
+    "perguntaPessoal": "Por que você continuou com as pessoas depois de perceber que a admiração tinha acabado? Uma frase, do seu jeito.",
+    "createdAt": "2026-10-30T00:40:00Z",
+    "updatedAt": "2026-10-30T00:40:00Z",
+    "version": 1,
+    "origem": "plano-rio",
+    "files": [],
+    "productId": null,
+    "aprovadoEm": "2026-10-30T00:40:00Z"
+  },
+  {
+    "id": "rio-corte-posse",
+    "type": "reelFalado",
+    "title": "Rio · Corte da palestra: crime de posse",
+    "slug": "rio-corte-crime-de-posse",
+    "goal": "alcance",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "CONDPEN Rio",
+    "style": "minimal",
+    "status": "gravar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": true,
+    "scheduledFor": "2026-10-31",
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "contradição",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "duracao": 20,
+      "gancho": "Feminicídio não é crime de anatomia. É crime de posse.",
+      "roteiro": [
+        {
+          "inicio": 0,
+          "fim": 20,
+          "fala": "Trecho da palestra a partir de 'não é crime de anatomia, é crime de posse'. Corte de 15 a 30 segundos, começando direto na frase."
+        }
+      ],
+      "orientacoes": [
+        "NÃO PRECISA GRAVAR: é trecho da palestra.",
+        "Me mande o vídeo (só o trecho, se a palestra inteira for grande). Eu corto em 1080×1920, ponho legenda e devolvo para postar sábado às 10h."
+      ],
+      "textoCapa": "Não é crime de anatomia. *É crime de posse.*",
+      "temaCapa": "escuro",
+      "legenda": "Feminicídio não é crime de anatomia. É crime de posse. Trecho da minha palestra no CONDPEN 2026.",
+      "cta": "Qual parte da palestra você quer ver completa?",
+      "cortes": [
+        "Corte seco entre as frases.",
+        "Legenda na tela em todas as falas.",
+        "Primeiros 2 segundos: só o gancho, sem vinheta."
+      ],
+      "fundamentos": "Desde a Lei 14.994/2024, o feminicídio é crime autônomo (Código Penal, art. 121-A).",
+      "objetivoEstrategico": "Alcance com a frase mais compartilhável da palestra."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "contradição inesperada",
+      "explicacao": "Frase curta que se entende sem contexto.",
+      "comparacao": "Revisado a partir do plano da Núbia para o CONDPEN.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T00:40:00Z"
+    },
+    "perguntaPessoal": "Mande o trecho da palestra com a frase 'não é crime de anatomia, é crime de posse'.",
+    "createdAt": "2026-10-30T00:40:00Z",
+    "updatedAt": "2026-10-30T00:40:00Z",
+    "version": 1,
+    "origem": "plano-rio",
+    "files": [],
+    "productId": null,
+    "aprovadoEm": "2026-10-30T00:40:00Z"
+  },
+  {
+    "id": "rio-e-contraste",
+    "type": "reel7",
+    "title": "Rio E · Contraste: palco, Rio e segunda",
+    "slug": "rio-e-contraste",
+    "goal": "alcance",
+    "objective": "crescimento",
+    "series": null,
+    "seriesName": "CONDPEN Rio",
+    "style": "editorial",
+    "status": "gravar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": true,
+    "perguntaPessoal": "O que é real na sua segunda-feira (dia 2)? Ex.: delegacia às 8h, audiência, presídio. Eu ajusto a frase.",
+    "scheduledFor": "2026-11-03",
+    "tags": {
+      "tema": "Liderança feminina",
+      "tipoGancho": "contradição",
+      "tipoCta": "compartilhar"
+    },
+    "payload": {
+      "duracao": 7,
+      "frase": "Sexta: palestra sobre feminicídio no CONDPEN. Sábado: Rio com o marido. *Segunda: [o que for real], uai.*",
+      "alternativas": [
+        "Agenda de criminalista: *palco na sexta, Rio no sábado, delegacia na segunda.*"
+      ],
+      "cena": "GRAVAR DOMINGO. Você de crachá no corredor do evento, ou descendo do palco (pode usar trecho de sexta). Olhe pra câmera no último segundo.",
+      "posicaoTexto": "centro",
+      "estiloTexto": "creme",
+      "estiloVisual": "Serifa creme sobre a cena real.",
+      "trilha": "Áudio em alta da biblioteca do Instagram.",
+      "legenda": "Agenda de criminalista não tem fim de semana. Mas esse teve Rio.",
+      "cta": "Manda pra amiga que também vive assim.",
+      "objetivoEstrategico": "Alcance pelo contraste glamour × rotina criminal, com cena real."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "contradição inesperada",
+      "explicacao": "Contraste real de agenda, no padrão das referências.",
+      "comparacao": "Revisado a partir do plano da Núbia para o CONDPEN.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T00:40:00Z"
+    },
+    "createdAt": "2026-10-30T00:40:00Z",
+    "updatedAt": "2026-10-30T00:40:00Z",
+    "version": 1,
+    "origem": "plano-rio",
+    "files": [],
+    "productId": null,
+    "aprovadoEm": "2026-10-30T00:40:00Z"
+  },
+  {
+    "id": "rio-stories-sexta",
+    "type": "stories",
+    "title": "Rio · Stories de sexta (ao vivo)",
+    "slug": "rio-stories-sexta",
+    "goal": "relacionamento",
+    "objective": "autoridade",
+    "series": null,
+    "seriesName": "CONDPEN Rio",
+    "style": "minimal",
+    "status": "gravar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "scheduledFor": "2026-10-30",
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "cena",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "stories": [
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Hoje vou falar sobre o crime mais anunciado do Brasil. *E sobre o que acontece antes dele.*",
+          "orientacao": "Foto ou vídeo do café/roteiro no hotel."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Preparada pra discutir proteção das mulheres e garantias processuais *no mesmo palco.*",
+          "orientacao": "Look do dia."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "CONDPEN 2026, Rio de Janeiro. *Hoje, às 14h.*",
+          "orientacao": "Fachada ou placa do evento."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Sou advogada de defesa. *E é justamente por isso que exijo proteção que funcione para as mulheres.*",
+          "orientacao": "Antes do palco."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "O Estado não precisa escolher entre proteger a vítima e respeitar o acusado.",
+          "orientacao": "Trecho da palestra, se alguém puder postar."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Terminei. Uma ideia que quero que vocês levem comigo é… [complete com reação verdadeira]",
+          "orientacao": "Logo depois do palco. Não escreva antes."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Depois de um dia intenso, *um pouco de Rio com Matheus.*",
+          "orientacao": "Noite, sem obrigação."
+        }
+      ],
+      "cta": "Responder enquete e perguntas.",
+      "objetivoEstrategico": "Bastidores ao vivo do dia da palestra."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "experiência real",
+      "explicacao": "Bastidor real da viagem.",
+      "comparacao": "Revisado a partir do plano da Núbia para o CONDPEN.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T00:40:00Z"
+    },
+    "createdAt": "2026-10-30T00:40:00Z",
+    "updatedAt": "2026-10-30T00:40:00Z",
+    "version": 1,
+    "origem": "plano-rio",
+    "files": [],
+    "productId": null,
+    "aprovadoEm": "2026-10-30T00:40:00Z"
+  },
+  {
+    "id": "rio-stories-sabado",
+    "type": "stories",
+    "title": "Rio · Stories de sábado",
+    "slug": "rio-stories-sabado",
+    "goal": "relacionamento",
+    "objective": "autoridade",
+    "series": null,
+    "seriesName": "CONDPEN Rio",
+    "style": "minimal",
+    "status": "gravar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "scheduledFor": "2026-10-31",
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "cena",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "stories": [
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Ontem falei de um tema pesado. *Hoje quero contar o que mais me marcou.*",
+          "orientacao": "Selfie de manhã."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Medida protetiva, sozinha, protege?",
+          "orientacao": "Enquete.",
+          "sticker": {
+            "tipo": "enquete",
+            "pergunta": "",
+            "opcoes": [
+              "Sim",
+              "Não sozinha"
+            ]
+          }
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Um aprendizado do evento: [fala real, com autoria conferida]",
+          "orientacao": "Sem atribuir fala não confirmada."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Trabalho e vida também precisam *caber na mesma agenda.*",
+          "orientacao": "Matheus, café ou jantar."
+        }
+      ],
+      "cta": "Responder enquete e perguntas.",
+      "objetivoEstrategico": "Relacionamento e enquete sobre o tema da palestra."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "experiência real",
+      "explicacao": "Bastidor real da viagem.",
+      "comparacao": "Revisado a partir do plano da Núbia para o CONDPEN.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T00:40:00Z"
+    },
+    "createdAt": "2026-10-30T00:40:00Z",
+    "updatedAt": "2026-10-30T00:40:00Z",
+    "version": 1,
+    "origem": "plano-rio",
+    "files": [],
+    "productId": null,
+    "aprovadoEm": "2026-10-30T00:40:00Z"
+  },
+  {
+    "id": "rio-stories-domingo",
+    "type": "stories",
+    "title": "Rio · Stories de domingo",
+    "slug": "rio-stories-domingo",
+    "goal": "relacionamento",
+    "objective": "autoridade",
+    "series": null,
+    "seriesName": "CONDPEN Rio",
+    "style": "minimal",
+    "status": "gravar",
+    "precisaGravacao": true,
+    "precisaInputPessoal": false,
+    "scheduledFor": "2026-11-01",
+    "tags": {
+      "tema": "Advocacia criminal",
+      "tipoGancho": "cena",
+      "tipoCta": "comentar"
+    },
+    "payload": {
+      "stories": [
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Três dias que me lembraram *por que escolhi a advocacia.*",
+          "orientacao": "Selfie ou paisagem."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "",
+          "orientacao": "Foto com Matheus ou do passeio, sem texto e sem vender nada."
+        },
+        {
+          "kicker": "CONDPEN Rio",
+          "texto": "Que parte da palestra *vocês querem completa?*",
+          "orientacao": "Caixa de perguntas.",
+          "sticker": {
+            "tipo": "perguntas",
+            "pergunta": "Me conta aqui"
+          }
+        }
+      ],
+      "cta": "Responder enquete e perguntas.",
+      "objetivoEstrategico": "Fechamento da viagem e pesquisa do que aprofundar."
+    },
+    "qualidade": {
+      "aprovado": true,
+      "nota": 8,
+      "diferencial": "experiência real",
+      "explicacao": "Bastidor real da viagem.",
+      "comparacao": "Revisado a partir do plano da Núbia para o CONDPEN.",
+      "motivos": [],
+      "trechos": [],
+      "refs": 0,
+      "reescritas": 0,
+      "at": "2026-10-30T00:40:00Z"
+    },
+    "createdAt": "2026-10-30T00:40:00Z",
+    "updatedAt": "2026-10-30T00:40:00Z",
+    "version": 1,
+    "origem": "plano-rio",
+    "files": [],
+    "productId": null,
+    "aprovadoEm": "2026-10-30T00:40:00Z"
+  }
+]

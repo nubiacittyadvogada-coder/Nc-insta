@@ -43,6 +43,7 @@ section { display: grid; gap: 12px }
 .btn { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 9px 15px; font: 600 14px/1.1 var(--sans); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; min-height: 40px }
 .btn.primary { background: var(--wine); border-color: var(--wine); color: var(--wine-ink) }
 .btn.ghost { background: transparent }
+.btn.small { min-height: 32px; padding: 6px 11px; font-size: 13px }
 .btn.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--line)) }
 .btn:disabled { opacity: .5; cursor: default }
 .btn:focus-visible, .tile:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, .nav a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
@@ -282,7 +283,7 @@ function meta(c) {
   return `<div class="row"><span class="pill wine">${TYPE[c.type] || c.type}</span><span class="pill">Objetivo: ${GOALS[goalOf(c)]}</span>
     ${q ? `<span class="pill ${q.aprovado ? 'ok' : 'bad'}">${q.aprovado ? 'Diferencial: ' + esc(q.diferencial) : 'Genérico'}</span>` : ''}
     ${c.seriesName ? `<span class="pill">${esc(c.seriesName)}</span>` : ''}<span class="pill ${tone}">${label}</span>
-    ${c.scheduledFor ? `<span class="pill">${fmtDay(c.scheduledFor)}</span>` : ''}</div>`;
+    ${c.scheduledFor ? `<span class="pill">${fmtDay(c.scheduledFor)}</span>` : ''}${c.metricoolUuid ? '<span class="pill ok">Agendado no Metricool</span>' : ''}</div>`;
 }
 function detail(c) {
   const p = c.payload || {}; const out = [];
@@ -348,7 +349,7 @@ function empty(title, text, btn) { return `<div class="empty"><b style="color:va
 function offlineNote() {
   return S.offline ? `<div class="card"><span class="pill warn">Modo visualização</span><p class="small">Esta página precisa ser aberta pelo claude.ai, logada na sua conta, para salvar, gerar e baixar conteúdos.</p></div>` : '';
 }
-function header(eyebrow, title, extra) { return `<div class="head"><span class="eyebrow">${eyebrow}</span><h1>${title}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
+function header(eyebrow, title, extra) { return `<div class="head"><div class="row between"><span class="eyebrow">${eyebrow}</span><button class="btn ghost small" data-act="atualizar" aria-label="Atualizar a Central">↻ Atualizar</button></div><h1>${title}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
 
 function vHoje() {
   const d = new Date(); const h = d.getHours(); const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -666,6 +667,7 @@ function mainText(c) {
 
 const ACTIONS = {
   ir: (c, b) => { location.hash = b.dataset.to; },
+  atualizar: () => { location.reload(); },
   criar: (c, b) => openCreate({ brief: b.dataset.brief || '' }),
   semana: () => openWeek(),
   async aprovar(c, b) {
