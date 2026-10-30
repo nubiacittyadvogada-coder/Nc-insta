@@ -1153,7 +1153,7 @@ function openVideo(c) {
   openSheet(`<h2>Enviar vídeo</h2><p class="small muted">${esc(plain(c.title))}</p>
     ${isReel7 ? `<p class="small">A Central monta o Reel final: recorta em 1080x1920, usa os primeiros 7 segundos, aplica a frase com a identidade visual e tira o áudio original (a trilha você escolhe no Instagram, que é licenciada).</p>`
       : `<p class="small">O vídeo fica guardado junto com o roteiro e a capa. Edição automática de Reel falado (cortes, legendas queimadas, capa) ainda não roda no celular: hoje ela é feita pela produção no servidor. Por enquanto, use o .srt revisável e os cortes sugeridos no seu editor.</p>`}
-    ${(() => { const fs = (c.files || []).filter(f => f.grupo === 'bruto'); return fs.length && !c.videoCompleto ? `<p class="small"><strong>Já guardei ${fs.length} de ${fs[0].partes} partes.</strong> Escolha o mesmo vídeo que eu continuo de onde parou.</p>` : ''; })()}
+    ${(() => { const fs = (c.files || []).filter(f => f.grupo === 'bruto'); return fs.length && !c.videoCompleto ? `<p class="small"><strong>Já guardei ${fs.length} parte(s), até ${Math.floor((fs[fs.length - 1].fim || 0) / 60)} min.</strong> Escolha o mesmo vídeo que eu continuo de onde parou.</p>` : ''; })()}
     <label for="vd-file">Vídeo<input type="file" id="vd-file" accept="video/*"></label>
     <p class="small muted">${isReel7 ? 'Limite de envio: 20 MB. No iPhone, grave em 1080p (Ajustes, Câmera, Gravar Vídeo) para caber.' : 'Vídeo grande? Pode mandar: a Central comprime aqui no aparelho e envia em partes. Leva o mesmo tempo do vídeo; deixe a tela ligada e a Central aberta até terminar.'}</p>
     <div class="row"><button class="btn primary" id="vd-ok">${isReel7 ? 'Montar Reel' : 'Enviar'}</button></div><p class="small" id="vd-msg"></p>`, (el) => {
@@ -1182,13 +1182,13 @@ function openVideo(c) {
           let lista = (c.files || []).slice();
           const feitas = lista.filter(f => f.grupo === 'bruto' && f.fonte === fonte).sort((x, y) => x.parte - y.parte);
           if (!feitas.length) lista = lista.filter(f => f.grupo !== 'bruto');
-          const parteSegAnt = feitas.length ? feitas[0].parteSeg : 0;
+          const inicioSeg = feitas.length ? feitas[feitas.length - 1].fim || 0 : 0;
           const r = await comprimirEmPartes(v, tocando, ac, {
-            jaFeitas: feitas.length, parteSegAnt,
+            jaFeitas: feitas.length, inicioSeg,
             onMsg: (t) => { msg.innerHTML = `<span class="spin"></span> ${t}`; },
             onParte: async (p) => {
               const up = await S.assets.upload(p.blob, { type: p.blob.type });
-              lista.push({ name: `${c.slug || 'video'}-bruto-parte-${String(p.idx + 1).padStart(2, '0')}.${p.ext}`, url: up.url, assetId: up.id, kind: 'video', w: p.w, h: p.h, parte: p.idx + 1, partes: p.n, inicio: p.inicio, parteSeg: p.parteSeg, grupo: 'bruto', fonte });
+              lista.push({ name: `${c.slug || 'video'}-bruto-parte-${String(p.idx + 1).padStart(2, '0')}.${p.ext}`, url: up.url, assetId: up.id, kind: 'video', w: p.w, h: p.h, parte: p.idx + 1, inicio: p.inicio, fim: p.fim, grupo: 'bruto', fonte });
               await col('contents').doc(c.id).update({ files: lista, updatedAt: now() });
             }
           });
@@ -1207,44 +1207,43 @@ function openVideo(c) {
     });
   });
 }
-// comprime vídeo grande no aparelho (canvas + MediaRecorder, com áudio) em partes de até ~18 MB.
-// Cada parte vai para onParte assim que fecha (sobe e libera memória); jaFeitas permite retomar.
-async function comprimirEmPartes(v, tocando, ac, { jaFeitas = 0, parteSegAnt = 0, onMsg, onParte }) {
+// comprime vídeo grande no aparelho (canvas + MediaRecorder, com áudio) e fecha uma parte a cada ~16 MB
+// (o Safari ignora o bitrate pedido, então o corte é por tamanho). Cada parte sobe assim que fecha;
+// inicioSeg permite retomar de onde a última parte guardada terminou.
+async function comprimirEmPartes(v, tocando, ac, { jaFeitas = 0, inicioSeg = 0, onMsg, onParte }) {
   if (v.readyState < 1) await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('Formato de vídeo não suportado neste aparelho.')); setTimeout(() => rej(new Error('O vídeo não abriu em 40 segundos. Feche e abra a Central e tente de novo; se repetir, me mande print.')), 40000); });
   try { await tocando; } catch (e) { throw new Error('O aparelho bloqueou a reprodução. Toque em Enviar de novo.'); }
   v.pause();
-  const k = Math.min(1, 1920 / Math.max(v.videoWidth, v.videoHeight), 1080 / Math.min(v.videoWidth, v.videoHeight));
+  const total = v.duration || 0;
+  const longo = total > 300 ? 1280 : 1920, curto = total > 300 ? 720 : 1080;
+  const k = Math.min(1, longo / Math.max(v.videoWidth, v.videoHeight), curto / Math.min(v.videoWidth, v.videoHeight));
   const W = Math.round(v.videoWidth * k / 2) * 2, H = Math.round(v.videoHeight * k / 2) * 2;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const ctx = cv.getContext('2d');
   const types = ['video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm'];
   const mime = types.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t));
   if (!mime) throw new Error('Este navegador não grava vídeo. Use o Safari atualizado ou o Chrome.');
   const ext = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
-  const total = v.duration || 0;
-  const vb = total > 300 ? 2.5e6 : 3.5e6;
-  const parteSeg = parteSegAnt || Math.floor(18 * 8e6 / (vb + 128e3));
-  const n = Math.max(1, Math.ceil(total / parteSeg));
-  let idx = jaFeitas;
-  if (idx >= n) return { n };
+  if (inicioSeg >= total - 0.5) return { n: jaFeitas };
+  const LIMITE = 16 * 1024 * 1024;
   const stream = cv.captureStream(30);
   try { const src = ac.createMediaElementSource(v); const dst = ac.createMediaStreamDestination(); src.connect(dst); dst.stream.getAudioTracks().forEach(t => stream.addTrack(t)); } catch (e) { /* segue sem áudio */ }
   if (ac.state === 'suspended') await ac.resume().catch(() => null);
-  let rec = null, chunks = [], fimParte = (idx + 1) * parteSeg, fila = Promise.resolve(), enviadas = jaFeitas, erroEnvio = null;
-  const abrir = () => { chunks = []; rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: vb, audioBitsPerSecond: 128e3 }); rec.ondataavailable = (e) => e.data.size && chunks.push(e.data); rec.start(1000); };
-  const fechar = (i) => new Promise((res) => { const r = rec, ch = chunks; r.onstop = () => {
+  let rec = null, chunks = [], bytes = 0, idx = jaFeitas, iniParte = inicioSeg, fila = Promise.resolve(), enviadas = jaFeitas, erroEnvio = null;
+  const abrir = () => { chunks = []; bytes = 0; iniParte = v.currentTime; rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 2.5e6, audioBitsPerSecond: 128e3 }); rec.ondataavailable = (e) => { if (e.data.size) { chunks.push(e.data); bytes += e.data.size; } }; rec.start(1000); };
+  const fechar = (i, ini, fim) => new Promise((res) => { const r = rec, ch = chunks; r.onstop = () => {
     const blob = new Blob(ch, { type: mime.split(';')[0] });
     if (blob.size > 20 * 1024 * 1024) erroEnvio = new Error('Uma parte passou de 20 MB. Me avise no chat que eu ajusto.');
-    else fila = fila.then(() => onParte({ blob, ext, w: W, h: H, idx: i, n, inicio: i * parteSeg, parteSeg })).then(() => { enviadas++; }).catch(e => { erroEnvio = e; });
+    else fila = fila.then(() => onParte({ blob, ext, w: W, h: H, idx: i, inicio: ini, fim })).then(() => { enviadas++; }).catch(e => { erroEnvio = e; });
     res(); }; r.stop(); });
-  v.currentTime = idx * parteSeg; await new Promise(r => { v.onseeked = r; setTimeout(r, 3000); }); await v.play(); abrir();
+  v.currentTime = inicioSeg; await new Promise(r => { v.onseeked = r; setTimeout(r, 3000); }); await v.play(); abrir();
   await new Promise((res, rej) => {
     const tick = async () => {
       try {
         if (erroEnvio) return rej(erroEnvio);
         ctx.drawImage(v, 0, 0, W, H);
-        onMsg(`Comprimindo parte ${idx + 1} de ${n} (${Math.floor(v.currentTime)}s de ${Math.floor(total)}s). ${enviadas} parte(s) já guardada(s). Não feche nem bloqueie a tela.`);
-        if (v.ended || v.currentTime >= total - 0.05) { await fechar(idx); return res(); }
-        if (v.currentTime >= fimParte) { await fechar(idx); idx++; fimParte += parteSeg; abrir(); }
+        onMsg(`Comprimindo: ${Math.floor(v.currentTime / 60)}min${String(Math.floor(v.currentTime % 60)).padStart(2, '0')} de ${Math.floor(total / 60)}min${String(Math.floor(total % 60)).padStart(2, '0')}. ${enviadas} parte(s) já guardada(s). Não feche nem bloqueie a tela.`);
+        if (v.ended || v.currentTime >= total - 0.05) { await fechar(idx, iniParte, total); idx++; return res(); }
+        if (bytes >= LIMITE) { const t = v.currentTime; await fechar(idx, iniParte, t); idx++; abrir(); }
         requestAnimationFrame(tick);
       } catch (e) { rej(e); }
     };
@@ -1252,7 +1251,7 @@ async function comprimirEmPartes(v, tocando, ac, { jaFeitas = 0, parteSegAnt = 0
   }).finally(() => { v.pause(); URL.revokeObjectURL(v.src); v.remove(); stream.getTracks().forEach(t => t.stop()); });
   onMsg('Terminando de guardar as últimas partes…');
   await fila; if (erroEnvio) throw erroEnvio;
-  return { n };
+  return { n: idx };
 }
 async function montarReel7(file, c) {
   await NCRender.ready();
