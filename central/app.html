@@ -1211,8 +1211,9 @@ async function comprimirEmPartes(v, tocando, ac, onMsg) {
   const stream = cv.captureStream(30);
   try { const src = ac.createMediaElementSource(v); const dst = ac.createMediaStreamDestination(); src.connect(dst); dst.stream.getAudioTracks().forEach(t => stream.addTrack(t)); } catch (e) { /* segue sem áudio */ }
   if (ac.state === 'suspended') await ac.resume().catch(() => null);
-  const vb = 3.5e6, parteSeg = Math.floor(18 * 8e6 / (vb + 128e3));
-  const total = v.duration || 0, n = Math.max(1, Math.ceil(total / parteSeg)), partes = [];
+  const total = v.duration || 0;
+  const vb = total > 300 ? 2.5e6 : 3.5e6, parteSeg = Math.floor(18 * 8e6 / (vb + 128e3));
+  const n = Math.max(1, Math.ceil(total / parteSeg)), partes = [];
   let rec = null, chunks = [], idx = 0, fimParte = parteSeg;
   const abrir = () => { chunks = []; rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: vb, audioBitsPerSecond: 128e3 }); rec.ondataavailable = (e) => e.data.size && chunks.push(e.data); rec.start(1000); };
   const fechar = () => new Promise((res) => { const r = rec, ch = chunks; r.onstop = () => { partes.push({ blob: new Blob(ch, { type: mime.split(';')[0] }), ext, w: W, h: H }); res(); }; r.stop(); });
