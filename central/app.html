@@ -1171,7 +1171,10 @@ function openVideo(c) {
         if (!isReel7 && blob.size > 19 * 1024 * 1024) {
           // áudio e play precisam nascer dentro do toque (regra do iPhone)
           const ac = new (window.AudioContext || window.webkitAudioContext)();
-          const v = document.createElement('video'); v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
+          const v = document.createElement('video'); v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
+          v.style.cssText = 'position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none';
+          document.body.appendChild(v); v.src = URL.createObjectURL(file);
+          msg.innerHTML = '<span class="spin"></span> Preparando o vídeo…';
           const tocando = v.play();
           const partes = await comprimirEmPartes(v, tocando, ac, (t) => { msg.innerHTML = `<span class="spin"></span> ${t}`; });
           const base = (c.files || []).filter(f => !(f.parte && f.grupo === 'bruto'));
@@ -1198,7 +1201,7 @@ function openVideo(c) {
 }
 // comprime vídeo grande no aparelho (canvas + MediaRecorder, com áudio) e corta em partes de até ~18 MB
 async function comprimirEmPartes(v, tocando, ac, onMsg) {
-  if (v.readyState < 1) await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('Formato de vídeo não suportado neste aparelho.')); });
+  if (v.readyState < 1) await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('Formato de vídeo não suportado neste aparelho.')); setTimeout(() => rej(new Error('O vídeo não abriu em 40 segundos. Feche e abra a Central e tente de novo; se repetir, me mande print.')), 40000); });
   try { await tocando; } catch (e) { throw new Error('O aparelho bloqueou a reprodução. Toque em Enviar de novo.'); }
   v.pause();
   const k = Math.min(1, 1920 / Math.max(v.videoWidth, v.videoHeight), 1080 / Math.min(v.videoWidth, v.videoHeight));
@@ -1230,7 +1233,7 @@ async function comprimirEmPartes(v, tocando, ac, onMsg) {
     };
     tick();
   });
-  v.pause(); URL.revokeObjectURL(v.src); stream.getTracks().forEach(t => t.stop());
+  v.pause(); URL.revokeObjectURL(v.src); v.remove(); stream.getTracks().forEach(t => t.stop());
   for (const p of partes) if (p.blob.size > 20 * 1024 * 1024) throw new Error('Uma parte passou de 20 MB. Me avise no chat que eu ajusto.');
   return partes;
 }
