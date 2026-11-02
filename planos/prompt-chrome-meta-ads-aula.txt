@@ -27,22 +27,22 @@ Em TODOS: excluir público personalizado de clientes, se existir um chamado "Cli
 
 PASSO 5, ANÚNCIOS (identidade: Página e Instagram @nubiacitty; CTA "Cadastre-se"):
 - Vídeo do sistema: video-dentro-do-sistema.mp4. Adicione música da biblioteca da Meta (instrumental, animada). Texto principal:
-"Seu marketing depende do tempo que sobra. E nunca sobra.
-Dia 10/11, às 20h, ao vivo e online, eu abro o sistema com IA que planeja o marketing do meu escritório todo dia. E mostro como fazer no seu negócio.
-Aula gratuita."
+"Você posta quando sobra tempo. E nunca sobra.
+Na aula de 10/11, às 20h, você vê ao vivo a IA montar uma semana inteira de posts em minutos: o que postar, o texto e a arte. E aprende a fazer no seu negócio.
+Online e gratuita."
 Título: "Aula online e gratuita · 10/11, 20h"
 - Arte A (feed-A-tempo no feed, story-A-tempo em stories e reels). Texto:
 "Seu marketing depende do tempo que sobra. E nunca sobra.
-Dia 10/11, às 20h, ao vivo e online, eu mostro como a IA deixa a sua semana de posts pronta em minutos.
-Aula gratuita."
+Na aula de 10/11, às 20h, você aprende a deixar a sua semana de posts pronta em minutos, com IA.
+Online e gratuita."
 - Arte B (feed-B-oab / story-B-oab). Texto:
 "Você posta, ninguém chama. E ainda tem medo de levar um processo ético.
-Dia 10/11, às 20h, eu mostro como planejar conteúdo com estratégia e dentro das regras da OAB.
-Aula online e gratuita para advogados."
+Na aula de 10/11, às 20h, você aprende a planejar conteúdo com estratégia e dentro das regras da OAB.
+Online e gratuita para advogados."
 - Arte C (feed-C-itabira / story-C-itabira). Texto:
 "Itabira e região: seu negócio ainda depende só de indicação?
-Dia 10/11, às 20h, eu mostro como uso IA para aparecer todo dia, sem virar refém do Instagram.
-Aula online e gratuita."
+Na aula de 10/11, às 20h, você aprende a usar IA para aparecer todo dia, sem virar refém do Instagram.
+Online e gratuita."
 Desligue melhorias automáticas que alterem texto ou imagem (aprimoramentos de criativo Advantage+), menos a música.
 
 PASSO 6, REVISÃO: me mostre a tela de revisão com os 4 conjuntos, as verbas e as datas. Só publique depois que eu disser "publica".
