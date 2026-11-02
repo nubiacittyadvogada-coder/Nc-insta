@@ -1083,7 +1083,7 @@ function openCreate(pre) {
       try {
         const c = await generate({ type: $('#cr-type', el).value, goal: $('#cr-obj', el).value, series: $('#cr-serie', el).value || null, style: $('#cr-style', el).value, brief: $('#cr-brief', el).value.trim() });
         if (c) { if (pre.radarId) { try { await col('radar').doc(pre.radarId).update({ usado: true, usadoEm: now(), contentId: c.id || null }); } catch (e) {} } closeSheet(); location.hash = 'aprovar'; toast('Pronto para aprovar'); }
-      } catch (e) { $('#cr-msg', el).textContent = e?.code === 'rate_limited' ? 'Muitas gerações seguidas. Espere um minuto.' : (e.message || 'A geração falhou.'); btn.disabled = false; btn.textContent = 'Gerar'; }
+      } catch (e) { try { col('log').add({ at: now(), acao: 'falha na geração', alvo: String(e?.message || e?.code || e).slice(0, 300) }); } catch (_) {} $('#cr-msg', el).textContent = e?.code === 'rate_limited' ? 'Muitas gerações seguidas. Espere um minuto.' : (e.message || 'A geração falhou.'); btn.disabled = false; btn.textContent = 'Gerar'; }
     });
   });
 }
