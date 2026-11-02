@@ -40,7 +40,7 @@ Link: https://pay.kiwify.com.br/N8xT9vQ
 >
 > https://pay.kiwify.com.br/N8xT9vQ
 >
-> E se o momento não for agora, tudo bem. No dia 12/11 eu faço uma live gratuita no Instagram sobre IA no escritório. Te espero lá: @nubiacitty
+> E se o momento não for agora, tudo bem. No dia 10/11, às 20h, eu dou uma aula gratuita e ao vivo sobre IA no escritório. Inscrição: [LINK DA INSCRIÇÃO]
 
 ---
 
@@ -72,7 +72,7 @@ Link: https://kit-escritorio-blindado.nubiacittyadvogada.workers.dev/ (página c
 > Se você ainda cria contrato do zero a cada cliente novo, o Kit te devolve horas por semana.
 > https://kit-escritorio-blindado.nubiacittyadvogada.workers.dev/
 >
-> E no dia 12/11 tem live gratuita no Instagram sobre IA no escritório: @nubiacitty
+> E no dia 10/11, às 20h, tem aula gratuita e ao vivo sobre IA no escritório. Inscrição: [LINK DA INSCRIÇÃO]
 
 ---
 
@@ -88,44 +88,44 @@ Link: https://pay.kiwify.com.br/d1CDcsP
 > Eu uso um sistema de planejamento de conteúdo com calendário editorial, banco de ideias por área, roteiros, prompts de IA, checklist ético e controle de métricas.
 > Marketing Jurídico Organizado, R$ 127: https://pay.kiwify.com.br/d1CDcsP
 
-**E-mail 2 (dia 4) · Assunto:** convite: live de IA no escritório, 12/11
-> *|FNAME|*, no dia 12/11 eu vou mostrar ao vivo no Instagram o sistema de marketing com IA que eu uso no meu escritório.
+**E-mail 2 (dia 4) · Assunto:** convite: aula de IA no escritório, 10/11 às 20h
+> *|FNAME|*, no dia 10/11, às 20h, eu vou mostrar ao vivo o sistema de marketing com IA que eu uso no meu escritório.
 > Ele planeja a semana, escreve, gera as artes e mede os resultados, dentro das regras do Provimento 205.
 >
-> Ative o lembrete da live no meu perfil: @nubiacitty
+> Garanta sua vaga: [LINK DA INSCRIÇÃO]
 
 ---
 
-## Trilha B · Quem quer IA, quem não respondeu, Expansão → Live de IA (12/11) e Central
+## Trilha B · Quem quer IA, quem não respondeu, Expansão → Aula de IA (10/11, 20h) e Central
 Esta trilha **não fala do Kit**.
 
-**E-mail 1 (5/11) · Assunto:** *|FNAME|*, vou te mostrar o sistema que planeja o meu marketing
+**E-mail 1 (4/11) · Assunto:** *|FNAME|*, vou te mostrar o sistema que planeja o meu marketing
 > Oi, *|FNAME|*! Aqui é a Núbia Citty, a gente se conheceu na LexUp.
 >
 > Eu não sei programar. Mesmo assim, criei com inteligência artificial um sistema que planeja o marketing do meu escritório todos os dias: sugere os conteúdos, escreve, gera as artes, puxa as métricas do Instagram e me mostra o que funciona.
 >
-> No dia 12/11, ao vivo no Instagram, vou abrir esse sistema e mostrar como ele funciona por dentro, dentro das regras da OAB.
+> No dia 10/11, às 20h, ao vivo, vou abrir esse sistema e mostrar como ele funciona por dentro, dentro das regras da OAB.
 >
-> Ative o lembrete no meu perfil: @nubiacitty
+> A aula é gratuita, mas precisa de inscrição: [LINK DA INSCRIÇÃO]
 >
 > E me responde com uma palavra: em que momento está o seu escritório hoje? Começando, organizando ou crescendo?
 
-**E-mail 2 (11/11) · Assunto:** amanhã, 20h, ao vivo
-> *|FNAME|*, amanhã às 20h eu abro o meu sistema de marketing com IA ao vivo no Instagram.
+**E-mail 2 (9/11) · Assunto:** amanhã, 20h, ao vivo
+> *|FNAME|*, amanhã às 20h eu abro o meu sistema de marketing com IA ao vivo.
 > Traga as suas dúvidas. Vou responder ao vivo.
-> @nubiacitty
+> Ainda não se inscreveu? [LINK DA INSCRIÇÃO]
 
-**E-mail 3 (12/11, 18h) · Assunto:** hoje às 20h
-> É hoje, *|FNAME|*. Às 20h, ao vivo no @nubiacitty.
+**E-mail 3 (10/11, 18h) · Assunto:** hoje às 20h
+> É hoje, *|FNAME|*. Às 20h, ao vivo. O link de acesso chega para quem se inscreveu: [LINK DA INSCRIÇÃO]
 
-**E-mail 4 (13/11) · Assunto:** 5 vagas: implantação da Central de Marketing com IA
-> *|FNAME|*, obrigada por acompanhar (ou por querer acompanhar) a live.
+**E-mail 4 (11/11) · Assunto:** 5 vagas: implantação da Central de Marketing com IA
+> *|FNAME|*, obrigada por acompanhar (ou por querer acompanhar) a aula.
 >
 > Vou implantar a Central de Marketing com IA para 5 escritórios, configurada com a marca de cada um.
 > Como são as primeiras, as vagas de fundador têm condição especial: R$ 1.497 pela implantação.
 > O sistema roda no seu próprio plano do Claude, e você fica com tudo.
 >
-> Se quiser uma das vagas, responda este e-mail com "QUERO" que eu te chamo para uma conversa de 15 minutos.
+> Se quiser uma das vagas, responda este e-mail com "QUERO" que eu te chamo para uma conversa de 15 minutos, entre 11 e 14/11.
 >
 > Sem promessa de seguidores ou clientes. O que eu entrego é método, organização e tempo de volta.
 
