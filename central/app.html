@@ -876,9 +876,16 @@ function normalize(type, raw) {
 }
 async function callAI(prompt) {
   if (!S.sample) throw new Error('A geração por IA precisa ser aberta pelo claude.ai e autorizada.');
-  const out = await S.sample.json(prompt, { modelTier: 'complex' });
-  countUsage();
-  return out;
+  let lastErr;
+  for (let i = 0; i < 3; i++) {
+    try { const out = await S.sample.json(prompt, { modelTier: 'complex' }); countUsage(); return out; }
+    catch (e) {
+      lastErr = e; const msg = String(e && (e.message || e.code) || '');
+      if (e?.code === 'rate_limited' || !/connection|network|lost|timeout|fetch|abort/i.test(msg)) throw e;
+      await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+    }
+  }
+  throw new Error('A conexão caiu durante a geração. Deixe a Central aberta na tela (sem trocar de app) e toque em Gerar de novo.');
 }
 
 // ================= filtro anti-genérico =================
@@ -1057,6 +1064,10 @@ function openCreate(pre) {
     <label for="cr-brief">Tema ou ideia (opcional)<textarea id="cr-brief" placeholder="Ex.: a cliente que pergunta se pode mentir no depoimento">${esc(pre.brief || '')}</textarea></label>
     <div class="row"><button class="btn primary" id="cr-ok">Gerar</button><button class="btn ghost" data-close>Cancelar</button></div>
     <p class="small muted" id="cr-msg">Leva de 30 a 90 segundos: a proposta passa pelo filtro anti-genérico e é reescrita se precisar. Se continuar genérica, é descartada.</p>`, (el) => {
+    const SERIE_PADRAO = { 'pergunta-criminalista': ['reelFalado', 'alcance'], 'dona-de-escritorio': ['carrossel', 'autoridade'], 'reality-criminal': ['reelFalado', 'seguidores'], 'sextou-doutora': ['reel7', 'alcance'], 'em-familia': ['stories', 'relacionamento'] };
+    const aplicaSerie = () => { const d = SERIE_PADRAO[$('#cr-serie', el).value]; if (d) { $('#cr-type', el).value = d[0]; $('#cr-obj', el).value = d[1]; } };
+    $('#cr-serie', el).addEventListener('change', aplicaSerie);
+    if (pre.brief) { const m = Object.keys(SERIE_PADRAO).find(id => { const s = S.series.find(x => x.id === id); return s && pre.brief.includes(s.nome); }); if (m) { $('#cr-serie', el).value = m; aplicaSerie(); } }
     $('#cr-ok', el).addEventListener('click', async (ev) => {
       const btn = ev.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Gerando';
       try {
