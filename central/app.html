@@ -168,7 +168,7 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 const now = () => new Date().toISOString();
 const ymd = (d) => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
 const today = () => ymd(new Date());
-const fmtDay = (s) => new Date(s + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+const fmtDay = (s) => new Date(String(s).slice(0, 10) + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
 const weekStart = (d = new Date()) => { const x = new Date(d); const k = (x.getDay() + 6) % 7; x.setDate(x.getDate() - k); return ymd(x); };
 const addDays = (s, n) => { const x = new Date(s + 'T12:00:00'); x.setDate(x.getDate() + n); return ymd(x); };
 const num = (v) => { if (v == null || v === '') return null; const n = Number(String(v).replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')); return Number.isFinite(n) ? n : null; };
@@ -354,7 +354,8 @@ function header(eyebrow, title, extra) { return `<div class="head"><div class="r
 function vHoje() {
   const d = new Date(); const h = d.getHours(); const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   const n = (st) => S.contents.filter(c => c.status === st).length;
-  const hoje = S.contents.filter(c => c.scheduledFor === today() && c.status !== 'rejeitado');
+  const sd = c => (c.scheduledFor || '').slice(0, 10);
+  const hoje = S.contents.filter(c => sd(c) === today() && !['rejeitado', 'publicado'].includes(c.status));
   const pessoal = S.contents.filter(c => c.precisaInputPessoal && !c.respostaPessoal && ['aprovar', 'gravar'].includes(c.status));
   const rot = S.rotina;
   return `${header(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }), `${saud}, <em>Núbia.</em>`)}
@@ -379,7 +380,7 @@ function radarCard(r) {
 }
 function mixCard() {
   const ws = weekStart(); const we = addDays(ws, 6);
-  const wk = S.contents.filter(c => c.scheduledFor && c.scheduledFor >= ws && c.scheduledFor <= we && c.status !== 'rejeitado');
+  const wk = S.contents.filter(c => c.scheduledFor && c.scheduledFor.slice(0, 10) >= ws && c.scheduledFor.slice(0, 10) <= we && c.status !== 'rejeitado');
   const tot = wk.length || 1; const m = brand().mix;
   const seg = (k) => `<i style="width:${(wk.filter(c => c.objective === k).length / tot) * 100}%;background:${OBJ_COLOR[k]}"></i>`;
   const seriesDup = Object.entries(wk.reduce((a, c) => { if (c.series) a[c.seriesName || c.series] = (a[c.seriesName || c.series] || 0) + 1; return a; }, {})).filter(([, n]) => n > 1);
@@ -401,7 +402,7 @@ function vCalendario() {
   const semData = S.contents.filter(c => !c.scheduledFor && ['pronto', 'gravar', 'aprovar'].includes(c.status));
   return `${header('Calendário', 'Próximos <em>14 dias</em>', 'Conteúdos agendados aparecem aqui. Toque em um dia vazio para ver o que pode entrar.')}
   ${mixCard()}
-  <div class="card" style="gap:0">${days.map(d => { const items = sched.filter(c => c.scheduledFor === d); const dt = new Date(d + 'T12:00:00');
+  <div class="card" style="gap:0">${days.map(d => { const items = sched.filter(c => c.scheduledFor.slice(0, 10) === d); const dt = new Date(d + 'T12:00:00');
     return `<div class="day"><div class="d"><small>${dt.toLocaleDateString('pt-BR', { weekday: 'short' })}</small>${dt.getDate()}</div><div class="stack" style="gap:6px">${items.length ? items.map(c => `<div class="row"><span class="pill ${(STATUS[c.status] || [])[1] || ''}">${TYPE[c.type]}</span><span class="pill">${GOALS[goalOf(c)]}</span><span class="small">${esc(plain(c.title))}</span></div>`).join('') : `<span class="small muted">Livre</span>`}</div></div>`; }).join('')}</div>
   <section><h2>Sem data</h2>${semData.length ? semData.map(c => `<div class="card"><div class="row between"><div class="stack" style="gap:4px;min-width:0"><span class="small muted">${TYPE[c.type]} · ${(STATUS[c.status] || [''])[0]}</span><b>${esc(plain(c.title))}</b></div><button class="btn" data-act="agendar" data-id="${c.id}">Definir data</button></div></div>`).join('') : empty('Tudo com data', 'Nenhum conteúdo esperando agendamento.')}</section>
   <p class="small muted">Publicação automática no Instagram ainda não está conectada. Hoje o fluxo é: você baixa em Prontos e publica pelo app do Instagram (ou pelo Metricool, se usar).</p>`;
