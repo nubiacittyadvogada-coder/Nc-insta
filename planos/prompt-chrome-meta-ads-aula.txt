@@ -1,0 +1,54 @@
+Vamos subir uma campanha na Meta (Gerenciador de Anúncios) para a aula gratuita de 10/11, e ajustar o formulário do Mailchimp. Regras: eu digito senhas e códigos; não publique a campanha sem me mostrar a tela de revisão; não mexa em outras campanhas; verba total aprovada: R$ 280 (R$ 40 por dia, de 03/11 a 09/11); me diga o resultado de cada passo em 1 linha.
+
+PASSO 0, POLÍTICA DE PRIVACIDADE: procure se existe página de política de privacidade em https://lexupsolucoesjuridicas.com.br e no site do escritório NC Advogados (tente /politica-de-privacidade, /privacidade e o rodapé). Me diga o link encontrado. Se NÃO existir nenhuma, PARE o formulário instantâneo e use o plano B do PASSO 2.
+
+PASSO 1, BAIXAR OS CRIATIVOS (abra cada link e salve no computador):
+Base: https://raw.githubusercontent.com/nubiacittyadvogada-coder/Nc-insta/central-nubia-citty/prontos-para-publicar/2026-11-03-trafego-aula/
+Arquivos: video-dentro-do-sistema.mp4, feed-A-tempo.png, story-A-tempo.png, feed-B-oab.png, story-B-oab.png, feed-C-itabira.png, story-C-itabira.png
+
+PASSO 2, CAMPANHA:
+- Objetivo: Cadastros (Leads), local: Formulário instantâneo. Nome: "Aula IA 10-11 | Cadastros".
+- Orçamento no nível do conjunto (não CBO). Início 03/11 às 07h, fim 09/11 às 23h59. Posicionamentos Advantage+.
+- PLANO B (só se não houver política de privacidade): objetivo Tráfego, destino site https://eepurl.com/pnjbcz2JOk, otimização "Visualizações da página de destino". Mesmos conjuntos e anúncios.
+
+PASSO 3, FORMULÁRIO INSTANTÂNEO (nome: "Aula 10-11"):
+- Tipo: Mais volume.
+- Introdução: título "Aula ao vivo e gratuita: o sistema de IA que planeja o meu marketing"; texto "Terça, 10/11, às 20h, online, com Núbia Citty. Você vai ver a semana de posts saindo pronta em minutos."
+- Campos: Nome completo e E-mail (pré-preenchidos). Pergunta de múltipla escolha "Você é:" com as opções: Advogado(a) / Empresário(a) / Profissional liberal / Outro.
+- Política de privacidade: o link do PASSO 0.
+- Tela final: "Vaga garantida! O link da aula chega no seu e-mail no dia 10/11." Botão "Ver o Instagram" para https://instagram.com/nubiacitty
+
+PASSO 4, CONJUNTOS (idade 25 a 60, Brasil salvo indicação):
+A) "Brasil negócios", R$ 16/dia. Interesses: empreendedorismo, pequenas e médias empresas, marketing digital, Instagram para negócios, profissional liberal. Anúncios: Vídeo do sistema e Arte A.
+B) "Brasil advogados", R$ 8/dia. Interesses: advocacia, advogado, Ordem dos Advogados do Brasil, direito. Anúncios: Vídeo do sistema e Arte B.
+C) "Itabira e região", R$ 8/dia. Local: Itabira, MG, raio de 50 km. Sem interesses (público aberto). Anúncios: Vídeo do sistema e Arte C.
+D) "Quente", R$ 8/dia. Público personalizado: pessoas que interagiram com o Instagram @nubiacitty nos últimos 60 dias. Anúncios: Vídeo do sistema, Arte A e Arte B.
+Em TODOS: excluir público personalizado de clientes, se existir um chamado "Clientes" ou parecido (se não existir, me avise e siga).
+
+PASSO 5, ANÚNCIOS (identidade: Página e Instagram @nubiacitty; CTA "Cadastre-se"):
+- Vídeo do sistema: video-dentro-do-sistema.mp4. Adicione música da biblioteca da Meta (instrumental, animada). Texto principal:
+"Seu marketing depende do tempo que sobra. E nunca sobra.
+Dia 10/11, às 20h, ao vivo e online, eu abro o sistema com IA que planeja o marketing do meu escritório todo dia. E mostro como fazer no seu negócio.
+Aula gratuita."
+Título: "Aula online e gratuita · 10/11, 20h"
+- Arte A (feed-A-tempo no feed, story-A-tempo em stories e reels). Texto:
+"Seu marketing depende do tempo que sobra. E nunca sobra.
+Dia 10/11, às 20h, ao vivo e online, eu mostro como a IA deixa a sua semana de posts pronta em minutos.
+Aula gratuita."
+- Arte B (feed-B-oab / story-B-oab). Texto:
+"Você posta, ninguém chama. E ainda tem medo de levar um processo ético.
+Dia 10/11, às 20h, eu mostro como planejar conteúdo com estratégia e dentro das regras da OAB.
+Aula online e gratuita para advogados."
+- Arte C (feed-C-itabira / story-C-itabira). Texto:
+"Itabira e região: seu negócio ainda depende só de indicação?
+Dia 10/11, às 20h, eu mostro como uso IA para aparecer todo dia, sem virar refém do Instagram.
+Aula online e gratuita."
+Desligue melhorias automáticas que alterem texto ou imagem (aprimoramentos de criativo Advantage+), menos a música.
+
+PASSO 6, REVISÃO: me mostre a tela de revisão com os 4 conjuntos, as verbas e as datas. Só publique depois que eu disser "publica".
+
+PASSO 7, MAILCHIMP (formulário da aula, link https://eepurl.com/pnjbcz2JOk): troque o subtítulo para "Terça, 10/11, às 20h, com Núbia Citty. Para quem tem um negócio e não tem tempo de pensar no marketing." Troque os 3 tópicos para: "A semana de posts saindo pronta em minutos" / "Como a IA escreve com a sua voz, e não com cara de robô" / "Como aparecer todo dia sem virar refém do Instagram". Troque o rótulo do campo "Área de atuação" para "Profissão ou tipo de negócio". Não mexa na tag AULA-IA-1011 nem no consentimento. Salve e me mostre.
+
+PASSO 8, ROTINA DIÁRIA DOS INSCRITOS (de 04/11 a 10/11, uma vez por dia): no Gerenciador de Anúncios, baixe os cadastros do formulário "Aula 10-11" (CSV) e importe no Mailchimp, público NC SOLUCOES EMPRESARIAIS LTDA, com a tag AULA-IA-1011, marcando "atualizar contatos existentes". Me diga quantos entraram.
+
+No fim, me dê um resumo: o que ficou no ar, os links, o que ficou pendente e qualquer erro.
