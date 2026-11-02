@@ -1,0 +1,16 @@
+Salva. Segunda que vem você testa em 5 minutos.
+
+PASSO 1 (cola na IA e troca pelo seu):
+Meu expediente é das [8h] às [18h]. Fixos: [dia, hora, compromisso]. Prazos: [o quê, quando vence]. Tarefas: [o quê, quanto tempo leva].
+
+PASSO 2 (cola logo depois):
+Monte minha semana de segunda a sexta em blocos de horário. No máximo 3 prioridades por dia. Trabalho de prazo, pelo menos 1 dia antes do vencimento. Diga o que delegar ou adiar. Depois gere um arquivo .ics com todos os blocos, no horário de Brasília (America/Sao_Paulo).
+
+iPhone: abre o arquivo e toca em "Adicionar tudo".
+Google Agenda: no computador, Configurações > Importar e exportar > Importar.
+
+Aviso de advogada: use apelido (Cliente A, Processo 1). Nome de cliente e número de processo não entram na IA.
+
+Quer ver o sistema que faz isso sozinho, todo dia, no meu escritório? Aula ao vivo e gratuita dia 10/11, às 20h. Link nos stories.
+
+#advocacia #advogados #inteligenciaartificial #produtividade #gestaojuridica
