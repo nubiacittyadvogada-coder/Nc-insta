@@ -370,13 +370,13 @@ function vHoje() {
   <section><h2>Publicar hoje</h2>${hoje.length ? hoje.map(c => contentCard(c, c.status === 'aprovar' ? 'aprovar' : c.status === 'gravar' ? 'gravar' : 'pronto')).join('') : empty('Nada agendado para hoje', 'Agende conteúdos prontos no Calendário ou crie um novo agora.')}</section>
   ${mixCard()}
   ${diretorResumo()}
-  <section><h2>Radar de pautas</h2>${S.radar.length ? S.radar.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 6).map(radarCard).join('') : empty('Nenhuma pauta no radar ainda', 'A pesquisa diária de notícias e tendências alimenta esta lista quando a rotina automática estiver ativada.')}</section>
+  <section><h2>Radar de pautas</h2>${S.radar.filter(r => !r.usado).length ? S.radar.filter(r => !r.usado).sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 6).map(radarCard).join('') : empty('Nenhuma pauta no radar ainda', 'A pesquisa diária de notícias e tendências alimenta esta lista quando a rotina automática estiver ativada.')}</section>
   <div class="card"><span class="eyebrow">Rotina automática</span>${rot ? `<p class="small">Última execução: <b>${new Date(rot.ultimaExecucao).toLocaleString('pt-BR')}</b>. ${esc(rot.resumo || '')}</p>` : `<p class="small">Ainda não ativada. Quando você autorizar, uma rotina diária pesquisa pautas, prepara propostas e deixa tudo aqui em Aprovar.</p>`}</div>`;
 }
 function radarCard(r) {
   return `<div class="card"><div class="row"><span class="pill ${r.tipo === 'fato' ? 'ok' : r.tipo === 'opiniao' ? 'wine' : ''}">${esc(r.tipo === 'fato' ? 'Fato verificado' : r.tipo === 'opiniao' ? 'Opinião' : 'Interpretação')}</span>${r.potencial ? `<span class="pill">Potencial ${esc(r.potencial)}</span>` : ''}<span class="small muted">${esc(r.data || '')}</span></div>
   <h3>${esc(r.tema)}</h3>${r.oportunidade ? `<p class="small">${esc(r.oportunidade)}</p>` : ''}${r.riscos ? `<p class="small muted">Riscos: ${esc(r.riscos)}</p>` : ''}
-  <div class="row between"><span class="small muted">${r.fonte ? `Fonte: ${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.fonte)}</a>` : esc(r.fonte)}` : ''}</span><button class="btn small" data-act="criar" data-brief="${esc(r.tema + (r.oportunidade ? '. ' + r.oportunidade : ''))}">Transformar em conteúdo</button></div></div>`;
+  <div class="row between"><span class="small muted">${r.fonte ? `Fonte: ${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.fonte)}</a>` : esc(r.fonte)}` : ''}</span><button class="btn small" data-act="criar" data-radar="${esc(r.id)}" data-brief="${esc(r.tema + (r.oportunidade ? '. ' + r.oportunidade : ''))}">Transformar em conteúdo</button><button class="btn small ghost" data-act="radarDescartar" data-id="${esc(r.id)}">Descartar</button></div></div>`;
 }
 function mixCard() {
   const ws = weekStart(); const we = addDays(ws, 6);
@@ -669,7 +669,8 @@ function mainText(c) {
 const ACTIONS = {
   ir: (c, b) => { location.hash = b.dataset.to; },
   atualizar: () => { location.reload(); },
-  criar: (c, b) => openCreate({ brief: b.dataset.brief || '' }),
+  criar: (c, b) => openCreate({ brief: b.dataset.brief || '', radarId: b.dataset.radar || null }),
+  radarDescartar: async (c, b) => { if (!needDb()) return; await col('radar').doc(b.dataset.id).update({ usado: true, descartado: true, usadoEm: now() }); toast('Pauta descartada'); },
   semana: () => openWeek(),
   async aprovar(c, b) {
     if (!needDb()) return;
@@ -1060,7 +1061,7 @@ function openCreate(pre) {
       const btn = ev.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Gerando';
       try {
         const c = await generate({ type: $('#cr-type', el).value, goal: $('#cr-obj', el).value, series: $('#cr-serie', el).value || null, style: $('#cr-style', el).value, brief: $('#cr-brief', el).value.trim() });
-        if (c) { closeSheet(); location.hash = 'aprovar'; toast('Pronto para aprovar'); }
+        if (c) { if (pre.radarId) { try { await col('radar').doc(pre.radarId).update({ usado: true, usadoEm: now(), contentId: c.id || null }); } catch (e) {} } closeSheet(); location.hash = 'aprovar'; toast('Pronto para aprovar'); }
       } catch (e) { $('#cr-msg', el).textContent = e?.code === 'rate_limited' ? 'Muitas gerações seguidas. Espere um minuto.' : (e.message || 'A geração falhou.'); btn.disabled = false; btn.textContent = 'Gerar'; }
     });
   });
