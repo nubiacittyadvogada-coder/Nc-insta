@@ -176,7 +176,11 @@ const pct = (a, b) => (a != null && b) ? (a / b * 100) : null;
 const f1 = (n) => n == null ? '–' : n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 const brand = () => S.brand || DEFAULT_BRAND;
 const view = () => { const h = location.hash.replace('#', ''); return VIEWS.includes(h) ? h : 'hoje'; };
-const col = (n) => S.db.collection(n);
+const MARCA = (() => { try { return localStorage.getItem('central-marca') === 'nc' ? 'nc' : 'nubia'; } catch (e) { return 'nubia'; } })();
+const PFX = MARCA === 'nc' ? 'nc_' : '';
+const MARCA_NOME = MARCA === 'nc' ? 'NC Advogados' : 'Núbia Citty';
+if (MARCA === 'nc') window.NC_HANDLE = '@nubiacittyadvogados';
+const col = (n) => S.db.collection(PFX + n);
 const SERIES_MANUAIS = ['sextou-doutora', 'em-familia'];
 const postaManual = (c) => c.canalPublicacao ? c.canalPublicacao === 'app' : (SERIES_MANUAIS.includes(c.series) || c.type === 'stories');
 
@@ -351,7 +355,7 @@ function empty(title, text, btn) { return `<div class="empty"><b style="color:va
 function offlineNote() {
   return S.offline ? `<div class="card"><span class="pill warn">Modo visualização</span><p class="small">Esta página precisa ser aberta pelo claude.ai, logada na sua conta, para salvar, gerar e baixar conteúdos.</p></div>` : '';
 }
-function header(eyebrow, title, extra) { return `<div class="head"><div class="row between"><span class="eyebrow">${eyebrow}</span><button class="btn ghost small" data-act="atualizar" aria-label="Atualizar a Central">↻ Atualizar</button></div><h1>${title}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
+function header(eyebrow, title, extra) { return `<div class="head"><div class="row between"><span class="eyebrow">${eyebrow}</span><div class="row" style="gap:6px"><button class="btn small ${MARCA === 'nc' ? 'primary' : ''}" data-act="trocarMarca" aria-label="Trocar de marca">${MARCA === 'nc' ? 'NC Advogados ⇄' : 'Núbia Citty ⇄'}</button><button class="btn ghost small" data-act="atualizar" aria-label="Atualizar a Central">↻</button></div></div><h1>${title}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
 
 function vHoje() {
   const d = new Date(); const h = d.getHours(); const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -361,7 +365,7 @@ function vHoje() {
   const manualHoje = hoje.filter(postaManual);
   const pessoal = S.contents.filter(c => c.precisaInputPessoal && !c.respostaPessoal && ['aprovar', 'gravar'].includes(c.status));
   const rot = S.rotina;
-  return `${header(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }), `${saud}, <em>Núbia.</em>`)}
+  return `${header(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }), (MARCA === 'nc' ? `${saud}. <em>NC Advogados.</em>` : `${saud}, <em>Núbia.</em>`))}
   ${offlineNote()}
   <div class="tiles">
     <button class="tile" data-act="ir" data-to="gravar"><b>${n('gravar')}</b><span class="small muted">para gravar</span></button>
@@ -673,6 +677,7 @@ function mainText(c) {
 const ACTIONS = {
   ir: (c, b) => { location.hash = b.dataset.to; },
   atualizar: () => { location.reload(); },
+  trocarMarca: () => { try { localStorage.setItem('central-marca', MARCA === 'nc' ? 'nubia' : 'nc'); } catch (e) {} location.reload(); },
   criar: (c, b) => openCreate({ brief: b.dataset.brief || '', radarId: b.dataset.radar || null }),
   radarDescartar: async (c, b) => { if (!needDb()) return; await col('radar').doc(b.dataset.id).update({ usado: true, descartado: true, usadoEm: now() }); toast('Pauta descartada'); },
   semana: () => openWeek(),
@@ -878,11 +883,12 @@ function normalize(type, raw) {
   return { title: plain(r.title) || 'Sem título', style, payload: p, precisaInputPessoal: !!r.precisaInputPessoal, perguntaPessoal: r.perguntaPessoal || '', validarOpiniao: r.validarOpiniao || '', riscos: r.riscos || '', hipoteseMelhoria: r.hipoteseMelhoria || '',
     tags: { tema: r.tags?.tema || '', tipoGancho: HOOKS.includes(r.tags?.tipoGancho) ? r.tags.tipoGancho : '', tipoCta: CTAS.includes(r.tags?.tipoCta) ? r.tags.tipoCta : '' } };
 }
+const NC_CONTEXTO = `CONTEXTO DE MARCA, QUE PREVALECE SOBRE QUALQUER MENÇÃO ABAIXO À NÚBIA COMO PESSOA: este trabalho é para o perfil INSTITUCIONAL do escritório NC Advogados (@nubiacittyadvogados), escritório full service com atuação em todo o Brasil (criminal, empresarial, trabalhista, previdenciário, cível, família e administrativo; prioridade de crescimento: previdenciário e trabalhista). Quem aparece nos vídeos são os advogados do escritório; também há artes sem rosto. Voz: clara, segura, acolhedora e técnica sem juridiquês; sem humor ácido, sem polêmica política, sem opinião pessoal da Núbia. Ética obrigatória (Código de Ética da OAB e Provimento 205/2021): conteúdo apenas informativo e educativo; proibido captação de clientela, promessa ou sugestão de resultado, menção a preços ou honorários, mercantilização, casos ou clientes identificáveis, comparação com outros escritórios, expressões como "ligue já", "garanta seu direito", "o melhor escritório". CTA permitido: salvar, compartilhar, comentar dúvida geral, seguir o perfil, acessar conteúdo informativo. Toda informação jurídica correta, com a exceção relevante e o fundamento legal. Hashtags da área do conteúdo.\n\n`;
 async function callAI(prompt) {
   if (!S.sample) throw new Error('A geração por IA precisa ser aberta pelo claude.ai e autorizada.');
   let lastErr;
   for (let i = 0; i < 3; i++) {
-    try { const out = await S.sample.json(prompt, { modelTier: 'complex' }); countUsage(); return out; }
+    try { const out = await S.sample.json((MARCA === 'nc' ? NC_CONTEXTO : '') + prompt, { modelTier: 'complex' }); countUsage(); return out; }
     catch (e) {
       lastErr = e; const msg = String(e && (e.message || e.code) || '');
       if (e?.code === 'rate_limited' || !/connection|network|lost|timeout|fetch|abort/i.test(msg)) throw e;

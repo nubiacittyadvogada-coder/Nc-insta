@@ -22,7 +22,7 @@
     overlay: { w: 1080, h: 1920, top: 0, bottom: 0 }
   };
   const STYLES = ['editorial', 'lifestyle', 'colagem', 'jornalistico', 'minimal', 'agenda'];
-  const HANDLE = '@nubiacitty';
+  const HANDLE_ = () => (typeof window !== 'undefined' && window.NC_HANDLE) || '@nubiacitty';
 
   // ---------- utilidades ----------
   function hash(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
@@ -154,7 +154,7 @@
     const y = H - f.bottom - 18;
     ctx.fillStyle = accent; ctx.fillRect(96, y - 30, 56, 3);
     ctx.font = sans(600)(24); ctx.fillStyle = color; ctx.textAlign = 'left';
-    spaced(ctx, HANDLE, 96, y + 6, 1.5, 'left');
+    spaced(ctx, HANDLE_(), 96, y + 6, 1.5, 'left');
     if (right) { ctx.font = sans(500)(24); spaced(ctx, right, W - 96, y + 6, 1.5, 'right'); }
   }
 
@@ -219,7 +219,7 @@
       ctx.fillStyle = claro ? 'rgba(15,13,13,.25)' : 'rgba(246,241,234,.25)'; ctx.fillRect(96, y - 46, W - 192, 2);
       ctx.font = sans(500)(22); ctx.fillStyle = claro ? C.cinza : C.cinzaClaro;
       if (s.source) spaced(ctx, ('FONTE: ' + s.source).toUpperCase(), 96, y, 1.5, 'left');
-      ctx.font = sans(700)(24); ctx.fillStyle = ink; spaced(ctx, HANDLE, W - 96, y, 1.5, 'right');
+      ctx.font = sans(700)(24); ctx.fillStyle = ink; spaced(ctx, HANDLE_(), W - 96, y, 1.5, 'right');
     },
 
     minimal(ctx, W, H, s, f) {
@@ -236,7 +236,7 @@
         tFont: serif(400), tMax: 112, tLh: 1.1, tColor: ink, emColor: acc, align: 'left', valign: 'center', titleShare: 0.66,
         bFont: sans(400), bMax: big(s) ? 48 : 36, bColor: dark ? 'rgba(246,241,234,.8)' : 'rgba(15,13,13,.75)', bEm: acc
       }));
-      ctx.font = sans(600)(22); ctx.fillStyle = ink; spaced(ctx, HANDLE, 96, H - f.bottom - 18, 2, 'left');
+      ctx.font = sans(600)(22); ctx.fillStyle = ink; spaced(ctx, HANDLE_(), 96, H - f.bottom - 18, 2, 'left');
     },
 
     colagem(ctx, W, H, s, f) {
@@ -275,7 +275,7 @@
         ctx.fillStyle = C.preto; ctx.fillRect(0, 0, lw, 66); ctx.fillStyle = C.off; ctx.fillText(label, 22, 52); ctx.restore();
       }
       if (s.total > 1) { ctx.font = sans(700)(24); ctx.fillStyle = C.off; spaced(ctx, `${s.index}/${s.total}`, W - 96, f.top + 84, 3, 'right'); }
-      ctx.font = sans(700)(24); ctx.fillStyle = C.preto; spaced(ctx, HANDLE, 96, H - f.bottom - 18, 2, 'left');
+      ctx.font = sans(700)(24); ctx.fillStyle = C.preto; spaced(ctx, HANDLE_(), 96, H - f.bottom - 18, 2, 'left');
     },
 
     lifestyle(ctx, W, H, s, f) {
@@ -352,7 +352,7 @@
         ctx.restore();
       }
       if (s.total > 1) { ctx.font = sans(600)(22); ctx.fillStyle = s.photo ? C.off : C.preto; spaced(ctx, `${s.index}/${s.total}`, W - 96, f.top + 44, 3, 'right'); }
-      ctx.font = sans(700)(22); ctx.fillStyle = s.photo ? C.off : C.preto; spaced(ctx, HANDLE, 96, H - f.bottom - 18, 2, 'left');
+      ctx.font = sans(700)(22); ctx.fillStyle = s.photo ? C.off : C.preto; spaced(ctx, HANDLE_(), 96, H - f.bottom - 18, 2, 'left');
     },
 
     // texto para sobrepor ao vídeo do Reel de 7 segundos (fundo transparente)
