@@ -180,6 +180,16 @@ const MARCA = (() => { try { return localStorage.getItem('central-marca') === 'n
 const PFX = MARCA === 'nc' ? 'nc_' : '';
 const MARCA_NOME = MARCA === 'nc' ? 'NC Advogados' : 'Núbia Citty';
 if (MARCA === 'nc') window.NC_HANDLE = '@nubiacittyadvogados';
+const VISUAL_PADRAO = MARCA === 'nc'
+  ? { principal: '#111111', fundo: '#F3F1EE', destaque: '#D8C4B6', apoio: '#E6DAD1', texto: '#111111' }
+  : { principal: '#6B1E2E', fundo: '#F6F1EA', destaque: '#B08D57', apoio: '#E4D6C3', texto: '#0F0D0D' };
+const VISUAL_NOMES = { principal: 'Cor principal', fundo: 'Fundo', destaque: 'Destaque', apoio: 'Apoio (etiquetas)', texto: 'Texto' };
+let visualAplicado = '';
+function aplicarVisual() {
+  const v = Object.assign({}, VISUAL_PADRAO, (S.brand && S.brand.visual) || {});
+  const k = JSON.stringify(v); if (k === visualAplicado || !window.NCRender) return;
+  visualAplicado = k; NCRender.setTheme(v); if (typeof previewCache !== 'undefined') previewCache.clear();
+}
 const col = (n) => S.db.collection(PFX + n);
 const SERIES_MANUAIS = ['sextou-doutora', 'em-familia'];
 const postaManual = (c) => c.canalPublicacao ? c.canalPublicacao === 'app' : (SERIES_MANUAIS.includes(c.series) || c.type === 'stories');
@@ -200,6 +210,7 @@ async function countUsage() {
 async function boot() {
   route();
   window.addEventListener('hashchange', route);
+  aplicarVisual();
   NCRender.ready().then(() => { S.fontsReady = true; render(); });
   const c = window.claude;
   if (!c || !c.use) { S.offline = true; S.loaded = true; render(); return; }
@@ -213,7 +224,7 @@ async function boot() {
   col('settings').doc('goals').onSnapshot(d => { S.goals = d.exists ? d.data() : null; render(); });
   sub('learning', 'learning', col('learning').orderBy('at', 'desc').limit(150));
   sub('log', 'log', col('log').orderBy('at', 'desc').limit(40));
-  col('settings').doc('brand').onSnapshot(d => { S.brand = d.exists ? d.data() : null; render(); });
+  col('settings').doc('brand').onSnapshot(d => { S.brand = d.exists ? d.data() : null; aplicarVisual(); render(); });
   col('settings').doc('usage').onSnapshot(d => { S.usage = d.exists ? d.data() : null; render(); });
   col('settings').doc('rotina').onSnapshot(d => { S.rotina = d.exists ? d.data() : null; render(); });
   setTimeout(() => { S.loaded = true; render(); }, 2500);
@@ -613,7 +624,9 @@ function vMarca() {
     <p class="small muted">Cada aprovação, edição e rejeição entra no contexto das próximas gerações. Mudanças na personalidade viram sugestões para você aprovar.</p>
     <div class="row"><button class="btn" data-act="sugerirVoz" ${S.learning.length < 3 ? 'disabled' : ''}>Analisar meu aprendizado</button></div>
     ${sug.length ? sug.map((s, i) => `<div class="box"><p class="small">${esc(s)}</p><div class="row"><button class="btn small" data-act="aceitarSug" data-i="${i}">Adicionar ao manual</button><button class="btn ghost small" data-act="descartarSug" data-i="${i}">Descartar</button></div></div>`).join('') : ''}</div>
-  <div class="card"><h2>Identidade visual</h2><div class="swatches">${b.paleta.map(c => `<span style="background:${esc(c)}" title="${esc(c)}"></span>`).join('')}</div>
+  <div class="card"><div class="row between"><h2>Identidade visual</h2><button class="btn" data-act="editarCores" ${S.db ? '' : 'disabled'}>Mudar cores</button></div>
+    <div class="swatches">${Object.entries(Object.assign({}, VISUAL_PADRAO, (S.brand && S.brand.visual) || {})).map(([k, c]) => `<span style="background:${esc(c)}" title="${esc(VISUAL_NOMES[k] || k)}: ${esc(c)}"></span>`).join('')}</div>
+    <p class="small muted">Cores das artes de ${esc(MARCA_NOME)}. Cada marca tem as suas.</p>
     <div class="chips">${NCRender.STYLES.map(s => `<span class="pill">${STYLE_NAME[s]}</span>`).join('')}</div>
     <p class="small muted">Fotos reais da Núbia só entram quando cadastradas na biblioteca como "foto própria autorizada". Rosto e corpo nunca são alterados.</p></div>
   <div class="card"><div class="row between"><h2>Séries</h2><button class="btn" data-act="serie">Nova série</button></div>
@@ -677,6 +690,22 @@ function mainText(c) {
 const ACTIONS = {
   ir: (c, b) => { location.hash = b.dataset.to; },
   atualizar: () => { location.reload(); },
+  editarCores: () => {
+    const v = Object.assign({}, VISUAL_PADRAO, (S.brand && S.brand.visual) || {});
+    openSheet(`<h2>Cores de ${esc(MARCA_NOME)}</h2><p class="small muted">Valem para todas as artes novas desta marca. A prévia muda na hora.</p>
+      ${Object.keys(VISUAL_NOMES).map(k => `<label class="row between" style="gap:12px"><span>${VISUAL_NOMES[k]}</span><input type="color" id="cor-${k}" value="${esc(v[k])}" style="width:64px;height:40px;padding:2px"></label>`).join('')}
+      <canvas id="cor-prev" style="width:100%;max-width:260px;border-radius:12px;display:block;margin:12px auto"></canvas>
+      <div class="row"><button class="btn primary" id="cor-salvar">Salvar cores</button><button class="btn ghost" id="cor-padrao">Voltar ao padrão</button></div>`, (el) => {
+      const ler = () => Object.fromEntries(Object.keys(VISUAL_NOMES).map(k => [k, el.querySelector('#cor-' + k).value]));
+      const prev = () => { NCRender.setTheme(ler()); const spec = { format: 'carrossel', style: 'editorial', variant: 'capa', kicker: MARCA_NOME, title: 'Prévia da *sua identidade*', body: 'É assim que as artes novas vão sair.', index: 1, total: 1 };
+        try { NCRender.render(spec, el.querySelector('#cor-prev')); } catch (e) {} visualAplicado = ''; aplicarVisual(); };
+      el.querySelectorAll('input[type=color]').forEach(i => i.addEventListener('input', prev)); prev();
+      el.querySelector('#cor-padrao').addEventListener('click', () => { Object.keys(VISUAL_NOMES).forEach(k => el.querySelector('#cor-' + k).value = VISUAL_PADRAO[k]); prev(); });
+      el.querySelector('#cor-salvar').addEventListener('click', async () => {
+        const visual = ler(); await col('settings').doc('brand').set(Object.assign({}, brand(), { visual, atualizado: now() }));
+        visualAplicado = ''; log('mudou cores da marca', JSON.stringify(visual)); closeSheet(); toast('Cores salvas'); });
+    });
+  },
   trocarMarca: () => { try { localStorage.setItem('central-marca', MARCA === 'nc' ? 'nubia' : 'nc'); } catch (e) {} location.reload(); },
   criar: (c, b) => openCreate({ brief: b.dataset.brief || '', radarId: b.dataset.radar || null }),
   radarDescartar: async (c, b) => { if (!needDb()) return; await col('radar').doc(b.dataset.id).update({ usado: true, descartado: true, usadoEm: now() }); toast('Pauta descartada'); },

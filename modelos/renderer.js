@@ -433,5 +433,17 @@
     return [];
   }
 
-  root.NCRender = { C, F, FORMATS, STYLES, ready, render, specsFor, slug };
+  // Identidade visual por marca: troca as cores do motor sem mexer nos estilos.
+  const C_ORIG = Object.assign({}, C);
+  function setTheme(t) {
+    Object.assign(C, C_ORIG);
+    if (!t) return;
+    const ok = v => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v);
+    if (ok(t.principal)) { C.vinho = t.principal; C.vinhoEsc = t.principal; C.vinhoClaro = t.principal; }
+    if (ok(t.fundo)) C.off = t.fundo;
+    if (ok(t.destaque)) C.dourado = t.destaque;
+    if (ok(t.apoio)) { C.bege = t.apoio; C.begeEsc = t.apoio; }
+    if (ok(t.texto)) { C.preto = t.texto; C.grafite = t.texto; }
+  }
+  root.NCRender = { C, F, FORMATS, STYLES, ready, render, specsFor, slug, setTheme };
 })(typeof window !== 'undefined' ? window : globalThis);
