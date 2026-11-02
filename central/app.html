@@ -177,6 +177,8 @@ const f1 = (n) => n == null ? '–' : n.toLocaleString('pt-BR', { maximumFractio
 const brand = () => S.brand || DEFAULT_BRAND;
 const view = () => { const h = location.hash.replace('#', ''); return VIEWS.includes(h) ? h : 'hoje'; };
 const col = (n) => S.db.collection(n);
+const SERIES_MANUAIS = ['sextou-doutora', 'em-familia'];
+const postaManual = (c) => c.canalPublicacao ? c.canalPublicacao === 'app' : (SERIES_MANUAIS.includes(c.series) || c.type === 'stories');
 
 function toast(msg) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; t.setAttribute('role', 'status');
@@ -283,7 +285,7 @@ function meta(c) {
   return `<div class="row"><span class="pill wine">${TYPE[c.type] || c.type}</span><span class="pill">Objetivo: ${GOALS[goalOf(c)]}</span>
     ${q ? `<span class="pill ${q.aprovado ? 'ok' : 'bad'}">${q.aprovado ? 'Diferencial: ' + esc(q.diferencial) : 'Genérico'}</span>` : ''}
     ${c.seriesName ? `<span class="pill">${esc(c.seriesName)}</span>` : ''}<span class="pill ${tone}">${label}</span>
-    ${c.scheduledFor ? `<span class="pill">${fmtDay(c.scheduledFor)}</span>` : ''}${c.metricoolUuid ? '<span class="pill ok">Agendado no Metricool</span>' : ''}</div>`;
+    ${c.scheduledFor ? `<span class="pill">${fmtDay(c.scheduledFor)}</span>` : ''}${c.metricoolUuid && !postaManual(c) ? '<span class="pill ok">Agendado no Metricool</span>' : ''}${postaManual(c) ? '<span class="pill warn">Você posta pelo app</span>' : ''}</div>`;
 }
 function detail(c) {
   const p = c.payload || {}; const out = [];
@@ -356,6 +358,7 @@ function vHoje() {
   const n = (st) => S.contents.filter(c => c.status === st).length;
   const sd = c => (c.scheduledFor || '').slice(0, 10);
   const hoje = S.contents.filter(c => sd(c) === today() && !['rejeitado', 'publicado'].includes(c.status));
+  const manualHoje = hoje.filter(postaManual);
   const pessoal = S.contents.filter(c => c.precisaInputPessoal && !c.respostaPessoal && ['aprovar', 'gravar'].includes(c.status));
   const rot = S.rotina;
   return `${header(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }), `${saud}, <em>Núbia.</em>`)}
@@ -367,7 +370,8 @@ function vHoje() {
   </div>
   <div class="row"><button class="btn primary" data-act="criar">Criar conteúdo</button><button class="btn" data-act="semana">Montar a semana</button></div>
   ${pessoal.length ? `<section><h2>Preciso de você</h2>${pessoal.map(c => `<div class="card"><span class="pill wine">${TYPE[c.type]}</span><h3>${esc(plain(c.title))}</h3><p class="small">${esc(c.perguntaPessoal || '')}</p><div class="row"><button class="btn" data-act="responder" data-id="${c.id}">Responder</button></div></div>`).join('')}</section>` : ''}
-  <section><h2>Publicar hoje</h2>${hoje.length ? hoje.map(c => contentCard(c, c.status === 'aprovar' ? 'aprovar' : c.status === 'gravar' ? 'gravar' : 'pronto')).join('') : empty('Nada agendado para hoje', 'Agende conteúdos prontos no Calendário ou crie um novo agora.')}</section>
+  ${manualHoje.length ? `<section><h2>Você posta hoje pelo app</h2><p class="small muted">Estes não saem sozinhos: precisam de música em alta, figurinha ou stories. Poste pelo Instagram e marque como publicado.</p>${manualHoje.map(c => `<div class="card"><span class="pill warn">${TYPE[c.type]}${c.horario ? ' · ' + esc(c.horario) : ''}</span><h3>${esc(plain(c.title))}</h3><div class="row"><button class="btn primary" data-act="baixar" data-id="${c.id}">Baixar</button><button class="btn" data-act="publicado" data-id="${c.id}">Marcar publicado</button></div></div>`).join('')}</section>` : ''}
+  <section><h2>Publicar hoje</h2>${hoje.filter(c => !postaManual(c)).length ? hoje.filter(c => !postaManual(c)).map(c => contentCard(c, c.status === 'aprovar' ? 'aprovar' : c.status === 'gravar' ? 'gravar' : 'pronto')).join('') : empty('Nada agendado para hoje', 'Agende conteúdos prontos no Calendário ou crie um novo agora.')}</section>
   ${mixCard()}
   ${diretorResumo()}
   <section><h2>Radar de pautas</h2>${S.radar.filter(r => !r.usado).length ? S.radar.filter(r => !r.usado).sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 6).map(radarCard).join('') : empty('Nenhuma pauta no radar ainda', 'A pesquisa diária de notícias e tendências alimenta esta lista quando a rotina automática estiver ativada.')}</section>
