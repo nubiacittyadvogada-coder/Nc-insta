@@ -1,0 +1,26 @@
+Vamos criar no ManyChat uma automação nova, igual à do KIT, para a palavra AULA. Regras: eu digito senhas e códigos; não apague nem altere a automação KIT nem a GARIMPO; não ative nada sem me mostrar a tela antes; me diga o resultado de cada passo em 1 linha.
+
+PASSO 1, CONFERIR: abra o ManyChat da conta @nubiacitty e me mostre a lista de automações ativas. Confirme que a KIT está ativa e que não existe outra automação usando a palavra AULA.
+
+PASSO 2, GATILHO DE COMENTÁRIO: crie uma automação "Comentário no post" com:
+- Posts: qualquer post ou Reel (todos, inclusive os futuros).
+- Palavra-chave: AULA (aceitar também "aula" e "Aula"; a mensagem precisa conter a palavra).
+- Resposta pública ao comentário (alternar entre as 3):
+  1. "Te mandei na DM 💌"
+  2. "Chegou na sua DM!"
+  3. "Corre na DM que o link está lá 🙌"
+
+PASSO 3, MENSAGEM NA DM (a mesma para o gatilho de comentário e para quem mandar AULA direto na DM):
+"Oi! Que bom que você vem 🙌
+A aula é ao vivo e gratuita, dia 10/11, às 20h. Eu vou abrir por dentro o sistema com IA que planeja o marketing do meu escritório.
+Sua inscrição é por aqui:"
+Botão: "Quero minha vaga" com o link https://eepurl.com/pnjbcz2JOk
+Depois do botão, uma segunda mensagem: "Depois de se inscrever, chega no seu e-mail o lembrete e o link da sala. Até lá!"
+
+PASSO 4, GATILHO DE DM: na mesma automação (ou numa irmã), adicione o gatilho "Palavra-chave na DM" = AULA, com a mesma mensagem do passo 3.
+
+PASSO 5, ETIQUETA: marque quem passar pelo fluxo com a etiqueta "aula-10-11" (crie a etiqueta se não existir). Não peça e-mail dentro do ManyChat: o formulário do link já faz isso.
+
+PASSO 6, TESTE: me mostre a pré-visualização do fluxo. Só ative depois que eu disser "ativa". Depois de ativar, me diga como testo (comentar AULA em um post meu com outra conta).
+
+No fim, me dê um resumo: o que ficou ativo, as palavras-chave e qualquer erro.
