@@ -216,6 +216,13 @@ async function boot() {
   if (!c || !c.use) { S.offline = true; S.loaded = true; render(); return; }
   const [db, assets, sample, downloads, user, mcp] = await Promise.all(['db', 'assets', 'sample', 'downloads', 'user', 'mcp'].map(n => c.use(n).catch(() => null)));
   Object.assign(S, { db, assets, sample, downloads, user, mcp });
+  // Equipe: quem não é a dona vê e aprova só o NC Advogados.
+  try { S.isOwner = user ? !!(await Promise.resolve(user.isOwner())) : true; } catch (e) { S.isOwner = true; }
+  if (!S.isOwner && MARCA !== 'nc') {
+    let ok = false; try { localStorage.setItem('central-marca', 'nc'); ok = localStorage.getItem('central-marca') === 'nc'; } catch (e) {}
+    if (ok) { location.reload(); return; }
+    S.semAcesso = true; S.loaded = true; render(); return;
+  }
   if (!db) { S.offline = true; S.loaded = true; render(); return; }
   const sub = (name, key, q) => (q || col(name)).onSnapshot(snap => { S[key] = snap.docs.map(d => Object.assign({}, d.data(), { id: d.id })); S.loaded = true; render(); }, () => { S.loaded = true; render(); });
   sub('contents', 'contents'); sub('products', 'products'); sub('references', 'references'); sub('metrics', 'metrics');
@@ -367,7 +374,7 @@ function empty(title, text, btn) { return `<div class="empty"><b style="color:va
 function offlineNote() {
   return S.offline ? `<div class="card"><span class="pill warn">Modo visualização</span><p class="small">Esta página precisa ser aberta pelo claude.ai, logada na sua conta, para salvar, gerar e baixar conteúdos.</p></div>` : '';
 }
-function header(eyebrow, title, extra) { return `<div class="head"><div class="row between"><span class="eyebrow">${eyebrow}</span><div class="row" style="gap:6px"><button class="btn small ${MARCA === 'nc' ? 'primary' : ''}" data-act="trocarMarca" aria-label="Trocar de marca">${MARCA === 'nc' ? 'NC Advogados ⇄' : 'Núbia Citty ⇄'}</button><button class="btn ghost small" data-act="atualizar" aria-label="Atualizar a Central">↻</button></div></div><h1>${title}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
+function header(eyebrow, title, extra) { return `<div class="head"><div class="row between"><span class="eyebrow">${eyebrow}</span><div class="row" style="gap:6px">${S.isOwner === false ? `<span class="pill">NC Advogados</span>` : `<button class="btn small ${MARCA === 'nc' ? 'primary' : ''}" data-act="trocarMarca" aria-label="Trocar de marca">${MARCA === 'nc' ? 'NC Advogados ⇄' : 'Núbia Citty ⇄'}</button>`}<button class="btn ghost small" data-act="atualizar" aria-label="Atualizar a Central">↻</button></div></div><h1>${title}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
 
 function vHoje() {
   const d = new Date(); const h = d.getHours(); const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -654,6 +661,7 @@ function vMarca() {
 }
 
 function render() {
+  if (S.semAcesso) { $('#app').innerHTML = `<div class="card"><h2>Acesso da equipe</h2><p class="small">Esta Central mostra para a equipe só o NC Advogados, mas o seu navegador está bloqueando o armazenamento local. Abra no navegador normal (fora da aba anônima) ou no app do Claude e tente de novo.</p></div>`; return; }
   const v = view(); renderNav();
   if (!S.loaded) return;
   const html = {
@@ -714,7 +722,7 @@ const ACTIONS = {
         visualAplicado = ''; log('mudou cores da marca', JSON.stringify(visual)); closeSheet(); toast('Cores salvas'); });
     });
   },
-  trocarMarca: () => { try { localStorage.setItem('central-marca', MARCA === 'nc' ? 'nubia' : 'nc'); } catch (e) {} location.reload(); },
+  trocarMarca: () => { if (S.isOwner === false) return; try { localStorage.setItem('central-marca', MARCA === 'nc' ? 'nubia' : 'nc'); } catch (e) {} location.reload(); },
   criar: (c, b) => openCreate({ brief: b.dataset.brief || '', radarId: b.dataset.radar || null }),
   buscarTrends: async (c, b) => {
     let ult = 0; try { ult = +localStorage.getItem('central-trends-ult') || 0; } catch (e) {}
