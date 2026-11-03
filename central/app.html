@@ -48,11 +48,14 @@ section { display: grid; gap: 12px }
 .btn:disabled { opacity: .5; cursor: default }
 .btn:focus-visible, .tile:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, .nav a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
 .pill { display: inline-flex; align-items: center; gap: 5px; font: 600 11px/1 var(--sans); letter-spacing: .04em; padding: 5px 9px; border-radius: 999px; background: var(--surface2); color: var(--ink); white-space: nowrap }
+.row > .pill { max-width: 100%; white-space: normal; overflow-wrap: anywhere; line-height: 1.25 }
 .pill.wine { background: color-mix(in srgb, var(--wine) 14%, transparent); color: var(--wine) }
 .pill.ok { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok) }
 .pill.warn { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn) }
 .pill.bad { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad) }
-.strip { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; -webkit-overflow-scrolling: touch }
+main, section, .stack, .head, .card, .box, .script { grid-template-columns: minmax(0, 1fr) }
+main > *, section > *, .card > *, .box > * { min-width: 0; max-width: 100% }
+.strip { display: flex; gap: 8px; overflow-x: auto; max-width: 100%; min-width: 0; scroll-snap-type: x mandatory; padding-bottom: 4px; -webkit-overflow-scrolling: touch }
 .strip img, .strip .ph { scroll-snap-align: start; flex: 0 0 auto; height: 220px; width: auto; border-radius: 8px; border: 1px solid var(--line); background: var(--surface2) }
 .strip .ov { position: relative; flex: 0 0 auto; height: 220px; aspect-ratio: 9/16; border-radius: 8px; overflow: hidden; background: repeating-conic-gradient(#3a3033 0 25%, #2a2224 0 50%) 0 0/20px 20px }
 .strip .ov img { height: 100%; border: 0; border-radius: 0; background: transparent }
@@ -66,7 +69,7 @@ details > summary::-webkit-details-marker { display: none }
 details > summary::after { content: " +"; color: var(--muted) }
 details[open] > summary::after { content: " −" }
 .script { display: grid; gap: 8px }
-.script div { display: grid; grid-template-columns: 52px 1fr; gap: 8px }
+.script div { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px }
 .script span { font: 600 12px/1.6 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums }
 label { display: grid; gap: 5px; font: 600 13px/1.2 var(--sans) }
 input, textarea, select { width: 100%; font: 15px/1.4 var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px }
