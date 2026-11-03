@@ -127,11 +127,11 @@ td.t { white-space: normal; min-width: 160px }
 // ================= estado =================
 const S = {
   db: null, assets: null, sample: null, downloads: null, user: null,
-  contents: [], products: [], references: [], metrics: [], learning: [], series: [], reports: [], radar: [], log: [],
+  contents: [], products: [], references: [], metrics: [], learning: [], series: [], reports: [], radar: [], log: [], mensagens: [],
   experiments: [], decisions: [], funnel: [], goals: null, dim: 'format',
   brand: null, usage: null, rotina: null, loaded: false, offline: false, busy: {}
 };
-const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'diretor', 'resultados', 'vendas', 'marca'];
+const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa'];
 const TYPE = { reel7: 'Reel 7s', reelFalado: 'Reel falado', carrossel: 'Carrossel', stories: 'Stories', estatico: 'Post' };
 const OBJ = { crescimento: 'Crescimento', autoridade: 'Autoridade', conversao: 'Conversão' };
 const OBJ_COLOR = { crescimento: 'var(--wine)', autoridade: 'var(--gold)', conversao: 'var(--ok)' };
@@ -227,6 +227,7 @@ async function boot() {
   const sub = (name, key, q) => (q || col(name)).onSnapshot(snap => { S[key] = snap.docs.map(d => Object.assign({}, d.data(), { id: d.id })); S.loaded = true; render(); }, () => { S.loaded = true; render(); });
   sub('contents', 'contents'); sub('products', 'products'); sub('references', 'references'); sub('metrics', 'metrics');
   sub('series', 'series'); sub('reports', 'reports'); sub('radar', 'radar');
+  sub('mensagens', 'mensagens', col('mensagens').orderBy('at', 'desc').limit(80));
   sub('experiments', 'experiments'); sub('decisions', 'decisions'); sub('funnel', 'funnel');
   col('settings').doc('goals').onSnapshot(d => { S.goals = d.exists ? d.data() : null; render(); });
   sub('learning', 'learning', col('learning').orderBy('at', 'desc').limit(150));
@@ -252,13 +253,14 @@ function renderNav() {
   const v = view(); const n = (st) => S.contents.filter(c => c.status === st).length;
   const items = [['hoje', 'Hoje'], ['gravar', 'Gravar', n('gravar')], ['aprovar', 'Aprovar', n('aprovar')], ['prontos', 'Prontos'], ['mais', 'Mais']];
   $('#nav').innerHTML = items.map(([k, label, badge]) => {
-    const cur = k === v || (k === 'mais' && ['calendario', 'diretor', 'resultados', 'vendas', 'marca'].includes(v));
+    const cur = k === v || (k === 'mais' && ['calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa'].includes(v));
     return `<a href="${k === 'mais' ? '#' : '#' + k}" data-nav="${k}" ${cur ? 'aria-current="page"' : ''}>${ICON[k]}<span>${label}</span>${badge ? `<span class="badge">${badge}</span>` : ''}</a>`;
   }).join('');
 }
 document.addEventListener('click', (e) => {
   const a = e.target.closest('[data-nav="mais"]');
   if (a) { e.preventDefault(); openSheet(`<h2>Mais</h2><div class="more">
+    <a href="#conversa" data-close style="grid-column:1/-1"><b>Conversa com o diretor</b><span class="small muted">Avise o que subiu, peça ajustes e veja as respostas</span></a>
     <a href="#diretor" data-close style="grid-column:1/-1"><b>Diretor de marketing</b><span class="small muted">Metas, funil, experimentos e relatório semanal</span></a>
     <a href="#calendario" data-close><b>Calendário</b><span class="small muted">Programação das publicações</span></a>
     <a href="#resultados" data-close><b>Resultados</b><span class="small muted">Métricas e relatórios</span></a>
@@ -624,6 +626,18 @@ function vVendas() {
 }
 
 // ---------- minha marca ----------
+const EQUIPE_NC = ['José Matheus', 'Daniel', 'Brendha', 'Livia', 'Letícia', 'Eduardo', 'Higor', 'Núbia', 'Outra pessoa'];
+function vConversa() {
+  const ms = S.mensagens.slice().sort((a, b) => (a.at || '').localeCompare(b.at || ''));
+  const linha = (m) => { const dir = m.autor === 'diretor';
+    return `<div class="card" style="${dir ? 'border-left:4px solid var(--wine,#6B1E2E)' : ''}"><div class="row between"><b class="small">${dir ? 'Diretor de marketing' : esc(m.nome || 'Equipe')}</b><span class="small muted">${m.at ? new Date(m.at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}${!dir && m.status === 'novo' ? ' · aguardando' : ''}${!dir && m.status === 'lido' ? ' · lido' : ''}</span></div>
+      ${m.titulo ? `<p class="small"><span class="pill">${esc(m.tipo === 'video' ? 'Vídeo enviado' : 'Conteúdo')}</span> ${esc(m.titulo)}${m.quem ? ` · gravado por <b>${esc(m.quem)}</b>` : ''}</p>` : ''}
+      <p style="white-space:pre-wrap">${esc(m.texto || '')}</p></div>`; };
+  return `${header('Conversa', 'Fale com o <em>diretor</em>', 'Avise o que subiu, diga o que mudou na gravação ou peça um ajuste. O diretor confere as mensagens a cada hora, das 8h às 20h, de segunda a sábado.')}
+  <div class="card"><label for="cv-txt">Mensagem<textarea id="cv-txt" placeholder="Ex.: subi o vídeo do José no roteiro dos descontos; ele trocou o exemplo do uniforme pelo de quebra de caixa."></textarea></label>
+    <div class="row"><button class="btn primary" data-act="enviarMensagem" ${S.db ? '' : 'disabled'}>Enviar</button></div></div>
+  ${ms.length ? ms.map(linha).join('') : empty('Nenhuma mensagem ainda', 'Quando você enviar um vídeo, a Central já avisa o diretor por aqui.')}`;
+}
 function vMarca() {
   const b = brand(); const sug = S.brand?.sugestoes || [];
   const used = S.usage && S.usage.mes === today().slice(0, 7) ? S.usage.chamadas : 0;
@@ -669,7 +683,7 @@ function render() {
     gravar: () => vLista(['gravar'], 'Gravar', 'Roteiros para <em>gravar</em>', 'Grave, envie o vídeo e a Central prepara o restante do que já está integrado.', 'Nada para gravar', 'Quando você aprovar um Reel, ele aparece aqui com cena e roteiro.'),
     aprovar: () => vLista(['aprovar'], 'Aprovar', 'Esperando seu <em>sim</em>', 'Nada é publicado sem a sua aprovação expressa.', 'Nada aguardando', 'Crie um conteúdo ou monte a semana para receber propostas.'),
     prontos: () => vLista(['pronto', 'agendado'], 'Prontos', 'Arquivos para <em>publicar</em>', 'Baixe os arquivos, copie a legenda e publique.', 'Nenhum arquivo pronto', 'Aprove conteúdos para que as artes finais apareçam aqui.'),
-    calendario: vCalendario, diretor: vDiretor, resultados: vResultados, vendas: vVendas, marca: vMarca
+    calendario: vCalendario, diretor: vDiretor, resultados: vResultados, vendas: vVendas, marca: vMarca, conversa: vConversa
   }[v]();
   $('#app').innerHTML = html;
   $('#app').querySelectorAll('select[data-serie]').forEach(sel => sel.addEventListener('change', async () => {
@@ -724,6 +738,12 @@ const ACTIONS = {
   },
   trocarMarca: () => { if (S.isOwner === false) return; try { localStorage.setItem('central-marca', MARCA === 'nc' ? 'nubia' : 'nc'); } catch (e) {} location.reload(); },
   criar: (c, b) => openCreate({ brief: b.dataset.brief || '', radarId: b.dataset.radar || null }),
+  enviarMensagem: async () => {
+    if (!needDb()) return; const t = ($('#cv-txt') || {}).value || ''; if (!t.trim()) { toast('Escreva a mensagem'); return; }
+    let nome = ''; try { const me = S.user && S.user.me ? await S.user.me() : null; nome = (me && me.name) || ''; } catch (e) {}
+    await col('mensagens').add({ at: now(), autor: 'equipe', nome: nome || (S.isOwner ? 'Núbia' : 'Equipe'), texto: t.trim(), status: 'novo', marca: MARCA_NOME });
+    $('#cv-txt').value = ''; toast('Mensagem enviada ao diretor');
+  },
   buscarTrends: async (c, b) => {
     let ult = 0; try { ult = +localStorage.getItem('central-trends-ult') || 0; } catch (e) {}
     if (Date.now() - ult < 30 * 60 * 1000) { toast('Busca já iniciada há pouco. Os trends aparecem no Radar em até 10 minutos.'); return; }
@@ -1239,6 +1259,8 @@ function openVideo(c) {
     ${isReel7 ? `<p class="small">A Central monta o Reel final: recorta em 1080x1920, usa os primeiros 7 segundos, aplica a frase com a identidade visual e tira o áudio original (a trilha você escolhe no Instagram, que é licenciada).</p>`
       : `<p class="small">O vídeo fica guardado junto com o roteiro e a capa. Edição automática de Reel falado (cortes, legendas queimadas, capa) ainda não roda no celular: hoje ela é feita pela produção no servidor. Por enquanto, use o .srt revisável e os cortes sugeridos no seu editor.</p>`}
     ${(() => { const fs = (c.files || []).filter(f => f.grupo === 'bruto'); return fs.length && !c.videoCompleto ? `<p class="small"><strong>Já guardei ${fs.length} parte(s), até ${Math.floor((fs[fs.length - 1].fim || 0) / 60)} min.</strong> Escolha o mesmo vídeo que eu continuo de onde parou.</p>` : ''; })()}
+    ${isReel7 ? '' : `<label for="vd-quem">Quem gravou<select id="vd-quem">${(MARCA === 'nc' ? EQUIPE_NC : ['Núbia', 'Outra pessoa']).map(n => `<option ${c.payload && c.payload.advogado && n.startsWith(String(c.payload.advogado).split(' ')[0]) ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <label for="vd-obs">Seguiu o roteiro? O que mudou na fala? (para o diretor editar certo)<textarea id="vd-obs" placeholder="Ex.: seguiu o roteiro, mas trocou o exemplo do uniforme por quebra de caixa"></textarea></label>`}
     <label for="vd-file">Vídeo<input type="file" id="vd-file" accept="video/*"></label>
     <p class="small muted">${isReel7 ? 'Limite de envio: 20 MB. No iPhone, grave em 1080p (Ajustes, Câmera, Gravar Vídeo) para caber.' : 'Vídeo grande? Pode mandar: a Central comprime aqui no aparelho e envia em partes. Leva o mesmo tempo do vídeo; deixe a tela ligada e a Central aberta até terminar.'}</p>
     <div class="row"><button class="btn primary" id="vd-ok">${isReel7 ? 'Montar Reel' : 'Enviar'}</button></div><p class="small" id="vd-msg"></p>`, (el) => {
@@ -1279,6 +1301,7 @@ function openVideo(c) {
           });
           await col('contents').doc(c.id).update({ files: lista, status: 'gravar', videoRecebido: now(), videoCompleto: true, updatedAt: now() });
           log('enviou vídeo em partes', `${plain(c.title)} (${r.n})`);
+          await avisarDiretorVideo(c, el);
           closeSheet(); toast(`Vídeo guardado em ${r.n} parte(s). Pode me avisar no chat.`); return;
         }
         if (blob.size > 20 * 1024 * 1024) throw new Error(`O arquivo tem ${(blob.size / 1048576).toFixed(1)} MB. O limite é 20 MB.`);
@@ -1287,10 +1310,19 @@ function openVideo(c) {
         const files = [...(c.files || []).filter(f => f.name !== name), { name, url: up.url, assetId: up.id, kind: 'video', w: 1080, h: 1920 }];
         await col('contents').doc(c.id).update({ files, status: isReel7 ? 'pronto' : 'gravar', videoRecebido: now(), updatedAt: now() });
         log(isReel7 ? 'montou reel' : 'enviou vídeo', plain(c.title));
+        if (!isReel7) await avisarDiretorVideo(c, el);
         closeSheet(); toast(isReel7 ? 'Reel montado. Está em Prontos.' : 'Vídeo guardado.');
       } catch (e) { msg.textContent = e.message || 'Não consegui processar este vídeo.'; btn.disabled = false; }
     });
   });
+}
+async function avisarDiretorVideo(c, el) {
+  try {
+    const quem = ($('#vd-quem', el) || {}).value || ''; const obs = (($('#vd-obs', el) || {}).value || '').trim();
+    let nome = ''; try { const me = S.user && S.user.me ? await S.user.me() : null; nome = (me && me.name) || ''; } catch (e) {}
+    await col('mensagens').add({ at: now(), autor: 'equipe', nome: nome || (S.isOwner ? 'Núbia' : 'Equipe'), tipo: 'video', contentId: c.id, titulo: plain(c.title), quem, texto: obs || 'Vídeo enviado. Sem observação: seguiu o roteiro.', status: 'novo', marca: MARCA_NOME });
+    if (quem) await col('contents').doc(c.id).update({ gravadoPor: quem, obsGravacao: obs });
+  } catch (e) {}
 }
 // comprime vídeo grande no aparelho (canvas + MediaRecorder, com áudio) e fecha uma parte a cada ~16 MB
 // (o Safari ignora o bitrate pedido, então o corte é por tamanho). Cada parte sobe assim que fecha;
