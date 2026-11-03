@@ -1,0 +1,68 @@
+Hoje vamos fazer 4 blocos, nesta ordem: e-mails da aula (Mailchimp), formulário da aula (Mailchimp), automação AULA (ManyChat) e campanha de anúncio (Meta). Regras para tudo: eu digito senhas e códigos; tokens e chaves nunca no chat; não envie, não agende, não ative e não publique nada sem me mostrar a tela e eu responder "ok"; não apague nada; não mexa em outras campanhas, automações ou listas; me diga o resultado de cada passo em 1 linha. Se algo travar, pule para o próximo bloco e me avise no fim.
+
+========== BLOCO A · E-MAILS DA AULA (MAILCHIMP) ==========
+A1) Abra a pasta de campanhas "Aula de IA 10/11 e trilhas LexUp" e confirme que os 7 rascunhos continuam como rascunho (nenhum enviado ou agendado).
+A2) Nos 4 rascunhos abaixo, confira: (a) o único botão é "Quero minha vaga" e leva para https://eepurl.com/pnjbcz2JOk; (b) o texto está curto (4 linhas e a assinatura "Núbia"); (c) não aparece nenhum "[LINK DA INSCRIÇÃO]" nem texto entre colchetes; (d) o público é o indicado e EXCLUI a tag Cliente:
+   - "Aula gratuita de IA no escritório": trilha-B, sem Cliente.
+   - "Boas-vindas à trilha A2": trilha-A2 (e kit-garimpo, se já estiver assim), sem Cliente.
+   - "Trilha A1 — Plano Prático 30 Dias": trilha-A1, sem Cliente.
+   - "Trilha A3 — Marketing Jurídico Organizado": trilha-A3, sem Cliente.
+   Se o rodapé estiver em inglês ("View email in browser", "update your preferences", "unsubscribe"), troque por "Ver no navegador", "atualizar preferências" e "cancelar inscrição", se o editor permitir.
+A3) Envie um e-mail de TESTE de cada um dos 4 para nubiacittyadvogada@gmail.com. Me avise quando enviar.
+A4) PARE. Espere eu responder "ok, agenda".
+A5) Depois do meu ok, agende para QUARTA, 04/11 (horário de Brasília): Aula gratuita às 9h; A2 às 10h; A1 às 12h; A3 às 14h. Me mostre a tela de cada agendamento e quantos contatos cada um vai receber.
+A6) NÃO agende "Amanhã, 20h, ao vivo", "É hoje, às 20h" nem "Workshop Híbrido de IA". Eles ficam como rascunho (o "É hoje" ainda precisa do link da sala).
+
+========== BLOCO B · FORMULÁRIO DA AULA (MAILCHIMP) ==========
+B1) Abra o formulário hospedado da aula (o do link https://eepurl.com/pnjbcz2JOk) no construtor de formulários.
+B2) Troque o subtítulo para: "Terça, 10/11, às 20h, com Núbia Citty. Para quem tem um negócio e não tem tempo de pensar no marketing."
+B3) Troque os 3 tópicos para: "A semana de posts saindo pronta em minutos" / "Como a IA escreve com a sua voz, e não com cara de robô" / "Como aparecer todo dia sem virar refém do Instagram".
+B4) Troque o rótulo do campo "Área de atuação" para "Profissão ou tipo de negócio".
+B5) Não mexa na tag AULA-IA-1011, no consentimento nem no botão. Salve e me mostre o formulário publicado.
+
+========== BLOCO C · AUTOMAÇÃO "AULA" (MANYCHAT) ==========
+C1) Abra o ManyChat da conta @nubiacitty e me mostre as automações ativas. Confirme que a KIT está ativa e que não existe outra usando a palavra AULA. Não mexa na KIT nem na GARIMPO.
+C2) Crie uma automação "Comentário no post": qualquer post ou Reel (todos, inclusive futuros); palavra-chave AULA (aceitar "aula" e "Aula"; o comentário precisa conter a palavra). Resposta pública alternando entre: "Te mandei na DM 💌" / "Chegou na sua DM!" / "Corre na DM que o link está lá 🙌".
+C3) Mensagem na DM: "Oi! Que bom que você vem 🙌 A aula é online e gratuita, dia 10/11, às 20h. Você vai ver uma semana inteira de posts saindo pronta em minutos, com IA. Sua vaga é por aqui:" + botão "Quero minha vaga" para https://eepurl.com/pnjbcz2JOk + segunda mensagem: "Depois de se inscrever, o lembrete e o link da sala chegam no seu e-mail. Até lá!"
+C4) Adicione também o gatilho "Palavra-chave na DM" = AULA, com a mesma mensagem.
+C5) Marque quem passar pelo fluxo com a etiqueta "aula-10-11" (crie se não existir). Não peça e-mail dentro do ManyChat.
+C6) Me mostre a pré-visualização. Só ative quando eu disser "ativa".
+
+========== BLOCO D · CAMPANHA DA AULA (META, GERENCIADOR DE ANÚNCIOS) ==========
+Verba aprovada: R$ 280 no total, R$ 40 por dia, do momento da publicação até 09/11 às 23h59.
+D0) POLÍTICA DE PRIVACIDADE: procure uma página de política de privacidade em https://lexupsolucoesjuridicas.com.br e no site do escritório NC Advogados (tente /politica-de-privacidade, /privacidade e o rodapé). Me diga o link. Se não existir nenhuma, use o PLANO B do passo D2.
+D1) BAIXE OS CRIATIVOS (abra cada link e salve no computador). Base: https://raw.githubusercontent.com/nubiacittyadvogada-coder/Nc-insta/central-nubia-citty/prontos-para-publicar/2026-11-03-trafego-aula/
+   Arquivos: video-dentro-do-sistema.mp4, feed-A-tempo.png, story-A-tempo.png, feed-B-oab.png, story-B-oab.png, feed-C-itabira.png, story-C-itabira.png
+D2) CAMPANHA: objetivo Cadastros (Leads), local Formulário instantâneo, nome "Aula IA 10-11 | Cadastros". Orçamento no nível do conjunto (não CBO). Início imediato, fim 09/11 às 23h59. Posicionamentos Advantage+.
+   PLANO B (só sem política de privacidade): objetivo Tráfego, destino site https://eepurl.com/pnjbcz2JOk, otimização "Visualizações da página de destino". Mesmos conjuntos e anúncios.
+D3) FORMULÁRIO INSTANTÂNEO "Aula 10-11": tipo Mais volume. Título "Aula ao vivo e gratuita: o sistema de IA que planeja o meu marketing"; texto "Terça, 10/11, às 20h, online, com Núbia Citty. Você vai ver a semana de posts saindo pronta em minutos." Campos: Nome completo e E-mail (pré-preenchidos) e a pergunta "Você é:" com Advogado(a) / Empresário(a) / Profissional liberal / Outro. Política de privacidade: o link do D0. Tela final: "Vaga garantida! O link da aula chega no seu e-mail no dia 10/11." com botão "Ver o Instagram" para https://instagram.com/nubiacitty
+D4) CONJUNTOS (idade 25 a 60, Brasil salvo indicação):
+   A) "Brasil negócios", R$ 16/dia. Interesses: empreendedorismo, pequenas e médias empresas, marketing digital, Instagram para negócios, profissional liberal. Anúncios: Vídeo do sistema e Arte A.
+   B) "Brasil advogados", R$ 8/dia. Interesses: advocacia, advogado, Ordem dos Advogados do Brasil, direito. Anúncios: Vídeo do sistema e Arte B.
+   C) "Itabira e região", R$ 8/dia. Itabira, MG, raio de 50 km, sem interesses. Anúncios: Vídeo do sistema e Arte C.
+   D) "Quente", R$ 8/dia. Público personalizado de quem interagiu com o Instagram @nubiacitty nos últimos 60 dias. Anúncios: Vídeo do sistema, Arte A e Arte B.
+   Em todos: excluir o público personalizado de clientes, se existir (se não existir, me avise e siga).
+D5) ANÚNCIOS (Página e Instagram @nubiacitty, CTA "Cadastre-se"; desligue os aprimoramentos automáticos de texto e imagem, menos a música):
+   - Vídeo do sistema (video-dentro-do-sistema.mp4), com música instrumental animada da biblioteca da Meta. Título "Aula online e gratuita · 10/11, 20h". Texto:
+     "Você posta quando sobra tempo. E nunca sobra.
+     Na aula de 10/11, às 20h, você vê ao vivo a IA montar uma semana inteira de posts em minutos: o que postar, o texto e a arte. E aprende a fazer no seu negócio.
+     Online e gratuita."
+   - Arte A (feed-A-tempo no feed, story-A-tempo em stories e reels):
+     "Seu marketing depende do tempo que sobra. E nunca sobra.
+     Na aula de 10/11, às 20h, você aprende a deixar a sua semana de posts pronta em minutos, com IA.
+     Online e gratuita."
+   - Arte B (feed-B-oab / story-B-oab):
+     "Você posta, ninguém chama. E ainda tem medo de levar um processo ético.
+     Na aula de 10/11, às 20h, você aprende a planejar conteúdo com estratégia e dentro das regras da OAB.
+     Online e gratuita para advogados."
+   - Arte C (feed-C-itabira / story-C-itabira):
+     "Itabira e região: seu negócio ainda depende só de indicação?
+     Na aula de 10/11, às 20h, você aprende a usar IA para aparecer todo dia, sem virar refém do Instagram.
+     Online e gratuita."
+D6) Me mostre a tela de revisão (4 conjuntos, verbas e datas). Só publique quando eu disser "publica".
+
+========== BLOCO E · ROTINA DOS INSCRITOS DO ANÚNCIO (de 04/11 a 10/11, 1 vez por dia, só se o anúncio usar formulário instantâneo) ==========
+No Gerenciador de Anúncios, baixe os cadastros do formulário "Aula 10-11" (CSV) e importe no Mailchimp, público NC SOLUCOES EMPRESARIAIS LTDA, com a tag AULA-IA-1011, marcando "atualizar contatos existentes". Me diga quantos entraram.
+
+========== NO FIM ==========
+Me dê um resumo em lista: o que ficou agendado ou ativo (com horários e números de destinatários), o que está esperando o meu "ok", "ativa" ou "publica", e qualquer erro.
