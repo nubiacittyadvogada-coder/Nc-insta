@@ -139,9 +139,9 @@ const S = {
   db: null, assets: null, sample: null, downloads: null, user: null,
   contents: [], products: [], references: [], metrics: [], learning: [], series: [], reports: [], radar: [], log: [], mensagens: [],
   experiments: [], decisions: [], funnel: [], goals: null, dim: 'format',
-  brand: null, usage: null, rotina: null, rotinaMkt: null, loaded: false, offline: false, busy: {}
+  brand: null, usage: null, rotina: null, rotinaMkt: null, tiktok: null, loaded: false, offline: false, busy: {}
 };
-const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina'];
+const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina', 'tiktok'];
 const TYPE = { reel7: 'Reel 7s', reelFalado: 'Reel falado', carrossel: 'Carrossel', stories: 'Stories', estatico: 'Post' };
 const OBJ = { crescimento: 'Crescimento', autoridade: 'Autoridade', conversao: 'Conversão' };
 const OBJ_COLOR = { crescimento: 'var(--wine)', autoridade: 'var(--gold)', conversao: 'var(--ok)' };
@@ -246,6 +246,7 @@ async function boot() {
   col('settings').doc('usage').onSnapshot(d => { S.usage = d.exists ? d.data() : null; render(); });
   col('settings').doc('rotina').onSnapshot(d => { S.rotina = d.exists ? d.data() : null; render(); });
   col('settings').doc('rotinaMkt').onSnapshot(d => { S.rotinaMkt = d.exists ? d.data() : null; render(); }, () => {});
+  if (MARCA !== 'nc') col('settings').doc('estrategiaTiktok').onSnapshot(d => { S.tiktok = d.exists ? d.data() : null; render(); }, () => {});
   S.db.collection('settings').doc('buscaTrends').onSnapshot(d => { S.buscaTrends = d.exists ? d.data() : null; render(); }, () => {});
   setTimeout(() => { S.loaded = true; render(); }, 2500);
 }
@@ -264,7 +265,7 @@ function renderNav() {
   const v = view(); const n = (st) => S.contents.filter(c => c.status === st).length;
   const items = [['hoje', 'Hoje'], ['gravar', 'Gravar', n('gravar')], ['aprovar', 'Aprovar', n('aprovar')], ['prontos', 'Prontos'], ['mais', 'Mais']];
   $('#nav').innerHTML = items.map(([k, label, badge]) => {
-    const cur = k === v || (k === 'mais' && ['calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina'].includes(v));
+    const cur = k === v || (k === 'mais' && ['calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina', 'tiktok'].includes(v));
     return `<a href="${k === 'mais' ? '#' : '#' + k}" data-nav="${k}" ${cur ? 'aria-current="page"' : ''}>${ICON[k]}<span>${label}</span>${badge ? `<span class="badge">${badge}</span>` : ''}</a>`;
   }).join('');
 }
@@ -272,6 +273,7 @@ document.addEventListener('click', (e) => {
   const a = e.target.closest('[data-nav="mais"]');
   if (a) { e.preventDefault(); openSheet(`<h2>Mais</h2><div class="more">
     <a href="#conversa" data-close style="grid-column:1/-1"><b>Conversa com o diretor</b><span class="small muted">Avise o que subiu, peça ajustes e veja as respostas</span></a>
+    ${MARCA !== 'nc' ? `<a href="#tiktok" data-close style="grid-column:1/-1"><b>Estratégia TikTok</b><span class="small muted">Fases, formatos e funil dos produtos</span></a>` : ''}
     <a href="#rotina" data-close style="grid-column:1/-1"><b>Rotina do marketing</b><span class="small muted">O que postar e o que fazer em cada dia</span></a>
     <a href="#diretor" data-close style="grid-column:1/-1"><b>Diretor de marketing</b><span class="small muted">Metas, funil, experimentos e relatório semanal</span></a>
     <a href="#calendario" data-close><b>Calendário</b><span class="small muted">Programação das publicações</span></a>
@@ -651,9 +653,8 @@ function vConversa() {
     <div class="row"><button class="btn primary" data-act="enviarMensagem" ${S.db ? '' : 'disabled'}>Enviar</button></div></div>
   ${ms.length ? ms.map(linha).join('') : empty('Nenhuma mensagem ainda', 'Quando você enviar um vídeo, a Central já avisa o diretor por aqui.')}`;
 }
-function vRotina() {
-  const r = S.rotinaMkt;
-  if (!r) return `${header('Rotina', 'Rotina do <em>marketing</em>', '')}${empty('Rotina ainda não cadastrada', 'O diretor de marketing ainda não montou a rotina desta marca.')}`;
+function vRotina(r = S.rotinaMkt, eb = 'Rotina', tt = 'Rotina do <em>marketing</em>') {
+  if (!r) return `${header(eb, tt, '')}${empty('Ainda não cadastrado', 'O diretor de marketing ainda não montou isto para esta marca.')}`;
   const DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
   const hoje = DIAS[new Date().getDay()] === 'dom' ? 'sab' : DIAS[new Date().getDay()];
   const ancora = new Date((r.ancora || '2026-11-02') + 'T00:00:00');
@@ -668,8 +669,9 @@ function vRotina() {
     ${d.stories?.length ? `<div class="box"><span class="eyebrow">Stories</span>${lista(d.stories)}</div>` : ''}
     ${d.tarefas?.length ? `<div class="box"><span class="eyebrow">Tarefas</span>${lista(d.tarefas)}</div>` : ''}</div></details>`;
   const dHoje = (r.dias || []).find(d => d.dia === hoje);
-  return `${header('Rotina', 'Rotina do <em>marketing</em>', esc(r.subtitulo || ''))}
-  <div class="row"><span class="pill">Semana ${ab}</span>${rod ? `<span class="pill">NC Responde: ${esc(rod)}</span>` : ''}${r.atualizado ? `<span class="small muted">Atualizada em ${fmtDay(r.atualizado)}</span>` : ''}</div>
+  return `${header(eb, tt, esc(r.subtitulo || ''))}
+  <div class="row">${r.rodizio ? `<span class="pill">Semana ${ab}</span>` : ''}${rod ? `<span class="pill">NC Responde: ${esc(rod)}</span>` : ''}${r.atualizado ? `<span class="small muted">Atualizada em ${fmtDay(r.atualizado)}</span>` : ''}</div>
+  ${(r.secoes || []).map(x => `<div class="card"><h2>${esc(x.titulo)}</h2>${x.texto ? `<p class="small">${fill(x.texto)}</p>` : ''}${lista(x.itens)}</div>`).join('')}
   ${r.todoDia?.length ? `<div class="card"><h2>Todo dia</h2>${lista(r.todoDia)}</div>` : ''}
   ${dHoje ? `<section><h2>Hoje</h2>${dia(dHoje, true)}</section>` : ''}
   <section><h2>A semana</h2>${(r.dias || []).filter(d => d !== dHoje).map(d => dia(d, false)).join('')}</section>
@@ -722,7 +724,7 @@ function render() {
     gravar: () => vLista(['gravar'], 'Gravar', 'Roteiros para <em>gravar</em>', 'Grave, envie o vídeo e a Central prepara o restante do que já está integrado.', 'Nada para gravar', 'Quando você aprovar um Reel, ele aparece aqui com cena e roteiro.'),
     aprovar: () => vLista(['aprovar'], 'Aprovar', 'Esperando seu <em>sim</em>', 'Nada é publicado sem a sua aprovação expressa.', 'Nada aguardando', 'Crie um conteúdo ou monte a semana para receber propostas.'),
     prontos: () => vLista(['pronto', 'agendado'], 'Prontos', 'Arquivos para <em>publicar</em>', 'Baixe os arquivos, copie a legenda e publique.', 'Nenhum arquivo pronto', 'Aprove conteúdos para que as artes finais apareçam aqui.'),
-    calendario: vCalendario, diretor: vDiretor, resultados: vResultados, vendas: vVendas, marca: vMarca, conversa: vConversa, rotina: vRotina
+    calendario: vCalendario, diretor: vDiretor, resultados: vResultados, vendas: vVendas, marca: vMarca, conversa: vConversa, rotina: () => vRotina(), tiktok: () => vRotina(S.tiktok, 'TikTok', 'Estratégia <em>TikTok</em>')
   }[v]();
   $('#app').innerHTML = html;
   $('#app').querySelectorAll('select[data-serie]').forEach(sel => sel.addEventListener('change', async () => {
