@@ -61,6 +61,13 @@ main > *, section > *, .card > *, .box > * { min-width: 0; max-width: 100% }
 .strip .ov img { height: 100%; border: 0; border-radius: 0; background: transparent }
 .strip video { height: 220px; border-radius: 8px; flex: 0 0 auto; background: #000 }
 .quote { font: 600 19px/1.3 var(--serif) }
+.tp { position: fixed; inset: 0; z-index: 100; background: #000; color: #fff; display: grid; grid-template-rows: auto minmax(0, 1fr) }
+.tp-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: calc(10px + env(safe-area-inset-top, 0px)) 12px 10px; background: #111 }
+.tp-bar .btn { background: #222; color: #fff; border-color: #333 } .tp-bar .btn.primary { background: var(--wine); border-color: var(--wine) }
+.tp-vel { color: #aaa; min-width: 44px; text-align: center }
+.tp-scroll { overflow-y: auto; padding: 35vh 22px 70vh }
+.tp-txt { font: 600 40px/1.35 var(--sans); max-width: 900px; margin: 0 auto }
+.tp-txt p { margin: 0 0 1em; overflow-wrap: anywhere }
 .quote em { color: var(--wine) }
 .box { background: var(--surface2); border-radius: 10px; padding: 12px; display: grid; gap: 6px; min-width: 0 }
 .box p, .card p { overflow-wrap: anywhere }
@@ -325,6 +332,7 @@ function detail(c) {
   }
   if (c.type === 'reelFalado') {
     out.push(`<div class="box"><span class="eyebrow">Gancho · 3 primeiros segundos</span><p class="quote" style="font-size:17px">${esc(p.gancho)}</p></div>`);
+    if ((p.roteiro || []).length) out.push(`<div class="row"><button class="btn small" data-tp="${esc(c.id)}">Copiar para teleprompter</button><button class="btn ghost small" data-tpopen="${esc(c.id)}">Abrir teleprompter</button></div>`);
     out.push(`<details><summary>Roteiro completo (${p.duracao || 60}s)</summary><div class="script" style="margin-top:10px">${(p.roteiro || []).map(b => `<div><span>${b.inicio}–${b.fim}s</span><p>${esc(b.fala)}</p></div>`).join('')}</div></details>`);
     if (p.orientacoes?.length) out.push(`<details><summary>Como gravar</summary><ul>${p.orientacoes.map(o => `<li>${esc(o)}</li>`).join('')}</ul></details>`);
     if (p.cortes?.length) out.push(`<details><summary>Cortes sugeridos</summary><ul>${p.cortes.map(o => `<li>${esc(o)}</li>`).join('')}</ul></details>`);
@@ -695,8 +703,41 @@ function render() {
   }));
 }
 
+// ================= teleprompter =================
+function textoTeleprompter(c) {
+  const p = c?.payload || {};
+  return (p.roteiro || []).map(b => plain(b.fala || '').replace(/\[(?!SUA )[^\]]*\]/g, '').replace(/\s{2,}/g, ' ').trim()).filter(Boolean).join('\n\n');
+}
+function abrirTeleprompter(c) {
+  const t = textoTeleprompter(c); if (!t) return;
+  const box = document.createElement('div'); box.className = 'tp';
+  box.innerHTML = `<div class="tp-bar"><button class="btn small" data-tpx="fechar">Fechar</button><button class="btn small primary" data-tpx="play">Iniciar</button><button class="btn small" data-tpx="lento" aria-label="Mais devagar">−</button><span class="tp-vel small">vel. 3</span><button class="btn small" data-tpx="rapido" aria-label="Mais rápido">+</button><button class="btn small" data-tpx="menor" aria-label="Letra menor">A−</button><button class="btn small" data-tpx="maior" aria-label="Letra maior">A+</button></div>
+    <div class="tp-scroll"><div class="tp-txt">${t.split('\n\n').map(x => `<p>${esc(x)}</p>`).join('')}</div></div>`;
+  document.body.appendChild(box); document.body.style.overflow = 'hidden';
+  const sc = box.querySelector('.tp-scroll'), txt = box.querySelector('.tp-txt'), vel = box.querySelector('.tp-vel'), play = box.querySelector('[data-tpx="play"]');
+  let v = 3, fs = 40, on = false, raf = 0, last = 0, acc = 0;
+  try { fs = +localStorage.getItem('tp-fs') || 40; v = +localStorage.getItem('tp-v') || 3; } catch (e) {}
+  const apply = () => { txt.style.fontSize = fs + 'px'; vel.textContent = 'vel. ' + v; };
+  const step = (ts) => { if (!on) return; if (last) { acc += (ts - last) * v * 0.012; const px = Math.floor(acc); if (px) { sc.scrollTop += px; acc -= px; } } last = ts;
+    if (sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2) { on = false; play.textContent = 'Recomeçar'; return; } raf = requestAnimationFrame(step); };
+  const save = () => { try { localStorage.setItem('tp-fs', fs); localStorage.setItem('tp-v', v); } catch (e) {} };
+  apply();
+  box.addEventListener('click', (e) => { const a = e.target.closest('[data-tpx]')?.dataset.tpx;
+    if (!a) { if (e.target.closest('.tp-scroll')) play.click(); return; }
+    if (a === 'fechar') { on = false; cancelAnimationFrame(raf); box.remove(); document.body.style.overflow = ''; return; }
+    if (a === 'play') { if (play.textContent === 'Recomeçar') sc.scrollTop = 0; on = !on; play.textContent = on ? 'Pausar' : 'Continuar'; last = 0; if (on) raf = requestAnimationFrame(step); }
+    if (a === 'lento') v = Math.max(1, v - 1); if (a === 'rapido') v = Math.min(10, v + 1);
+    if (a === 'menor') fs = Math.max(24, fs - 4); if (a === 'maior') fs = Math.min(72, fs + 4);
+    apply(); save(); });
+}
+
 // ================= ações =================
 document.addEventListener('click', async (e) => {
+  const tp = e.target.closest('[data-tp]');
+  if (tp) { const t = textoTeleprompter(S.contents.find(x => x.id === tp.dataset.tp));
+    try { await navigator.clipboard.writeText(t); toast('Roteiro copiado. Cole no app de teleprompter'); } catch (err) { openSheet(`<h2>Texto do teleprompter</h2><textarea id="cp-tp" rows="10">${esc(t)}</textarea><p class="small muted">Selecione e copie.</p>`, el => $('#cp-tp', el).select()); } return; }
+  const tpo = e.target.closest('[data-tpopen]');
+  if (tpo) { abrirTeleprompter(S.contents.find(x => x.id === tpo.dataset.tpopen)); return; }
   const cp = e.target.closest('[data-copy]');
   if (cp) { const c = S.contents.find(x => x.id === cp.dataset.copy); const t = plain(c?.payload?.legenda || '') + (c?.payload?.cta ? '\n\n' + c.payload.cta : '');
     try { await navigator.clipboard.writeText(t); toast('Legenda copiada'); } catch (err) { openSheet(`<h2>Legenda</h2><textarea id="cp-legenda" rows="8">${esc(t)}</textarea><p class="small muted">Selecione e copie.</p>`, el => $('#cp-legenda', el).select()); } return; }
