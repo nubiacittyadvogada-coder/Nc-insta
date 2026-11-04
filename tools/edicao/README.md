@@ -28,3 +28,11 @@ Referências servem para medir qualidade, nunca para copiar. Proibido: carimbo i
 ## Versão NC Advogados (biblioteca-modelos-nc.html)
 Mesmos movimentos, cores do NC: preto #111111, off-white #F3F1EE, bege #D8C4B6, apoio #E6DAD1. Modelos: ficha "NC ADVOGADOS" com nome e cargo do advogado (abertura obrigatória), ficha da série com aba "EP 01" e linha do tempo, contador com grifo bege, etiquetas claras numeradas, tipografia empilhada em caixas pretas, faixa preta "ATENÇÃO" com texto datilografado.
 Advogado sentado à mesa: somar `mascara-mesa.png` à máscara (blend lighten) para manter a mesa nítida e evitar ruído do recorte.
+
+## Absorvido das edições da Núbia (04/11/2026)
+1. Legenda palavra a palavra em blocos de 1 a 3 palavras, no centro, na altura do peito, com degradê escuro embaixo para leitura. Mantemos o grifo vinho só nas palavras-chave.
+2. Zoom de corte a cada 3 a 5 segundos (100%, 115%, 130%), alternando plano aberto e fechado, inclusive close extremo no gancho.
+3. Gancho visual com objeto ou ação no primeiro segundo (ex.: o celular tocando).
+4. Imagens de apoio ilustrando a frase (pessoa ao telefone em pânico, mãos digitando, audiência), de 1 a 2 segundos.
+5. Transição por desfoque e flash branco curto. Fora: transição de grade ou glitch, que briga com a identidade premium.
+Regras novas: nada de imagem de autoridade ou pessoa real identificável (ministros, juízes, sessões reais) nem banco de imagens sem licença; preferir imagens de apoio gravadas pela equipe (rotina da Karol) ou de banco com licença comercial. Sempre manter, mesmo com esse ritmo: texto do gancho no topo nos 3 primeiros segundos, ficha de nome e cargo, CTA final e @.
