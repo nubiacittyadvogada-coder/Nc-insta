@@ -1337,7 +1337,7 @@ function openVideo(c) {
     ${isReel7 ? '' : `<label for="vd-quem">Quem gravou<select id="vd-quem">${(MARCA === 'nc' ? EQUIPE_NC : ['Núbia', 'Outra pessoa']).map(n => `<option ${c.payload && c.payload.advogado && n.startsWith(String(c.payload.advogado).split(' ')[0]) ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
     <label for="vd-obs">Seguiu o roteiro? O que mudou na fala? (para o diretor editar certo)<textarea id="vd-obs" placeholder="Ex.: seguiu o roteiro, mas trocou o exemplo do uniforme por quebra de caixa"></textarea></label>`}
     <label for="vd-file">Vídeo<input type="file" id="vd-file" accept="video/*"></label>
-    <p class="small muted">${isReel7 ? 'Limite de envio: 20 MB. No iPhone, grave em 1080p (Ajustes, Câmera, Gravar Vídeo) para caber.' : 'Vídeo grande? Pode mandar: a Central comprime aqui no aparelho e envia em partes. Leva o mesmo tempo do vídeo; deixe a tela ligada e a Central aberta até terminar.'}</p>
+    <p class="small muted">${isReel7 ? 'Limite de envio: 20 MB. No iPhone, grave em 1080p (Ajustes, Câmera, Gravar Vídeo) para caber.' : '<strong>Antes de enviar, corte o vídeo no app Fotos</strong> (Editar, arrastar o início e o fim) deixando só a tomada boa: o envio leva o mesmo tempo do vídeo, então 1 minuto cortado sobe em 1 minuto, e 5 minutos brutos levam 5. Deixe a Central aberta na tela até aparecer \'Vídeo guardado\'. Se parar no meio, escolha o mesmo vídeo de novo que eu continuo de onde parou.'}</p>
     <div class="row"><button class="btn primary" id="vd-ok">${isReel7 ? 'Montar Reel' : 'Enviar'}</button></div><p class="small" id="vd-msg"></p>`, (el) => {
     $('#vd-ok', el).addEventListener('click', async (ev) => {
       const file = $('#vd-file', el).files[0]; const msg = $('#vd-msg', el);
@@ -1365,6 +1365,10 @@ function openVideo(c) {
           const feitas = lista.filter(f => f.grupo === 'bruto' && f.fonte === fonte).sort((x, y) => x.parte - y.parte);
           if (!feitas.length) lista = lista.filter(f => f.grupo !== 'bruto');
           const inicioSeg = feitas.length ? feitas[feitas.length - 1].fim || 0 : 0;
+          // mantém a tela acesa durante a compressão (iPhone com iOS 16.4+ e Android) e retoma se a pessoa voltar para a Central
+          let wl = null; const pedirTela = async () => { try { if (navigator.wakeLock && document.visibilityState === 'visible') wl = await navigator.wakeLock.request('screen'); } catch (e) {} };
+          const aoVoltar = () => { if (document.visibilityState === 'visible') { pedirTela(); if (v.paused && !v.ended) v.play().catch(() => {}); } };
+          await pedirTela(); document.addEventListener('visibilitychange', aoVoltar);
           const r = await comprimirEmPartes(v, tocando, ac, {
             jaFeitas: feitas.length, inicioSeg,
             onMsg: (t) => { msg.innerHTML = `<span class="spin"></span> ${t}`; },
@@ -1374,6 +1378,7 @@ function openVideo(c) {
               await col('contents').doc(c.id).update({ files: lista, updatedAt: now() });
             }
           });
+          document.removeEventListener('visibilitychange', aoVoltar); try { wl && wl.release(); } catch (e) {}
           await col('contents').doc(c.id).update({ files: lista, status: 'gravar', videoRecebido: now(), videoCompleto: true, updatedAt: now() });
           log('enviou vídeo em partes', `${plain(c.title)} (${r.n})`);
           await avisarDiretorVideo(c, el);
