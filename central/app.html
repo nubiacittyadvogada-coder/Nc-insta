@@ -1332,13 +1332,32 @@ function openVideo(c) {
   const isReel7 = c.type === 'reel7';
   openSheet(`<h2>Enviar vídeo</h2><p class="small muted">${esc(plain(c.title))}</p>
     ${isReel7 ? `<p class="small">A Central monta o Reel final: recorta em 1080x1920, usa os primeiros 7 segundos, aplica a frase com a identidade visual e tira o áudio original (a trilha você escolhe no Instagram, que é licenciada).</p>`
-      : `<p class="small">O vídeo fica guardado junto com o roteiro e a capa. Edição automática de Reel falado (cortes, legendas queimadas, capa) ainda não roda no celular: hoje ela é feita pela produção no servidor. Por enquanto, use o .srt revisável e os cortes sugeridos no seu editor.</p>`}
+      : `<p class="small"><strong>Mande o vídeo bruto, do jeito que gravou, com erros e tudo.</strong> Os cortes, legendas e animações são feitos pelo diretor. Você não precisa editar nada.</p>`}
     ${(() => { const fs = (c.files || []).filter(f => f.grupo === 'bruto'); return fs.length && !c.videoCompleto ? `<p class="small"><strong>Já guardei ${fs.length} parte(s), até ${Math.floor((fs[fs.length - 1].fim || 0) / 60)} min.</strong> Escolha o mesmo vídeo que eu continuo de onde parou.</p>` : ''; })()}
     ${isReel7 ? '' : `<label for="vd-quem">Quem gravou<select id="vd-quem">${(MARCA === 'nc' ? EQUIPE_NC : ['Núbia', 'Outra pessoa']).map(n => `<option ${c.payload && c.payload.advogado && n.startsWith(String(c.payload.advogado).split(' ')[0]) ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
     <label for="vd-obs">Seguiu o roteiro? O que mudou na fala? (para o diretor editar certo)<textarea id="vd-obs" placeholder="Ex.: seguiu o roteiro, mas trocou o exemplo do uniforme por quebra de caixa"></textarea></label>`}
+    ${isReel7 ? '' : `<div class="box" style="margin:10px 0"><p class="small"><strong>Jeito mais fácil (recomendado): pelo Google Drive.</strong> No Fotos, abra o vídeo, toque em Compartilhar, escolha Drive e salve na pasta da Central. No Drive, toque nos três pontinhos do vídeo, Compartilhar, Acesso geral: Qualquer pessoa com o link, e Copiar link. Cole aqui. O Drive sobe sozinho, pode bloquear o celular.</p>
+    <label for="vd-link">Link do vídeo no Drive<input type="url" id="vd-link" placeholder="https://drive.google.com/file/d/..."></label>
+    <div class="row"><button class="btn primary" id="vd-link-ok">Enviar link</button></div><p class="small" id="vd-link-msg"></p></div>
+    <p class="small muted">Ou envie o arquivo direto por aqui (vídeos curtos):</p>`}
     <label for="vd-file">Vídeo<input type="file" id="vd-file" accept="video/*"></label>
     <p class="small muted">${isReel7 ? 'Limite de envio: 20 MB. No iPhone, grave em 1080p (Ajustes, Câmera, Gravar Vídeo) para caber.' : '<strong>Antes de enviar, corte o vídeo no app Fotos</strong> (Editar, arrastar o início e o fim) deixando só a tomada boa: o envio leva o mesmo tempo do vídeo, então 1 minuto cortado sobe em 1 minuto, e 5 minutos brutos levam 5. Deixe a Central aberta na tela até aparecer \'Vídeo guardado\'. Se parar no meio, escolha o mesmo vídeo de novo que eu continuo de onde parou.'}</p>
     <div class="row"><button class="btn primary" id="vd-ok">${isReel7 ? 'Montar Reel' : 'Enviar'}</button></div><p class="small" id="vd-msg"></p>`, (el) => {
+    const lk = $('#vd-link-ok', el);
+    if (lk) lk.addEventListener('click', async (ev) => {
+      const url = ($('#vd-link', el).value || '').trim(); const m = $('#vd-link-msg', el);
+      if (!/^https:\/\/(drive|docs)\.google\.com\//.test(url)) { m.textContent = 'Cole o link do Google Drive (começa com https://drive.google.com).'; return; }
+      if (!needDb()) { m.textContent = 'Envio disponível apenas pelo claude.ai.'; return; }
+      ev.currentTarget.disabled = true; m.innerHTML = '<span class="spin"></span> Enviando…';
+      try {
+        const files = [...(c.files || []).filter(f => f.grupo !== 'bruto'), { name: `${c.slug || 'video'}-bruto-drive`, url, kind: 'video', grupo: 'bruto', fonte: 'drive' }];
+        await col('contents').doc(c.id).update({ files, status: 'gravar', videoRecebido: now(), videoCompleto: true, updatedAt: now() });
+        log('enviou link do vídeo', plain(c.title));
+        const o = $('#vd-obs', el); if (o) o.value = `${(o.value || '').trim()}${o.value && o.value.trim() ? ' ' : ''}[Link do Drive: ${url}]`;
+        await avisarDiretorVideo(c, el);
+        closeSheet(); toast('Link enviado. O diretor baixa e edita.');
+      } catch (e) { m.textContent = e.message || 'Não consegui salvar o link.'; ev.currentTarget.disabled = false; }
+    });
     $('#vd-ok', el).addEventListener('click', async (ev) => {
       const file = $('#vd-file', el).files[0]; const msg = $('#vd-msg', el);
       if (!file) { msg.textContent = 'Escolha o vídeo primeiro.'; return; }
