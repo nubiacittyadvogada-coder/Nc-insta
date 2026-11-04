@@ -71,3 +71,11 @@ Modelo: overlay_min.py (configs a, b, jr como exemplo). Regras:
 3. Tamanhos: gancho 62px em frase normal (não maiúsculas), legenda Archivo 600 54px em frase normal, nome 40px, cargo 16px espaçado, número de lista 130px.
 4. Linha divisória da tela dividida com 4px, etiqueta 18px sem fundo. Flash a 30%.
 5. CTA em duas linhas (frase + itálico) e @ pequeno embaixo.
+
+## PADRÃO OFICIAL: Estética A (aprovada pela Núbia em 04/11/2026, vale para pessoal e NC)
+Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os ajustes anteriores de tipografia.
+- Cada texto em UMA família só. Nunca misturar sem serifa pesada com itálico serifado na mesma frase.
+- Títulos (gancho, CTA, nome, título de lista, frase da série): Bodoni Moda 400, com o itálico da MESMA família no destaque. Gancho 74px, CTA 62px, nome 46px.
+- Legendas e etiquetas: Archivo 500 (legenda 48px em frase normal; etiquetas 15 a 18px em maiúsculas espaçadas).
+- Sem caixas, tarjas ou grifos coloridos. Texto branco com sombra suave.
+- Uma camada por vez: gancho sozinho até 3s, nome depois (nunca sobre imagem de apoio), sem legenda no gancho e no CTA.
