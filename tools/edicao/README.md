@@ -11,3 +11,13 @@
    - Cartão de vidro: recorte da área, `gblur=sigma=30`, máscara arredondada (raio 44), entra com fade e sobe 60 px.
 4. Tipografia: Archivo 700 (palavra grande, letter-spacing -11px), Bodoni Moda itálico 400 sobreposto, Archivo 600 em maiúsculas espaçadas (.42em) como subtítulo. Entrada letra a letra saindo do desfoque.
 5. Regras: nunca número, resultado ou depoimento que não seja real; texto fora do rosto (terço de cima ou de baixo).
+
+## Biblioteca de modelos (biblioteca-modelos.html)
+`node render_frames.js biblioteca-modelos.html PASTA_FRAMES QTD_FRAMES` (30 fps). Cada modelo tem uma janela de tempo em `setT(s)`; troque textos e tempos por vídeo.
+1. Cartão da série: "SÉRIE · NOME", etiqueta "DIA X · AGORA", fileira de episódios, barra de progresso com placar real.
+2. Contador: etiqueta + número em itálico serifado contando + sublinhado que se desenha.
+3. Etiquetas numeradas 01, 02, 03 (fumê), entrando uma a uma no lado direito.
+4. Tipografia empilhada: palavra em caixa preta / itálico / palavra em caixa preta, no terço de cima.
+5. Ícone de app que salta com rótulo.
+6. Carimbo inclinado com veredito (ex.: "DARIA CADEIA").
+Falta: legenda palavra a palavra (depende de transcrição) e vídeo dentro do vídeo (depende de clipes extras).

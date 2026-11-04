@@ -1,0 +1,71 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:A;font-weight:700;src:url("file:///home/user/Nc-insta/modelos/fontes/archivo-latin-700-normal.woff2")}
+@font-face{font-family:A;font-weight:600;src:url("file:///home/user/Nc-insta/modelos/fontes/archivo-latin-600-normal.woff2")}
+@font-face{font-family:B;font-style:italic;font-weight:400;src:url("file:///home/user/Nc-insta/modelos/fontes/bodoni-moda-latin-400-italic.woff2")}
+@font-face{font-family:B;font-style:italic;font-weight:600;src:url("file:///home/user/Nc-insta/modelos/fontes/bodoni-moda-latin-600-italic.woff2")}
+html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden;font-family:A;color:#fff}
+.g{position:absolute;opacity:0;will-change:transform,opacity}
+.fume{background:linear-gradient(135deg,rgba(18,14,15,.62),rgba(18,14,15,.42));border:2px solid rgba(255,255,255,.20);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 30px 80px rgba(0,0,0,.30);border-radius:40px}
+.eb{white-space:nowrap;font-weight:600;letter-spacing:.26em;font-size:26px;opacity:.85}
+.pill{display:inline-block;white-space:nowrap;border-radius:999px;padding:10px 22px;font-weight:600;font-size:26px;letter-spacing:.12em}
+/* 1 cartão da série */
+#serie{left:60px;top:1160px;width:960px;height:330px;padding:36px 40px;box-sizing:border-box}
+#serie .top{display:flex;justify-content:space-between;align-items:center}
+#serie .ag{background:rgba(255,255,255,.16)}
+.days{display:flex;gap:14px;margin-top:30px}
+.d{flex:1;height:104px;border-radius:18px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px;font-weight:600;font-size:24px;letter-spacing:.06em;opacity:.55}
+.d.on{opacity:1;background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.75)}
+.bar{margin-top:26px;height:10px;border-radius:9px;background:rgba(255,255,255,.15);overflow:hidden}.bar i{display:block;height:100%;background:#fff;width:0}
+.sc{display:flex;justify-content:space-between;margin-top:12px;font-weight:600;font-size:26px;letter-spacing:.08em}
+/* 2 contador */
+#cont{left:0;right:0;top:170px;text-align:center}
+#cont .pill{background:rgba(18,14,15,.55);border:1px solid rgba(255,255,255,.25)}
+#cont .n{font-family:B;font-style:italic;font-weight:600;font-size:200px;line-height:1.05;margin-top:10px;text-shadow:0 10px 50px rgba(0,0,0,.35)}
+#cont .u{width:420px;height:3px;background:rgba(255,255,255,.7);margin:6px auto 0;transform-origin:left}
+/* 3 etiquetas numeradas */
+#lista{right:70px;top:1180px;display:flex;flex-direction:column;align-items:flex-end;gap:18px;opacity:1}
+.tag{display:flex;align-items:center;gap:16px;padding:16px 28px;border-radius:999px;font-weight:600;font-size:38px;opacity:0}
+.tag b{font-size:26px;letter-spacing:.1em;opacity:.7}
+/* 4 tipografia empilhada */
+#stack{left:0;right:0;top:110px;text-align:center;line-height:.9}
+#stack .a{font-weight:700;font-size:130px;letter-spacing:-6px}
+#stack .b{font-family:B;font-style:italic;font-size:100px;margin:-8px 0}
+.box{display:inline-block;background:#111;color:#fff;padding:4px 30px 12px;border-radius:14px}
+/* 5 ícone de app */
+#app{left:50%;top:1230px;transform:translateX(-50%);text-align:center}
+.ic{width:200px;height:200px;border-radius:48px;background:linear-gradient(160deg,#8E3346,#5a1626);box-shadow:0 24px 60px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-family:B;font-style:italic;font-weight:600;font-size:120px;margin:0 auto}
+#app .lb{margin-top:18px;font-weight:600;font-size:34px;text-shadow:0 4px 20px rgba(0,0,0,.5)}
+/* 6 carimbo */
+#stamp{left:50%;top:1250px;padding:22px 46px;border:8px solid #1f3d2b;background:#f1ece2;color:#1f3d2b;font-weight:700;font-size:84px;letter-spacing:.02em;border-radius:14px;white-space:nowrap;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+</style></head><body>
+<div class="g fume" id="serie"><div class="top"><span class="eb">SÉRIE · 7 DIAS PARA LOTAR</span><span class="pill ag">DIA 1 · AGORA</span></div>
+<div class="days"><div class="d on">DIA 1</div><div class="d">DIA 2</div><div class="d">DIA 3</div><div class="d">DIA 4</div><div class="d">DIA 5</div><div class="d">DIA 6</div><div class="d">DIA 7</div></div>
+<div class="bar"><i id="bar"></i></div><div class="sc"><span id="sc1">0 INSCRITOS</span><span>META 50</span></div></div>
+<div class="g" id="cont"><span class="pill">META ATÉ TERÇA</span><div class="n" id="num">0</div><div class="u" id="und"></div></div>
+<div class="g" id="lista"><div class="tag fume"><b>01</b>três assuntos fixos</div><div class="tag fume"><b>02</b>um dia para criar</div><div class="tag fume"><b>03</b>a IA com a sua voz</div></div>
+<div class="g" id="stack"><div class="a"><span class="box">UMA</span></div><div class="b">oferta</div><div class="a"><span class="box">SÓ</span></div></div>
+<div class="g" id="app"><div class="ic">C</div><div class="lb">minha central</div></div>
+<div class="g" id="stamp">DARIA CADEIA</div>
+<script>
+const $=id=>document.getElementById(id);
+const e4=t=>{t=Math.min(1,Math.max(0,t));return 1-Math.pow(1-t,4)};
+const back=t=>{t=Math.min(1,Math.max(0,t));const c=1.7;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
+function win(s,a,b){const i=e4((s-a)/0.5),o=e4((s-(b-0.45))/0.45);return [i,o]}
+window.setT=(s)=>{
+ // 1 série 0-3.2
+ let [i,o]=win(s,0.1,3.2);const S=$('serie');S.style.opacity=i*(1-o);S.style.transform=`translateY(${(1-i)*60+o*30}px) scale(${0.96+0.04*i})`;
+ const p=e4((s-0.8)/1.2)*(8/50);$('bar').style.width=(p*100)+'%';$('sc1').textContent=Math.round(e4((s-0.8)/1.2)*8)+' INSCRITOS';
+ // 2 contador 3.3-6.4
+ [i,o]=win(s,3.3,6.4);const C=$('cont');C.style.opacity=i*(1-o);C.style.filter=`blur(${(1-i)*12+o*12}px)`;C.style.transform=`translateY(${(1-i)*40-o*40}px)`;
+ $('num').textContent=Math.round(e4((s-3.6)/1.4)*50);$('und').style.transform=`scaleX(${e4((s-4.2)/0.8)})`;
+ // 3 lista 6.5-9.6
+ const L=$('lista');L.style.opacity=1-e4((s-9.15)/0.45);[...L.children].forEach((t,k)=>{const q=e4((s-6.6-k*0.55)/0.45);t.style.opacity=q;t.style.transform=`translateX(${(1-q)*80}px)`});
+ // 4 empilhada 9.7-12.4
+ [i,o]=win(s,9.7,12.4);const K=$('stack');K.style.opacity=i*(1-o);[...K.children].forEach((r,k)=>{const q=e4((s-9.7-k*0.12)/0.5);r.style.transform=`translateY(${(1-q)*60}px)`;r.style.filter=`blur(${(1-q)*10+o*12}px)`});
+ // 5 app 12.5-14.5
+ [i,o]=win(s,12.5,14.5);const A=$('app');const bq=back((s-12.5)/0.5);A.style.opacity=Math.min(1,i*1.4)*(1-o);A.style.transform=`translateX(-50%) scale(${Math.max(0,bq)*(1-o*0.3)})`;
+ // 6 carimbo 14.6-16.5
+ const T=$('stamp');const st=(s-14.6)/0.28;const sq=Math.min(1,Math.max(0,st));T.style.opacity=s>14.6?1:0;
+ T.style.transform=`translateX(-50%) rotate(-6deg) scale(${s<14.6?2.4:2.4-1.4*e4(st)+ (st>1&&st<1.6?0.04*Math.sin((st-1)*20):0)})`;
+};
+</script></body></html>
