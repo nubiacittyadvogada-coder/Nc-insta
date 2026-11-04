@@ -248,6 +248,7 @@ async function boot() {
   col('settings').doc('rotinaMkt').onSnapshot(d => { S.rotinaMkt = d.exists ? d.data() : null; render(); }, () => {});
   col('settings').doc('estrategiaTiktok').onSnapshot(d => { S.tiktok = d.exists ? d.data() : null; render(); }, () => {});
   S.db.collection('settings').doc('buscaTrends').onSnapshot(d => { S.buscaTrends = d.exists ? d.data() : null; render(); }, () => {});
+  S.db.collection('settings').doc('radarDia').onSnapshot(d => { S.radarDia = d.exists ? d.data() : null; render(); }, () => {});
   setTimeout(() => { S.loaded = true; render(); }, 2500);
 }
 
@@ -415,7 +416,7 @@ function vHoje() {
   <section><h2>Publicar hoje</h2>${hoje.filter(c => !postaManual(c)).length ? hoje.filter(c => !postaManual(c)).map(c => contentCard(c, c.status === 'aprovar' ? 'aprovar' : c.status === 'gravar' ? 'gravar' : 'pronto')).join('') : empty('Nada agendado para hoje', 'Agende conteúdos prontos no Calendário ou crie um novo agora.')}</section>
   ${mixCard()}
   ${diretorResumo()}
-  <section><div class="row between"><h2>Radar de pautas</h2><button class="btn small" data-act="buscarTrends">Buscar trends agora</button></div>${statusTrends()}${S.radar.filter(r => !r.usado).length ? S.radar.filter(r => !r.usado).sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 6).map(radarCard).join('') : empty('Nenhuma pauta no radar ainda', 'A pesquisa diária de notícias e tendências alimenta esta lista quando a rotina automática estiver ativada.')}</section>
+  ${radarDiaBox()}<section><div class="row between"><h2>Radar de pautas</h2><button class="btn small" data-act="buscarTrends">Buscar trends agora</button></div>${statusTrends()}${S.radar.filter(r => !r.usado).length ? S.radar.filter(r => !r.usado).sort((a, b) => (b.data || '').localeCompare(a.data || '') || ((a.rank || 99) - (b.rank || 99))).slice(0, 8).map(radarCard).join('') : empty('Nenhuma pauta no radar ainda', 'A pesquisa diária de notícias e tendências alimenta esta lista quando a rotina automática estiver ativada.')}</section>
   <div class="card"><span class="eyebrow">Rotina automática</span>${rot ? `<p class="small">Última execução: <b>${new Date(rot.ultimaExecucao).toLocaleString('pt-BR')}</b>. ${esc(rot.resumo || '')}</p>` : `<p class="small">Ainda não ativada. Quando você autorizar, uma rotina diária pesquisa pautas, prepara propostas e deixa tudo aqui em Aprovar.</p>`}</div>`;
 }
 function statusTrends() {
@@ -425,9 +426,21 @@ function statusTrends() {
   if (b.status === 'erro') return `<p class="small" style="color:var(--danger,#a33)">A última busca falhou (${quando(b.terminadoEm || b.iniciadoEm)}): ${esc(b.resumo || '')}</p>`;
   return `<p class="small muted">Última busca: ${quando(b.terminadoEm)} · ${esc(String(b.pessoal ?? 0))} no seu perfil, ${esc(String(b.nc ?? 0))} no NC. ${esc(b.resumo || '')}</p>`;
 }
+function mdLite(t) {
+  return esc(t || '').split(/\n/).map(l => {
+    let x = l.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank" rel="noopener">fonte</a>');
+    if (/^#{1,3}\s/.test(l)) return `<h3 style="margin:14px 0 6px">${x.replace(/^#{1,3}\s/, '')}</h3>`;
+    if (/^[-•]\s/.test(l)) return `<div style="padding-left:14px">• ${x.replace(/^[-•]\s/, '')}</div>`;
+    return x.trim() ? `<p class="small" style="margin:4px 0">${x}</p>` : '';
+  }).join('');
+}
+function radarDiaBox() {
+  const r = S.radarDia; if (!r || !r.relatorio) return '';
+  return `<section><div class="row between"><h2>Radar do dia</h2><span class="small muted">${esc(r.data || '')}</span></div>${(r.top2 || []).length ? `<p class="small"><strong>Gravar hoje:</strong> ${r.top2.map(esc).join(' · ')}</p>` : ''}<details><summary class="small">Ler o radar completo (ranking, fichas e roteiros)</summary><div style="margin-top:8px">${mdLite(r.relatorio)}</div></details></section>`;
+}
 function radarCard(r) {
   return `<div class="card"><div class="row"><span class="pill ${r.tipo === 'fato' ? 'ok' : r.tipo === 'opiniao' || r.tipo === 'trend' ? 'wine' : ''}">${esc(r.tipo === 'fato' ? 'Fato verificado' : r.tipo === 'opiniao' ? 'Opinião' : r.tipo === 'trend' ? 'Trend (conferir no app)' : 'Interpretação')}</span>${r.potencial ? `<span class="pill">Potencial ${esc(r.potencial)}</span>` : ''}<span class="small muted">${esc(r.data || '')}</span></div>
-  <h3>${esc(r.tema)}</h3>${r.oportunidade ? `<p class="small">${esc(r.oportunidade)}</p>` : ''}${r.riscos ? `<p class="small muted">Riscos: ${esc(r.riscos)}</p>` : ''}
+  <h3>${r.rank ? `${esc(String(r.rank))}. ` : ''}${esc(r.tema)}</h3>${r.gancho ? `<p class="small"><strong>Gancho:</strong> ${esc(r.gancho)}</p>` : ''}${r.naoSignifica ? `<p class="small"><strong>O que não significa:</strong> ${esc(r.naoSignifica)}</p>` : ''}${r.notas ? `<p class="small muted">Debate ${esc(String(r.notas.debate ?? '-'))} · Autoridade ${esc(String(r.notas.autoridade ?? '-'))} · Crescimento ${esc(String(r.notas.crescimento ?? '-'))} · Comercial ${esc(String(r.notas.comercial ?? '-'))}${r.notas.produto ? ` (${esc(r.notas.produto)})` : ''}</p>` : ''}${r.oportunidade ? `<p class="small">${esc(r.oportunidade)}</p>` : ''}${r.riscos ? `<p class="small muted">Riscos: ${esc(r.riscos)}</p>` : ''}
   <div class="row between"><span class="small muted">${r.fonte ? `Fonte: ${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.fonte)}</a>` : esc(r.fonte)}` : ''}</span><button class="btn small" data-act="criar" data-radar="${esc(r.id)}" data-brief="${esc(r.tema + (r.oportunidade ? '. ' + r.oportunidade : ''))}">Transformar em conteúdo</button><button class="btn small ghost" data-act="radarDescartar" data-id="${esc(r.id)}">Descartar</button></div></div>`;
 }
 function mixCard() {
