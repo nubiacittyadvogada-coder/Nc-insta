@@ -24,3 +24,7 @@ Falta: legenda palavra a palavra (depende de transcrição) e vídeo dentro do v
 
 ## Identidade própria (decisão da Núbia, 04/11/2026)
 Referências servem para medir qualidade, nunca para copiar. Proibido: carimbo inclinado verde e creme, fileira de miniaturas de episódios, cartão de número com linha de gráfico, palavra solta flutuando ao lado do rosto. Assinatura nossa: vinho #6B1E2E, off-white #F6F1EA, Bodoni itálico, linguagem de ficha, grifo e sentença.
+
+## Versão NC Advogados (biblioteca-modelos-nc.html)
+Mesmos movimentos, cores do NC: preto #111111, off-white #F3F1EE, bege #D8C4B6, apoio #E6DAD1. Modelos: ficha "NC ADVOGADOS" com nome e cargo do advogado (abertura obrigatória), ficha da série com aba "EP 01" e linha do tempo, contador com grifo bege, etiquetas claras numeradas, tipografia empilhada em caixas pretas, faixa preta "ATENÇÃO" com texto datilografado.
+Advogado sentado à mesa: somar `mascara-mesa.png` à máscara (blend lighten) para manter a mesa nítida e evitar ruído do recorte.
