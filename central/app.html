@@ -372,7 +372,7 @@ function contentCard(c, mode) {
   const busy = S.busy[c.id];
   const acts = {
     aprovar: `<button class="btn primary" data-act="aprovar" data-id="${c.id}">Aprovar</button><button class="btn" data-act="editar" data-id="${c.id}">Editar</button><button class="btn" data-act="versao" data-id="${c.id}">Nova versão</button><button class="btn ghost danger" data-act="rejeitar" data-id="${c.id}">Rejeitar</button>`,
-    gravar: `<button class="btn primary" data-act="video" data-id="${c.id}">Enviar vídeo gravado</button><button class="btn" data-act="gravei" data-id="${c.id}">Já editei por fora</button>`,
+    gravar: `<button class="btn primary" data-act="video" data-id="${c.id}">Enviar vídeo gravado</button><button class="btn" data-act="gravei" data-id="${c.id}">Já editei por fora</button>${c.type === 'reelFalado' ? `<button class="btn" data-act="editarAnim" data-id="${c.id}">Editar com animações</button>` : ''}`,
     pronto: `<button class="btn primary" data-act="baixar" data-id="${c.id}">Baixar tudo</button><button class="btn" data-act="agendar" data-id="${c.id}">${c.scheduledFor ? 'Mudar data' : 'Agendar'}</button><button class="btn" data-act="publicado" data-id="${c.id}">Marcar publicado</button>`,
     lista: ''
   };
@@ -733,6 +733,498 @@ function render() {
   }));
 }
 
+// ================= editor com animações (Reel falado) =================
+// Tudo roda no navegador da pessoa: o vídeo não sai do aparelho até ela salvar no card.
+// 1. ouve o áudio (Web Audio) e acha os trechos de fala; pausas acima de 0,6 s saem;
+// 2. casa cada bloco do roteiro com a fala, em ordem (dá para arrastar na linha do tempo);
+// 3. sugere uma animação por bloco a partir do texto (só usa o que está escrito no roteiro);
+// 4. exporta em 1080x1920 (canvas + MediaRecorder), MP4 quando o navegador grava MP4, senão WebM.
+const EditorAnim = (() => {
+  const W = 1080, H = 1920;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const ease = (t) => 1 - Math.pow(1 - clamp(t, 0, 1), 3);              // sai rápido, chega suave
+  const easeBack = (t) => { t = clamp(t, 0, 1); const s = 1.7; return 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2); };
+  const semAst = (s) => String(s || '').replace(/\*/g, '').replace(/\s+/g, ' ').trim();
+
+  // ---------- áudio ----------
+  async function decodificar(blob) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) throw new Error('Este navegador não consegue ouvir o áudio do vídeo.');
+    const ab = await blob.arrayBuffer(); const ac = new AC();
+    try {
+      const buf = await new Promise((ok, err) => { const p = ac.decodeAudioData(ab, ok, err); if (p && p.catch) p.catch(err); });
+      const n = buf.length, mono = new Float32Array(n);
+      for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = 0; i < n; i++) mono[i] += d[i] / buf.numberOfChannels; }
+      return { mono, sr: buf.sampleRate, duracao: buf.duration };
+    } catch (e) { throw new Error('Não consegui ler o áudio deste vídeo. Grave de novo pela câmera do celular (MP4 ou MOV) e tente outra vez.'); }
+    finally { try { ac.close(); } catch (e) { /* ok */ } }
+  }
+  const PASSO = 0.02;   // análise em janelas de 20 ms
+  function energia(mono, sr) {
+    const n = Math.floor(sr * PASSO), quadros = Math.floor(mono.length / n), db = new Float32Array(quadros);
+    for (let q = 0; q < quadros; q++) { let s = 0; for (let i = q * n, f = i + n; i < f; i++) s += mono[i] * mono[i]; db[q] = 10 * Math.log10(s / n + 1e-12); }
+    return db;
+  }
+  const percentil = (arr, p) => { const a = Array.from(arr).sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.floor(p * a.length))] || -120; };
+  // Trechos de fala: quadros acima do limiar; pausas menores que `pausa` ficam (fazem parte da frase).
+  function trechosDeFala(db, { pausa = 0.6, folga = 0.12, minFala = 0.18 } = {}) {
+    if (!db.length) return { trechos: [], limiar: 0 };
+    const chao = percentil(db, 0.1), alto = percentil(db, 0.95);
+    const limiar = Math.max(chao + 6, chao + (alto - chao) * 0.35);
+    const runs = []; let ini = -1;
+    for (let q = 0; q <= db.length; q++) {
+      const v = q < db.length && db[q] > limiar;
+      if (v && ini < 0) ini = q;
+      if (!v && ini >= 0) { runs.push([ini * PASSO, q * PASSO]); ini = -1; }
+    }
+    const juntos = [];
+    for (const r of runs) { const u = juntos[juntos.length - 1]; if (u && r[0] - u[1] < pausa) u[1] = r[1]; else juntos.push([r[0], r[1]]); }
+    const dur = db.length * PASSO;
+    const trechos = juntos.filter((r) => r[1] - r[0] >= minFala).map((r) => ({ ini: Math.max(0, r[0] - folga), fim: Math.min(dur, r[1] + folga) }));
+    for (let i = 1; i < trechos.length; i++) if (trechos[i].ini < trechos[i - 1].fim) trechos[i].ini = trechos[i - 1].fim;
+    return { trechos: trechos.map((t) => ({ ini: +t.ini.toFixed(3), fim: +t.fim.toFixed(3) })), limiar };
+  }
+  // Volume: leva a fala para cerca de -16 dBFS (o limitador na exportação segura os picos).
+  function ganhoParaNormalizar(db, limiar) {
+    const fala = Array.from(db).filter((v) => v > limiar);
+    if (!fala.length) return 1;
+    const media = 10 * Math.log10(fala.reduce((s, v) => s + Math.pow(10, v / 10), 0) / fala.length);
+    return clamp(Math.pow(10, (-16 - media) / 20), 0.5, 6);
+  }
+
+  // ---------- linha do tempo cortada ----------
+  function mapa(trechos) {
+    let acc = 0; const clipes = trechos.map((t) => { const c = { orig: t.ini, fimOrig: t.fim, saida: acc }; acc += t.fim - t.ini; return c; });
+    return { clipes, total: +acc.toFixed(3), paraSaida: (t) => { for (const c of clipes) if (t <= c.fimOrig) return c.saida + Math.max(0, t - c.orig); return acc; },
+      paraOrig: (s) => { for (const c of clipes) if (s <= c.saida + (c.fimOrig - c.orig)) return c.orig + Math.max(0, s - c.saida); const u = clipes[clipes.length - 1]; return u ? u.fimOrig : 0; } };
+  }
+
+  // ---------- casar os blocos do roteiro com a fala ----------
+  // Cada bloco começa no início de um trecho de fala. Escolhe, em ordem, os inícios que melhor
+  // batem com a proporção de texto de cada bloco, dando preferência às pausas maiores.
+  function casarBlocos(blocos, trechos, m) {
+    const B = blocos.length; if (!B) return [];
+    const pesos = blocos.map((b) => Math.max(8, semAst(b.fala).length));
+    const W_ = pesos.reduce((a, b) => a + b, 0); const alvo = []; let acc = 0;
+    for (let k = 0; k < B; k++) { alvo.push(acc / W_); acc += pesos[k]; }
+    const total = m.total || 1;
+    const cand = trechos.map((t, j) => ({ frac: m.paraSaida(t.ini) / total, pausa: j ? t.ini - trechos[j - 1].fim : 0, s: m.paraSaida(t.ini) }));
+    const S = cand.length;
+    if (S < B) return alvo.map((f) => +(f * total).toFixed(3));        // fala corrida: proporção do texto
+    // custo de pôr o bloco k no início do trecho j
+    const custo = (k, j) => { const d = cand[j].frac - alvo[k]; return d * d * 40 - Math.min(cand[j].pausa, 1.5) * 0.15; };
+    const INF = 1e9, dp = Array.from({ length: B }, () => new Float64Array(S).fill(INF)), de = Array.from({ length: B }, () => new Int32Array(S).fill(-1));
+    dp[0][0] = 0;
+    for (let k = 1; k < B; k++) for (let j = k; j <= S - (B - k); j++) {
+      let melhor = INF, arg = -1;
+      for (let i = k - 1; i < j; i++) if (dp[k - 1][i] < melhor) { melhor = dp[k - 1][i]; arg = i; }
+      if (arg >= 0) { dp[k][j] = melhor + custo(k, j); de[k][j] = arg; }
+    }
+    let j = -1, melhor = INF; for (let x = B - 1; x < S; x++) if (dp[B - 1][x] < melhor) { melhor = dp[B - 1][x]; j = x; }
+    const ini = new Array(B); for (let k = B - 1; k >= 0; k--) { ini[k] = +cand[j].s.toFixed(3); j = de[k][j]; }
+    ini[0] = 0; return ini;
+  }
+
+  // ---------- sugestões de animação (só com o que está escrito) ----------
+  const MESES = 'janeiro|fevereiro|março|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro';
+  const RE_DATA = new RegExp(`\\b(\\d{1,2}\\s+de\\s+(?:${MESES})(?:\\s+de\\s+\\d{4})?|\\d{1,2}/\\d{1,2}(?:/\\d{2,4})?|\\d{1,2}h\\d{0,2}|\\d{1,2}:\\d{2})\\b`, 'i');
+  const RE_NUM = /(R\$\s?)?\b(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?\s?(%|mil|milhões|milhão|anos|dias|meses|horas|vezes|reais|pessoas)?/i;
+  const RE_LISTA = /\b(primeir[oa]|segund[oa]|terceir[oa])\b|\b(um|dois|três|tres)[,:.]/i;
+  const RE_CTA = /\b(comenta|comente|escreve|digita)\s+["“']?([A-Za-zÀ-ú0-9]+)["”']?|\blink\s+(?:na\s+bio|no\s+perfil)|\b(salva|salve|compartilha|compartilhe|manda pra|envia pra)\b/i;
+  const PARADAS = new Set('a o as os de da do das dos e é em um uma que se não na no nas nos para pra por com sem mais mas ou você vocês isso este esta essa esse ao à sua seu suas seus eu ele ela tem ter ser foi vai vou já'.split(' '));
+  function palavraForte(texto) {
+    const t = String(texto || ''); const m = t.match(/\*([^*]+)\*/); if (m) return semAst(m[1]).split(' ').slice(0, 2).join(' ');
+    const ps = semAst(t).replace(/[^\wÀ-ú\s]/g, ' ').split(/\s+/).filter((p) => p && !PARADAS.has(p.toLowerCase()));
+    return ps.sort((a, b) => b.length - a.length)[0] || semAst(t).split(' ')[0] || '';
+  }
+  // Itens da lista: o texto entre um marcador e o seguinte ("primeiro, ...", "segundo, ...").
+  // Número por extenso só vale como marcador com pontuação logo depois ("um:", "dois,"), para não
+  // confundir com "um advogado". O que vem antes do primeiro marcador é a introdução e fica de fora.
+  const RE_MARCA = /\b(?:primeir[oa]|segund[oa]|terceir[oa]|quart[oa]|quint[oa])\b[,:.]?\s*|\b(?:um|dois|três|tres|quatro|cinco)[,:.]\s*/gi;
+  function itensDaLista(fala) {
+    const t = semAst(fala); const marcas = [...t.matchAll(RE_MARCA)];
+    if (marcas.length < 2) return [];
+    // introdução antes do primeiro item vira o título do cartão (texto do roteiro, sem inventar)
+    itensDaLista.titulo = t.slice(0, marcas[0].index).replace(/^.*?,\s*(?=\S+\s+de\s+)/, '').replace(/[,:.;\s]+$/, '').slice(0, 42);
+    return marcas.map((m, i) => t.slice(m.index + m[0].length, i + 1 < marcas.length ? marcas[i + 1].index : t.length))
+      .map((x) => x.split(/[.;!?]/)[0].replace(/^[,:\s]+|[,:\s]+$/g, '').slice(0, 46)).filter((x) => x.length > 1).slice(0, 5);
+  }
+  function sugerir(bloco, idx, ctx = {}) {
+    const fala = semAst(bloco.fala);
+    if (idx === 0) return { tipo: 'gancho', palavra: palavraForte(ctx.gancho || bloco.fala) };
+    if (RE_LISTA.test(fala)) { const itens = itensDaLista(fala); if (itens.length >= 2) return { tipo: 'lista', titulo: itensDaLista.titulo || '', itens }; }
+    const cta = fala.match(RE_CTA);
+    if (cta && idx >= (ctx.total || 1) - 2) return { tipo: 'cta', palavra: (cta[2] || (/link/i.test(cta[0]) ? 'LINK NO PERFIL' : cta[3] || cta[0])).toUpperCase() };
+    if (/\bantes\b/i.test(fala) && /\b(depois|agora|hoje)\b/i.test(fala)) {
+      const [a, d] = fala.split(/\b(?:depois|agora|hoje)\b/i); return { tipo: 'antesdepois', antes: a.replace(/\bantes\b[,:]?/i, '').trim().slice(0, 40), depois: (d || '').replace(/^[,:\s]+/, '').trim().slice(0, 40) };
+    }
+    const data = fala.match(RE_DATA); if (data) return { tipo: 'data', texto: data[1] };
+    const num = numeroDoTexto(fala); if (num) return { tipo: 'numero', ...num };
+    if (cta) return { tipo: 'cta', palavra: (cta[2] || (/link/i.test(cta[0]) ? 'LINK NO PERFIL' : cta[3] || cta[0])).toUpperCase() };
+    return { tipo: 'nenhuma' };
+  }
+  // Número que existe no roteiro (nunca inventa): devolve o valor e o texto ao redor.
+  function numeroDoTexto(fala) {
+    const m = semAst(fala).match(RE_NUM); if (!m) return null;
+    const inteiro = Number(m[2].replace(/\./g, '')); if (!isFinite(inteiro)) return null;
+    const dec = m[3] ? Number('0.' + m[3]) : 0;
+    return { valor: inteiro + dec, casas: m[3] ? m[3].length : 0, antes: m[1] ? 'R$ ' : '', depois: m[4] ? (m[4] === '%' ? '%' : ' ' + m[4]) : '', original: m[0].trim() };
+  }
+  // Confere se a animação só usa o que está no texto do bloco (número e data têm de aparecer no roteiro).
+  function valida(anim, bloco) {
+    const fala = semAst(bloco.fala);
+    if (anim.tipo === 'numero') { const n = numeroDoTexto(fala); return !!n && n.valor === anim.valor; }
+    if (anim.tipo === 'data') return !!anim.texto && fala.toLowerCase().includes(String(anim.texto).toLowerCase());
+    return true;
+  }
+
+  // ---------- desenho ----------
+  const tema = () => { const R = window.NCRender || {}; const C = R.C || {}; const F = R.F || {};
+    return { principal: C.vinho || '#6B1E2E', fundo: C.off || '#F6F1EA', destaque: C.dourado || '#B08D57', apoio: C.bege || '#E4D6C3', texto: C.preto || '#0F0D0D',
+      serif: F.serif || 'Georgia, serif', sans: F.sans || 'Arial, sans-serif', cond: F.cond || 'Impact, sans-serif' }; };
+  function retangulo(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  function cartao(ctx, x, y, w, h, T, alfa = 1) {
+    ctx.save(); ctx.globalAlpha *= alfa; ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 14;
+    retangulo(ctx, x, y, w, h, 38); ctx.fillStyle = T.fundo; ctx.fill(); ctx.restore();
+  }
+  function caber(ctx, texto, fonte, max, tamanho) { let t = tamanho; do { ctx.font = fonte.replace('{t}', t); if (ctx.measureText(texto).width <= max) break; t -= 2; } while (t > 18); return t; }
+  // Zonas seguras: nunca no meio da tela (rosto).
+  const TOPO = { y: Math.round(H * 0.07), h: Math.round(H * 0.25) }, BASE = { y: Math.round(H * 0.66), h: Math.round(H * 0.25) };
+  const entraSai = (t, dur, entra = 0.35, sai = 0.3) => Math.min(ease(t / entra), dur > 0 ? ease((dur - t) / sai) : 1);
+
+  const DESENHO = {
+    gancho(ctx, a, t, dur, T) {   // palavra grande no topo: entra crescendo e some
+      const vida = Math.min(dur, 2.6); if (t > vida) return;
+      const k = easeBack(t / 0.45), al = entraSai(t, vida, 0.25, 0.4); const p = String(a.palavra || '').toUpperCase(); if (!p) return;
+      ctx.save(); ctx.globalAlpha = al; ctx.translate(W / 2, TOPO.y + TOPO.h * 0.5); ctx.scale(0.6 + 0.4 * k, 0.6 + 0.4 * k);
+      const tam = caber(ctx, p, `400 {t}px ${T.cond}`, W * 0.84, 190); ctx.font = `400 ${tam}px ${T.cond}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = tam * 0.12; ctx.strokeStyle = T.principal; ctx.lineJoin = 'round'; ctx.strokeText(p, 0, 0); ctx.fillStyle = '#FFFFFF'; ctx.fillText(p, 0, 0); ctx.restore();
+    },
+    frase(ctx, a, t, dur, T) {   // palavras grandes com uma em itálico serifado
+      const pal = semAst(a.texto || '').split(' ').slice(0, 5); if (!pal.length) return; const forte = (a.italico || palavraForte(a.texto)).toLowerCase();
+      const al = entraSai(t, dur); ctx.save(); ctx.globalAlpha = al; ctx.textBaseline = 'alphabetic';
+      const y0 = TOPO.y + 40 + (1 - ease(t / 0.4)) * 30; let x = 80, y = y0 + 120;
+      for (const p of pal) { const it = p.toLowerCase().replace(/[^\wÀ-ú]/g, '') === forte.toLowerCase(); ctx.font = it ? `italic 600 118px ${T.serif}` : `800 104px ${T.sans}`;
+        const w = ctx.measureText(p + ' ').width; if (x + w > W - 70) { x = 80; y += 128; } ctx.fillStyle = it ? T.principal : '#FFFFFF'; ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 18; ctx.fillText(p, x, y); x += w; }
+      ctx.restore();
+    },
+    lista(ctx, a, t, dur, T) {   // checklist: cada item entra quando a frase dele começa
+      const itens = (a.itens || []).slice(0, 5); if (!itens.length) return; const n = itens.length;
+      const tempos0 = a.tempos && a.tempos.length === n ? a.tempos : itens.map((_, i) => (dur * 0.85 * i) / n);
+      // o cartão cresce conforme os itens entram (sem espaço vazio esperando)
+      const visiveis = tempos0.reduce((k, ti) => k + clamp((t - ti) / 0.3, 0, 1), 0);
+      const lh = 92, tit = a.titulo ? 84 : 0, h = 50 + tit + Math.max(0.35, visiveis) * lh, w = W - 140, x = 70, y = TOPO.y; const al = entraSai(t, dur, 0.3, 0.35);
+      ctx.save(); ctx.globalAlpha = al; ctx.translate(0, (1 - ease(t / 0.35)) * -40); cartao(ctx, x, y, w, h, T);
+      if (tit) { const tt = String(a.titulo); const ts = caber(ctx, tt, `italic 600 {t}px ${T.serif}`, w - 90, 58); ctx.font = `italic 600 ${ts}px ${T.serif}`; ctx.fillStyle = T.principal; ctx.textBaseline = 'middle'; ctx.fillText(tt, x + 45, y + 62); }
+      const tempos = a.tempos && a.tempos.length === n ? a.tempos : itens.map((_, i) => (dur * 0.85 * i) / n);
+      itens.forEach((it, i) => {
+        // o cartão abre espaço antes do item aparecer
+        const ti = t - tempos[i] - 0.15; if (ti < 0) return; const e = ease(ti / 0.3); const yy = y + 50 + tit + i * lh;
+        ctx.save(); ctx.globalAlpha *= e; ctx.translate((1 - e) * 40, 0);
+        ctx.lineWidth = 6; ctx.strokeStyle = T.principal; retangulo(ctx, x + 40, yy, 54, 54, 12); ctx.stroke();
+        const marca = clamp((ti - 0.15) / 0.3, 0, 1); if (marca > 0) { ctx.beginPath(); ctx.moveTo(x + 52, yy + 28); ctx.lineTo(x + 52 + 12 * Math.min(1, marca * 2), yy + 28 + 12 * Math.min(1, marca * 2)); if (marca > 0.5) ctx.lineTo(x + 64 + 22 * (marca - 0.5) * 2, yy + 40 - 30 * (marca - 0.5) * 2); ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke(); }
+        // só o "antes" sai riscado
+        const riscado = /^antes\b/i.test(it); ctx.fillStyle = riscado ? T.principal : T.texto; const tam = caber(ctx, it, `600 {t}px ${T.sans}`, w - 160, 50); ctx.font = `600 ${tam}px ${T.sans}`; ctx.textBaseline = 'middle'; ctx.fillText(it, x + 122, yy + 29);
+        if (riscado) { const lw = ctx.measureText(it).width * clamp((ti - 0.2) / 0.4, 0, 1); ctx.fillRect(x + 118, yy + 27, lw + 8, 6); }
+        ctx.restore();
+      });
+      ctx.restore();
+    },
+    data(ctx, a, t, dur, T) {   // cartão com a data
+      const al = entraSai(t, Math.min(dur, 3.2)); if (t > Math.min(dur, 3.2)) return; const w = 640, h = 230, x = (W - w) / 2, y = BASE.y + 30;
+      ctx.save(); ctx.globalAlpha = al; ctx.translate(0, (1 - easeBack(t / 0.45)) * 60); cartao(ctx, x, y, w, h, T);
+      ctx.fillStyle = T.principal; retangulo(ctx, x, y, w, 64, 38); ctx.fill(); ctx.fillRect(x, y + 30, w, 34);
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `700 34px ${T.sans}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('ANOTA AÍ', W / 2, y + 34);
+      const tx = String(a.texto || ''); const tam = caber(ctx, tx, `italic 600 {t}px ${T.serif}`, w - 60, 92); ctx.font = `italic 600 ${tam}px ${T.serif}`; ctx.fillStyle = T.texto; ctx.fillText(tx, W / 2, y + 150); ctx.restore();
+    },
+    numero(ctx, a, t, dur, T) {   // número que conta até o valor do roteiro
+      const vida = Math.min(dur, 3.4); if (t > vida) return; const al = entraSai(t, vida); const v = (a.valor || 0) * ease(t / 1.2);
+      const num = v.toLocaleString('pt-BR', { minimumFractionDigits: a.casas || 0, maximumFractionDigits: a.casas || 0 });
+      const tx = `${a.antes || ''}${num}${a.depois || ''}`; ctx.save(); ctx.globalAlpha = al; const w = W - 220, h = 280, x = 110, y = TOPO.y + 20; cartao(ctx, x, y, w, h, T);
+      const tam = caber(ctx, tx, `400 {t}px ${T.cond}`, w - 80, 190); ctx.font = `400 ${tam}px ${T.cond}`; ctx.fillStyle = T.principal; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(tx, W / 2, y + h / 2 + 6); ctx.restore();
+    },
+    cta(ctx, a, t, dur, T) {   // palavra-chave pula na tela
+      const p = String(a.palavra || '').toUpperCase(); if (!p) return; const pulo = Math.abs(Math.sin(t * 6)) * Math.max(0, 1 - t / 1.4);
+      const k = easeBack(t / 0.4); const al = entraSai(t, dur, 0.2, 0.3); ctx.save(); ctx.globalAlpha = al;
+      ctx.translate(W / 2, BASE.y + BASE.h * 0.45 - pulo * 50); ctx.scale(k, k); const tam = caber(ctx, p, `400 {t}px ${T.cond}`, W * 0.7, 140);
+      ctx.font = `400 ${tam}px ${T.cond}`; const w = ctx.measureText(p).width + 90, h = tam + 70; ctx.fillStyle = T.principal; retangulo(ctx, -w / 2, -h / 2, w, h, 30); ctx.fill();
+      ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(p, 0, 6); ctx.restore();
+    },
+    antesdepois(ctx, a, t, dur, T) {
+      const al = entraSai(t, dur); const w = W - 140, x = 70, y = TOPO.y, h = 300; ctx.save(); ctx.globalAlpha = al; cartao(ctx, x, y, w, h, T); ctx.textBaseline = 'middle';
+      ctx.font = `600 32px ${T.sans}`; ctx.fillStyle = T.principal; ctx.fillText('ANTES', x + 50, y + 62); const ta = String(a.antes || ''); const ts = caber(ctx, ta, `600 {t}px ${T.sans}`, w - 100, 52); ctx.font = `600 ${ts}px ${T.sans}`; ctx.fillText(ta, x + 50, y + 120);
+      const r = clamp((t - 0.4) / 0.5, 0, 1); ctx.fillRect(x + 46, y + 117, (ctx.measureText(ta).width + 8) * r, 7);
+      if (t > 0.9) { const e = ease((t - 0.9) / 0.35); ctx.globalAlpha *= e; ctx.font = `600 32px ${T.sans}`; ctx.fillStyle = T.texto; ctx.fillText('DEPOIS', x + 50, y + 192); const td = String(a.depois || ''); const t2 = caber(ctx, td, `italic 600 {t}px ${T.serif}`, w - 100, 60); ctx.font = `italic 600 ${t2}px ${T.serif}`; ctx.fillText(td, x + 50, y + 250); }
+      ctx.restore();
+    },
+    nenhuma() {},
+  };
+  // Nome e área nos 3 primeiros segundos; @ no final (terço de baixo).
+  function rodape(ctx, t, total, info, T) {
+    if (info.nome && t < 3) { const al = entraSai(t, 3, 0.35, 0.4); const x = 70, y = BASE.y + 120; ctx.save(); ctx.globalAlpha = al; ctx.translate((1 - ease(t / 0.4)) * -60, 0);
+      ctx.font = `700 66px ${T.sans}`; const w1 = ctx.measureText(info.nome).width; ctx.font = `italic 600 46px ${T.serif}`; const w2 = info.area ? ctx.measureText(info.area).width : 0; const w = Math.max(w1, w2) + 80;
+      ctx.fillStyle = T.principal; retangulo(ctx, x, y, w, info.area ? 176 : 110, 28); ctx.fill(); ctx.fillStyle = '#FFFFFF'; ctx.textBaseline = 'middle'; ctx.font = `700 66px ${T.sans}`; ctx.fillText(info.nome, x + 40, y + 58);
+      if (info.area) { ctx.font = `italic 600 46px ${T.serif}`; ctx.globalAlpha *= 0.94; ctx.fillText(info.area, x + 40, y + 128); } ctx.restore(); }
+    const fimIni = total - 2.4; if (info.handle && t >= fimIni) { const tt = t - fimIni; const al = ease(tt / 0.35); ctx.save(); ctx.globalAlpha = al; ctx.font = `700 64px ${T.sans}`; const w = ctx.measureText(info.handle).width + 90, x = (W - w) / 2;
+      const y = (info.handleNoTopo ? TOPO.y + 40 : BASE.y + 150) + (1 - ease(tt / 0.4)) * 40;
+      ctx.fillStyle = '#FFFFFF'; retangulo(ctx, x, y, w, 110, 55); ctx.fill(); ctx.fillStyle = T.principal; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(info.handle, W / 2, y + 58); ctx.restore(); }
+  }
+  // Desenha um quadro: vídeo cobrindo 1080x1920 (recorte central) e as animações do tempo t (já cortado).
+  function quadro(ctx, video, t, plano) {
+    const T = tema(); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    if (video && video.videoWidth) { const vw = video.videoWidth, vh = video.videoHeight, k = Math.max(W / vw, H / vh); const dw = vw * k, dh = vh * k; ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh); }
+    plano.blocos.forEach((b, i) => { const ini = b.inicio, fim = i + 1 < plano.blocos.length ? plano.blocos[i + 1].inicio : plano.total; if (t >= ini && t < fim && b.anim && DESENHO[b.anim.tipo]) DESENHO[b.anim.tipo](ctx, b.anim, t - ini, fim - ini, T); });
+    const ult = plano.blocos[plano.blocos.length - 1];
+    rodape(ctx, t, plano.total, Object.assign({}, plano.info || {}, { handleNoTopo: !!(ult && ult.anim && ['cta', 'data'].includes(ult.anim.tipo)) }), T);
+  }
+  // Para a lista: cada item entra quando a frase dele começa (estimado pela posição do item no texto do bloco).
+  function temposDaLista(anim, bloco, dur) {
+    const fala = semAst(bloco.fala).toLowerCase(); const n = (anim.itens || []).length; if (!n) return [];
+    return anim.itens.map((it, i) => { const p = fala.indexOf(String(it).toLowerCase().slice(0, 12)); const f = p >= 0 ? p / Math.max(1, fala.length) : i / n; return +(clamp(f, 0, 0.95) * dur * 0.95).toFixed(2); });
+  }
+
+  // ---------- exportação ----------
+  function formatoGravacao() {
+    const op = ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    return op.find((t) => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+  }
+  function podeExportar() {
+    const cv = document.createElement('canvas');
+    if (!window.MediaRecorder || !cv.captureStream) return 'Este navegador não consegue exportar vídeo. Use o Safari atualizado no iPhone ou o Chrome no Android e no computador.';
+    if (!formatoGravacao()) return 'Este navegador não grava vídeo em nenhum formato aceito. Atualize o navegador ou use o Chrome.';
+    return '';
+  }
+  // `preparo` nasce dentro do toque (regra do iPhone): { ac, video, tocando }.
+  async function exportar(preparo, plano, { ganho = 1, limiteMB = 0, onProgresso } = {}) {
+    const motivo = podeExportar(); if (motivo) throw new Error(motivo);
+    const { ac, video } = preparo; const mime = formatoGravacao();
+    try { await preparo.tocando; } catch (e) { throw new Error('O aparelho bloqueou a reprodução. Toque em Exportar de novo.'); }
+    video.pause();
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const ctx = cv.getContext('2d');
+    const stream = cv.captureStream(30);
+    const src = ac.createMediaElementSource(video); const g = ac.createGain(); g.gain.value = ganho;
+    const lim = ac.createDynamicsCompressor(); lim.threshold.value = -3; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.003; lim.release.value = 0.12;
+    const dst = ac.createMediaStreamDestination(); src.connect(g); g.connect(lim); lim.connect(dst);
+    dst.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+    const bps = limiteMB ? Math.max(1_200_000, Math.min(6_000_000, Math.floor((limiteMB * 8 * 1048576 * 0.85) / Math.max(5, plano.total)) - 128_000)) : 6_000_000;
+    let rec; try { rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: bps, audioBitsPerSecond: 128_000 }); } catch (e) { rec = new MediaRecorder(stream); }
+    const partes = []; rec.ondataavailable = (e) => { if (e.data && e.data.size) partes.push(e.data); };
+    const acabou = new Promise((ok) => { rec.onstop = ok; });
+    let saida = 0; let vivo = true;
+    const desenhar = () => { if (!vivo) return; const c = plano.mapa.clipes.find((x) => video.currentTime >= x.orig - 0.05 && video.currentTime <= x.fimOrig + 0.05);
+      const t = c ? c.saida + (video.currentTime - c.orig) : saida; saida = t; quadro(ctx, video, t, plano); if (onProgresso) onProgresso(Math.min(1, t / plano.total)); };
+    const laco = () => { if (!vivo) return; desenhar(); requestAnimationFrame(laco); };
+    if (ac.state === 'suspended') { try { await ac.resume(); } catch (e) { /* segue */ } }
+    rec.start(500); rec.pause(); laco();
+    try {
+      for (const c of plano.mapa.clipes) {
+        video.currentTime = c.orig;
+        await new Promise((ok, err) => { const to = setTimeout(() => err(new Error('O vídeo travou ao pular um trecho. Tente de novo com a tela ligada.')), 15000); video.onseeked = () => { clearTimeout(to); ok(); }; });
+        desenhar(); rec.resume(); await video.play();
+        await new Promise((ok) => { const fim = () => { if (video.currentTime >= c.fimOrig || video.ended) { video.pause(); ok(); } else requestAnimationFrame(fim); }; fim(); });
+        rec.pause();
+      }
+    } finally { vivo = false; try { if (rec.state !== 'inactive') { rec.resume(); rec.stop(); } } catch (e) { /* ok */ } }
+    await acabou; stream.getTracks().forEach((t) => t.stop()); try { src.disconnect(); } catch (e) { /* ok */ }
+    const tipo = (rec.mimeType || mime || 'video/webm').split(';')[0];
+    const blob = new Blob(partes, { type: tipo });
+    return { blob, ext: tipo === 'video/mp4' ? 'mp4' : 'webm', tipo, h264: tipo === 'video/mp4' && await temH264(blob) };
+  }
+
+  // O Instagram e o TikTok pedem vídeo H.264: confere no próprio arquivo (caixa "avc1").
+  async function temH264(blob) {
+    try { const b = new Uint8Array(await blob.slice(0, Math.min(blob.size, 4 * 1048576)).arrayBuffer());
+      for (let i = 0; i < b.length - 4; i++) if (b[i] === 0x61 && b[i + 1] === 0x76 && b[i + 2] === 0x63 && b[i + 3] === 0x31) return true; } catch (e) { /* sem leitura */ }
+    return false;
+  }
+  // Monta o plano a partir do áudio e do roteiro.
+  function planejar(db, blocos, ctx = {}) {
+    const { trechos, limiar } = trechosDeFala(db);
+    const m = mapa(trechos.length ? trechos : [{ ini: 0, fim: db.length * PASSO }]);
+    const inicios = casarBlocos(blocos, trechos, m);
+    const total = blocos.length;
+    const bs = blocos.map((b, i) => { const anim = sugerir(b, i, { ...ctx, total }); return { fala: semAst(b.fala), inicio: inicios[i] || 0, anim }; });
+    bs.forEach((b, i) => { if (b.anim.tipo === 'lista') b.anim.tempos = temposDaLista(b.anim, b, (i + 1 < bs.length ? bs[i + 1].inicio : m.total) - b.inicio); });
+    return { trechos, mapa: m, total: m.total, blocos: bs, ganho: ganhoParaNormalizar(db, limiar), duracaoOriginal: db.length * PASSO };
+  }
+
+  // Animações que fazem sentido para o bloco (número e data só se existirem no texto) e o padrão de cada uma.
+  const NOMES = { gancho: 'Palavra grande no topo', frase: 'Frase em destaque', lista: 'Checklist', data: 'Cartão de data', numero: 'Número que conta', cta: 'Palavra-chave pulando', antesdepois: 'Antes e depois', nenhuma: 'Sem animação' };
+  function opcoes(bloco) {
+    const f = semAst(bloco.fala); const o = ['gancho', 'frase'];
+    if (itensDaLista(f).length >= 2) o.push('lista');
+    if (RE_DATA.test(f)) o.push('data');
+    if (numeroDoTexto(f)) o.push('numero');
+    o.push('cta');
+    if (/\bantes\b/i.test(f)) o.push('antesdepois');
+    o.push('nenhuma'); return o;
+  }
+  function padrao(tipo, bloco, dur) {
+    const f = semAst(bloco.fala);
+    if (tipo === 'gancho') return { tipo, palavra: palavraForte(bloco.fala) };
+    if (tipo === 'frase') return { tipo, texto: f.split(' ').slice(0, 5).join(' '), italico: palavraForte(f) };
+    if (tipo === 'lista') { const itens = itensDaLista(f); const a = { tipo, titulo: itensDaLista.titulo || '', itens }; a.tempos = temposDaLista(a, bloco, dur); return a; }
+    if (tipo === 'data') { const m = f.match(RE_DATA); return m ? { tipo, texto: m[1] } : { tipo: 'nenhuma' }; }
+    if (tipo === 'numero') { const n = numeroDoTexto(f); return n ? { tipo, ...n } : { tipo: 'nenhuma' }; }
+    if (tipo === 'cta') { const m = f.match(RE_CTA); return { tipo, palavra: (m && (m[2] || m[3]) ? (m[2] || m[3]) : palavraForte(f)).toUpperCase() }; }
+    if (tipo === 'antesdepois') { const a = sugerir(bloco, 1, { total: 99 }); return a.tipo === 'antesdepois' ? a : { tipo, antes: f.slice(0, 40), depois: '' }; }
+    return { tipo: 'nenhuma' };
+  }
+
+  return { NOMES, opcoes, padrao, W, H, decodificar, energia, trechosDeFala, mapa, casarBlocos, sugerir, numeroDoTexto, valida, planejar, quadro, temposDaLista, exportar, podeExportar, formatoGravacao, palavraForte, itensDaLista, PASSO };
+})();
+
+// Tela do editor com animações (abre pelo card do Reel falado em Gravar).
+const mmssEA = (s) => { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+function brutoUnico(c) {
+  const fs = (c.files || []).filter(f => f.kind === 'video' && (f.grupo === 'bruto' || /-bruto\./.test(f.name || '')));
+  if (fs.some(f => f.parte)) return null;                      // enviado em partes: escolhe o arquivo do aparelho
+  return fs[fs.length - 1] || null;
+}
+function openEditorAnim(c) {
+  const blocos = ((c.payload && c.payload.roteiro) || []).filter(b => b && b.fala);
+  if (!blocos.length) { toast('Este Reel não tem roteiro em blocos para casar com o vídeo.'); return; }
+  const motivo = EditorAnim.podeExportar();
+  const bruto = brutoUnico(c);
+  const b0 = brand();
+  const nomePadrao = (c.gravadoPor && c.gravadoPor !== 'Outra pessoa' ? c.gravadoPor : '') || (c.payload && c.payload.advogado) || b0.nome || (typeof MARCA_NOME !== 'undefined' ? MARCA_NOME : '');
+  const areaPadrao = b0.area || (b0.descricao ? String(b0.descricao).split(/[,.;:]/)[0].slice(0, 40) : '');
+  openSheet(`<h2>Editar com animações</h2><p class="small muted">${esc(plain(c.title))}</p>
+    <div id="ea-p1">
+      <p class="small">O editor ouve o vídeo, corta as pausas longas, acerta o volume e coloca uma animação no começo de cada frase do roteiro. Tudo acontece aqui no aparelho: o vídeo não vai para nenhum servidor até você salvar no card.</p>
+      ${motivo ? `<p class="small" style="color:var(--wine)"><b>${esc(motivo)}</b></p>` : ''}
+      ${bruto ? `<div class="row"><button class="btn primary" id="ea-usar">Usar o vídeo enviado</button></div><p class="small muted">Ou escolha outro arquivo:</p>` : ''}
+      <label for="ea-file">Vídeo gravado<input type="file" id="ea-file" accept="video/*"></label>
+      <p class="small" id="ea-msg" role="status"></p>
+    </div>
+    <div id="ea-ed" hidden>
+      <p class="small" id="ea-resumo"></p>
+      <canvas id="ea-prev" width="1080" height="1920" style="width:min(62vw,280px);aspect-ratio:9/16;border-radius:16px;background:#000;display:block;margin:6px auto"></canvas>
+      <div class="row" style="justify-content:center"><button class="btn" id="ea-play">▶ Ver prévia</button><span class="small muted" id="ea-tempo">0:00</span></div>
+      <div id="ea-linha" style="position:relative;height:58px;margin:10px 0 4px;border-radius:12px;background:var(--line);touch-action:none;user-select:none;cursor:pointer"></div>
+      <p class="small muted">Cada faixa é um bloco do roteiro. Se uma animação entrar fora da hora, arraste o marcador do bloco. Toque na linha para ver aquele momento.</p>
+      <div id="ea-blocos" class="stack"></div>
+      <div class="grid2"><label for="ea-nome">Nome na abertura<input id="ea-nome" value="${esc(nomePadrao)}"></label><label for="ea-area">Área<input id="ea-area" value="${esc(areaPadrao)}"></label></div>
+      <div class="row"><button class="btn primary" id="ea-exp">Exportar e salvar</button></div>
+      <p class="small muted">A exportação leva o tempo do vídeo. Deixe a tela ligada e a Central aberta até terminar. O vídeo editado volta para Aprovar: nada é publicado sozinho.</p>
+      <p class="small" id="ea-exp-msg" role="status"></p>
+    </div>`, (el) => {
+    let plano = null, arquivo = null, url = '', vPrev = null, tocandoPrev = false;
+    const msg = $('#ea-msg', el);
+    async function carregar(blob) {
+      arquivo = blob; msg.innerHTML = '<span class="spin"></span> Ouvindo o áudio e achando as frases…';
+      try {
+        await (window.NCRender && NCRender.ready ? NCRender.ready().catch(() => null) : null);
+        const d = await EditorAnim.decodificar(blob);
+        const db = EditorAnim.energia(d.mono, d.sr);
+        plano = EditorAnim.planejar(db, blocos, { gancho: (c.payload && (c.payload.textoCapa || c.payload.gancho)) || '' });
+        if (!plano.trechos.length) throw new Error('Não encontrei fala neste vídeo. Confira se ele tem som.');
+        // edição salva antes: mantém os ajustes da pessoa
+        const salvo = c.edicaoAnimada; if (salvo && Array.isArray(salvo.blocos) && salvo.blocos.length === plano.blocos.length && salvo.fonte === `${blob.size}`) salvo.blocos.forEach((b, i) => { plano.blocos[i].inicio = b.inicio; if (b.anim) plano.blocos[i].anim = b.anim; });
+        url = URL.createObjectURL(blob);
+        vPrev = document.createElement('video'); vPrev.playsInline = true; vPrev.setAttribute('playsinline', ''); vPrev.preload = 'auto'; vPrev.src = url;
+        await new Promise((ok, err) => { vPrev.onloadeddata = ok; vPrev.onerror = () => err(new Error('Este aparelho não abriu o vídeo. Grave em MP4 ou MOV e tente de novo.')); setTimeout(ok, 8000); });
+        $('#ea-p1', el).hidden = true; $('#ea-ed', el).hidden = false;
+        const pausas = Math.max(0, plano.trechos.length - 1);
+        $('#ea-resumo', el).innerHTML = `Encontrei <b>${plano.trechos.length}</b> trecho(s) de fala e cortei <b>${pausas}</b> pausa(s) longa(s): de ${mmssEA(plano.duracaoOriginal)} para <b>${mmssEA(plano.total)}</b>. Volume ajustado.`;
+        montarBlocos(); desenharLinha(); irPara(0);
+      } catch (e) { msg.textContent = e.message || 'Não consegui ler este vídeo.'; }
+    }
+    if (bruto) $('#ea-usar', el).addEventListener('click', async () => {
+      msg.innerHTML = '<span class="spin"></span> Abrindo o vídeo enviado…';
+      try { const r = await fetch(bruto.url); if (!r.ok) throw new Error(); carregar(await r.blob()); }
+      catch (e) { msg.textContent = 'Não consegui abrir o vídeo enviado. Escolha o arquivo do aparelho.'; }
+    });
+    $('#ea-file', el).addEventListener('change', (ev) => { const f = ev.target.files[0]; if (f) carregar(f); });
+
+    const fim = (i) => (i + 1 < plano.blocos.length ? plano.blocos[i + 1].inicio : plano.total);
+    function montarBlocos() {
+      $('#ea-blocos', el).innerHTML = plano.blocos.map((b, i) => {
+        const ops = EditorAnim.opcoes(b); const a = b.anim || { tipo: 'nenhuma' };
+        const campo = a.tipo === 'gancho' || a.tipo === 'cta' ? `<input data-campo="${i}" value="${esc(a.palavra || '')}" aria-label="Palavra">`
+          : a.tipo === 'frase' ? `<input data-campo="${i}" value="${esc(a.texto || '')}" aria-label="Frase">`
+          : a.tipo === 'lista' ? `<textarea data-campo="${i}" rows="3" aria-label="Itens, um por linha">${esc((a.itens || []).join('\n'))}</textarea>`
+          : a.tipo === 'numero' ? `<p class="small muted">Conta até ${esc(a.original)} (do roteiro).</p>` : a.tipo === 'data' ? `<p class="small muted">Data do roteiro: ${esc(a.texto)}.</p>` : '';
+        return `<div class="box"><div class="row between"><b class="small">Bloco ${i + 1} · ${mmssEA(b.inicio)}</b><select data-tipo="${i}">${ops.map(o => `<option value="${o}" ${o === a.tipo ? 'selected' : ''}>${EditorAnim.NOMES[o]}</option>`).join('')}</select></div>
+          <p class="small muted">${esc(b.fala.slice(0, 120))}${b.fala.length > 120 ? '…' : ''}</p>${campo}</div>`;
+      }).join('');
+      el.querySelectorAll('[data-tipo]').forEach(s => s.addEventListener('change', () => { const i = +s.dataset.tipo; plano.blocos[i].anim = EditorAnim.padrao(s.value, plano.blocos[i], fim(i) - plano.blocos[i].inicio); montarBlocos(); irPara(plano.blocos[i].inicio + 0.6); }));
+      el.querySelectorAll('[data-campo]').forEach(inp => inp.addEventListener('input', () => {
+        const a = plano.blocos[+inp.dataset.campo].anim;
+        if (a.tipo === 'lista') { a.itens = inp.value.split('\n').map(x => x.trim()).filter(Boolean).slice(0, 5); a.tempos = EditorAnim.temposDaLista(a, plano.blocos[+inp.dataset.campo], fim(+inp.dataset.campo) - plano.blocos[+inp.dataset.campo].inicio); }
+        else if (a.tipo === 'frase') a.texto = inp.value; else a.palavra = inp.value;
+        irPara(plano.blocos[+inp.dataset.campo].inicio + 0.6);
+      }));
+    }
+    // linha do tempo: uma faixa por bloco, marcador arrastável no começo de cada uma
+    function desenharLinha() {
+      const L = $('#ea-linha', el); const cores = ['var(--wine)', 'var(--ink)'];
+      L.innerHTML = plano.blocos.map((b, i) => `<div style="position:absolute;top:8px;bottom:8px;left:${(b.inicio / plano.total) * 100}%;width:${((fim(i) - b.inicio) / plano.total) * 100}%;background:${cores[i % 2]};opacity:${i % 2 ? .18 : .28};border-radius:6px"></div>`
+        + (i ? `<div data-m="${i}" title="Arraste o começo do bloco ${i + 1}" style="position:absolute;top:0;bottom:0;left:calc(${(b.inicio / plano.total) * 100}% - 11px);width:22px;cursor:ew-resize;display:flex;justify-content:center"><div style="width:6px;height:100%;border-radius:3px;background:var(--wine)"></div><span style="position:absolute;top:-2px;font:700 11px sans-serif;color:#fff;background:var(--wine);border-radius:8px;padding:0 5px">${i + 1}</span></div>` : '')).join('')
+        + `<div id="ea-cursor" style="position:absolute;top:0;bottom:0;width:2px;background:#000;left:0"></div>`;
+    }
+    function irPara(t) {
+      if (!plano || !vPrev) return; const tt = Math.max(0, Math.min(plano.total - 0.05, t));
+      vPrev.currentTime = plano.mapa.paraOrig(tt);
+      const desenha = () => { const cv = $('#ea-prev', el); if (cv) EditorAnim.quadro(cv.getContext('2d'), vPrev, tt, comInfo()); };
+      vPrev.onseeked = desenha; setTimeout(desenha, 250);
+      const cur = $('#ea-cursor', el); if (cur) cur.style.left = (tt / plano.total) * 100 + '%'; const te = $('#ea-tempo', el); if (te) te.textContent = `${mmssEA(tt)} / ${mmssEA(plano.total)}`;
+    }
+    const comInfo = () => Object.assign(plano, { info: { nome: ($('#ea-nome', el) || {}).value || '', area: ($('#ea-area', el) || {}).value || '', handle: window.NC_HANDLE || brand().handle || '' } });
+    const linha = $('#ea-linha', el); let arrasto = -1;
+    linha.addEventListener('pointerdown', (ev) => { const m = ev.target.closest('[data-m]'); if (m) { arrasto = +m.dataset.m; linha.setPointerCapture(ev.pointerId); ev.preventDefault(); return; }
+      const r = linha.getBoundingClientRect(); irPara(((ev.clientX - r.left) / r.width) * plano.total); });
+    linha.addEventListener('pointermove', (ev) => { if (arrasto < 1) return; const r = linha.getBoundingClientRect(); const t = ((ev.clientX - r.left) / r.width) * plano.total;
+      const b = plano.blocos; b[arrasto].inicio = +Math.max(b[arrasto - 1].inicio + 0.4, Math.min(fim(arrasto) - 0.4, t)).toFixed(2); desenharLinha(); irPara(b[arrasto].inicio + 0.05); });
+    linha.addEventListener('pointerup', () => { if (arrasto < 1) return; const i = arrasto; arrasto = -1; plano.blocos.forEach((b, k) => { if (b.anim && b.anim.tipo === 'lista') b.anim.tempos = EditorAnim.temposDaLista(b.anim, b, fim(k) - b.inicio); }); montarBlocos(); irPara(plano.blocos[i].inicio + 0.6); });
+    // prévia: toca os trechos com fala, um atrás do outro, desenhando as animações
+    $('#ea-play', el).addEventListener('click', async (ev) => {
+      if (tocandoPrev) { tocandoPrev = false; vPrev.pause(); ev.currentTarget.textContent = '▶ Ver prévia'; return; }
+      tocandoPrev = true; ev.currentTarget.textContent = '❚❚ Pausar'; const bt = ev.currentTarget; const p0 = vPrev.play().catch(() => null);
+      await p0; const cv = $('#ea-prev', el); const ctx = cv.getContext('2d');
+      for (const k of plano.mapa.clipes) {
+        if (!tocandoPrev) break; vPrev.currentTime = k.orig; await new Promise(ok => { vPrev.onseeked = ok; setTimeout(ok, 1500); }); try { await vPrev.play(); } catch (e) { break; }
+        await new Promise(ok => { const passo = () => { if (!tocandoPrev) return ok(); const t = k.saida + (vPrev.currentTime - k.orig); EditorAnim.quadro(ctx, vPrev, t, comInfo()); const cur = $('#ea-cursor', el); if (cur) cur.style.left = (t / plano.total) * 100 + '%';
+          if (vPrev.currentTime >= k.fimOrig || vPrev.ended) { vPrev.pause(); ok(); } else requestAnimationFrame(passo); }; passo(); });
+      }
+      tocandoPrev = false; vPrev.pause(); bt.textContent = '▶ Ver prévia';
+    });
+    // exportar: o áudio e o play nascem dentro do toque (regra do iPhone)
+    $('#ea-exp', el).addEventListener('click', async (ev) => {
+      const m = $('#ea-exp-msg', el); const motivo2 = EditorAnim.podeExportar(); if (motivo2) { m.textContent = motivo2; return; }
+      for (let i = 0; i < plano.blocos.length; i++) if (!EditorAnim.valida(plano.blocos[i].anim || { tipo: 'nenhuma' }, plano.blocos[i])) { m.textContent = `O bloco ${i + 1} tem um número ou uma data que não estão no roteiro. Troque a animação.`; return; }
+      tocandoPrev = false; if (vPrev) vPrev.pause();
+      const bt = ev.currentTarget; bt.disabled = true;
+      let ac, v, tocando, wake = null;
+      try { ac = new (window.AudioContext || window.webkitAudioContext)(); v = document.createElement('video'); v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
+        v.style.cssText = 'position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none'; document.body.appendChild(v); v.src = url; tocando = v.play(); }
+      catch (e) { m.textContent = 'Este navegador não deixou preparar o vídeo. Atualize o navegador e tente de novo.'; bt.disabled = false; return; }
+      try { if (navigator.wakeLock) wake = await navigator.wakeLock.request('screen'); } catch (e) { /* segue */ }
+      const limiteMB = window.LEXUP ? 90 : 19;
+      try {
+        m.innerHTML = '<span class="spin"></span> Exportando… 0%';
+        const r = await EditorAnim.exportar({ ac, video: v, tocando }, comInfo(), { ganho: plano.ganho, limiteMB, onProgresso: (p) => { m.innerHTML = `<span class="spin"></span> Exportando… ${Math.round(p * 100)}%`; } });
+        const mb = r.blob.size / 1048576; const nome = `${c.slug || 'reel'}-editado.${r.ext}`;
+        const aviso = r.h264 ? '' : ' Atenção: este navegador gravou o vídeo num formato que o Instagram e o TikTok podem recusar. Se der erro ao postar, exporte pelo Safari (iPhone) ou pelo Chrome atualizado.';
+        if (mb > limiteMB || !S.assets || !needDb()) {
+          const link = URL.createObjectURL(r.blob);
+          m.innerHTML = `O vídeo ficou pronto (${mb.toFixed(1)} MB), mas ${mb > limiteMB ? 'passou do limite de envio' : 'não dá para salvar agora'}. <a href="${link}" download="${esc(nome)}">Baixar o vídeo</a> e postar direto.${esc(aviso)}`;
+          bt.disabled = false; return;
+        }
+        m.innerHTML = '<span class="spin"></span> Salvando no card…';
+        const up = await S.assets.upload(r.blob, { type: r.tipo });
+        const files = [...(c.files || []).filter(f => f.grupo !== 'editado'), { name: nome, url: up.url, assetId: up.id, kind: 'video', w: 1080, h: 1920, grupo: 'editado', editadoNoApp: true }];
+        const salvo = { fonte: `${arquivo.size}`, em: now(), total: plano.total, blocos: plano.blocos.map(b => ({ inicio: b.inicio, anim: b.anim })) };
+        await col('contents').doc(c.id).update({ files, status: 'aprovar', edicaoAnimada: salvo, updatedAt: now() });
+        log('editou com animações', plain(c.title));
+        if (aviso) { m.innerHTML = '<b>Vídeo salvo. Está em Aprovar.</b>' + esc(aviso); bt.hidden = true; return; }
+        closeSheet(); toast('Vídeo editado. Está em Aprovar.');
+      } catch (e) { m.textContent = (e && e.message) || 'A exportação falhou. Tente de novo com a tela ligada.'; bt.disabled = false; }
+      finally { try { if (wake) wake.release(); } catch (e) { /* ok */ } try { v.remove(); ac.close(); } catch (e) { /* ok */ } }
+    });
+  });
+}
+
 // ================= teleprompter =================
 function textoTeleprompter(c) {
   const p = c?.payload || {};
@@ -891,6 +1383,7 @@ const ACTIONS = {
     });
   },
   video: (c) => openVideo(c),
+  editarAnim: (c) => openEditorAnim(c),
   async gravei(c) { if (!needDb()) return; await col('contents').doc(c.id).update({ status: 'pronto', updatedAt: now() }); log('gravado (edição externa)', plain(c.title)); toast('Movido para Prontos'); },
   baixar: (c) => baixar(c),
   agendar(c) {
@@ -1331,7 +1824,7 @@ function openVideo(c) {
   const isReel7 = c.type === 'reel7';
   openSheet(`<h2>Enviar vídeo</h2><p class="small muted">${esc(plain(c.title))}</p>
     ${isReel7 ? `<p class="small">A Central monta o Reel final: recorta em 1080x1920, usa os primeiros 7 segundos, aplica a frase com a identidade visual e tira o áudio original (a trilha você escolhe no Instagram, que é licenciada).</p>`
-      : `<p class="small">O vídeo fica guardado junto com o roteiro e a capa. Edição automática de Reel falado (cortes, legendas queimadas, capa) ainda não roda no celular: hoje ela é feita pela produção no servidor. Por enquanto, use o .srt revisável e os cortes sugeridos no seu editor.</p>`}
+      : `<p class="small">O vídeo fica guardado junto com o roteiro e a capa. Depois de enviar, toque em <b>Editar com animações</b> no card: a Central corta as pausas, acerta o volume e coloca uma animação no começo de cada frase do roteiro, aqui no aparelho.</p>`}
     ${(() => { const fs = (c.files || []).filter(f => f.grupo === 'bruto'); return fs.length && !c.videoCompleto ? `<p class="small"><strong>Já guardei ${fs.length} parte(s), até ${Math.floor((fs[fs.length - 1].fim || 0) / 60)} min.</strong> Escolha o mesmo vídeo que eu continuo de onde parou.</p>` : ''; })()}
     ${isReel7 ? '' : `<label for="vd-quem">Quem gravou<select id="vd-quem">${(MARCA === 'nc' ? EQUIPE_NC : ['Núbia', 'Outra pessoa']).map(n => `<option ${c.payload && c.payload.advogado && n.startsWith(String(c.payload.advogado).split(' ')[0]) ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
     <label for="vd-obs">Seguiu o roteiro? O que mudou na fala? (para o diretor editar certo)<textarea id="vd-obs" placeholder="Ex.: seguiu o roteiro, mas trocou o exemplo do uniforme por quebra de caixa"></textarea></label>`}
