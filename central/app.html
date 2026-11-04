@@ -246,7 +246,7 @@ async function boot() {
   col('settings').doc('usage').onSnapshot(d => { S.usage = d.exists ? d.data() : null; render(); });
   col('settings').doc('rotina').onSnapshot(d => { S.rotina = d.exists ? d.data() : null; render(); });
   col('settings').doc('rotinaMkt').onSnapshot(d => { S.rotinaMkt = d.exists ? d.data() : null; render(); }, () => {});
-  if (MARCA !== 'nc') col('settings').doc('estrategiaTiktok').onSnapshot(d => { S.tiktok = d.exists ? d.data() : null; render(); }, () => {});
+  col('settings').doc('estrategiaTiktok').onSnapshot(d => { S.tiktok = d.exists ? d.data() : null; render(); }, () => {});
   S.db.collection('settings').doc('buscaTrends').onSnapshot(d => { S.buscaTrends = d.exists ? d.data() : null; render(); }, () => {});
   setTimeout(() => { S.loaded = true; render(); }, 2500);
 }
@@ -273,7 +273,7 @@ document.addEventListener('click', (e) => {
   const a = e.target.closest('[data-nav="mais"]');
   if (a) { e.preventDefault(); openSheet(`<h2>Mais</h2><div class="more">
     <a href="#conversa" data-close style="grid-column:1/-1"><b>Conversa com o diretor</b><span class="small muted">Avise o que subiu, peça ajustes e veja as respostas</span></a>
-    ${MARCA !== 'nc' ? `<a href="#tiktok" data-close style="grid-column:1/-1"><b>Estratégia TikTok</b><span class="small muted">Fases, formatos e funil dos produtos</span></a>` : ''}
+    <a href="#tiktok" data-close style="grid-column:1/-1"><b>${MARCA === 'nc' ? 'Estratégia do NC' : 'Estratégia TikTok'}</b><span class="small muted">${MARCA === 'nc' ? 'Séries, frases fixas, edição e regras da OAB' : 'Fases, formatos e funil dos produtos'}</span></a>
     <a href="#rotina" data-close style="grid-column:1/-1"><b>Rotina do marketing</b><span class="small muted">O que postar e o que fazer em cada dia</span></a>
     <a href="#diretor" data-close style="grid-column:1/-1"><b>Diretor de marketing</b><span class="small muted">Metas, funil, experimentos e relatório semanal</span></a>
     <a href="#calendario" data-close><b>Calendário</b><span class="small muted">Programação das publicações</span></a>
@@ -725,7 +725,7 @@ function render() {
     gravar: () => vLista(['gravar'], 'Gravar', 'Roteiros para <em>gravar</em>', 'Grave, envie o vídeo e a Central prepara o restante do que já está integrado.', 'Nada para gravar', 'Quando você aprovar um Reel, ele aparece aqui com cena e roteiro.'),
     aprovar: () => vLista(['aprovar'], 'Aprovar', 'Esperando seu <em>sim</em>', 'Nada é publicado sem a sua aprovação expressa.', 'Nada aguardando', 'Crie um conteúdo ou monte a semana para receber propostas.'),
     prontos: () => vLista(['pronto', 'agendado'], 'Prontos', 'Arquivos para <em>publicar</em>', 'Baixe os arquivos, copie a legenda e publique.', 'Nenhum arquivo pronto', 'Aprove conteúdos para que as artes finais apareçam aqui.'),
-    calendario: vCalendario, diretor: vDiretor, resultados: vResultados, vendas: vVendas, marca: vMarca, conversa: vConversa, rotina: () => vRotina(), tiktok: () => vRotina(S.tiktok, 'TikTok', 'Estratégia <em>TikTok</em>')
+    calendario: vCalendario, diretor: vDiretor, resultados: vResultados, vendas: vVendas, marca: vMarca, conversa: vConversa, rotina: () => vRotina(), tiktok: () => vRotina(S.tiktok, MARCA === 'nc' ? 'Estratégia' : 'TikTok', MARCA === 'nc' ? 'Estratégia do <em>NC</em>' : 'Estratégia <em>TikTok</em>')
   }[v]();
   $('#app').innerHTML = html;
   $('#app').querySelectorAll('select[data-serie]').forEach(sel => sel.addEventListener('change', async () => {

@@ -46,3 +46,8 @@ Regras novas: nada de imagem de autoridade ou pessoa real identificável (minist
 4. Imagens de apoio geradas no Runway (nano-banana-2, 9:16, 7 créditos cada), 1,5 s com zoom lento, no momento da fala. NC: imagens sóbrias, sem algemas, sangue, viatura em ação ou qualquer cena sensacionalista; nunca cliente, pessoa real ou lugar identificável.
 5. Velocidade final 1,1x.
 6. Gancho no topo nos 3 primeiros segundos, ficha de nome e cargo, CTA final e @.
+
+## Estética v2 (aprovada em 04/11/2026, perfil pessoal e NC)
+- Legenda editorial: Archivo 700 em maiúsculas, 82px, letter-spacing -3px, a palavra falada em branco e as seguintes a 55%; expressão-chave em Bodoni itálico 600 dentro do grifo (vinho no pessoal; preto com texto bege no NC). Degradê escuro na metade de baixo.
+- Listas (primeiro, segundo, terceiro): número grande em Bodoni itálico ("01") no topo, rótulo pequeno espaçado e título curto, com barra de progresso de 3 traços que acende a cada ponto.
+- Imagens de apoio em tela dividida: pessoa em cima (960px), imagem embaixo (960px), linha fina na cor da marca entre as duas, etiqueta com a ação da cena, legenda na divisa.
