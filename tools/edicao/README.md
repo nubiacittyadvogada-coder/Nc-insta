@@ -36,3 +36,11 @@ Advogado sentado à mesa: somar `mascara-mesa.png` à máscara (blend lighten) p
 4. Imagens de apoio ilustrando a frase (pessoa ao telefone em pânico, mãos digitando, audiência), de 1 a 2 segundos.
 5. Transição por desfoque e flash branco curto. Fora: transição de grade ou glitch, que briga com a identidade premium.
 Regras novas: nada de imagem de autoridade ou pessoa real identificável (ministros, juízes, sessões reais) nem banco de imagens sem licença; preferir imagens de apoio gravadas pela equipe (rotina da Karol) ou de banco com licença comercial. Sempre manter, mesmo com esse ritmo: texto do gancho no topo nos 3 primeiros segundos, ficha de nome e cargo, CTA final e @.
+
+## Padrão atualizado 04/11/2026 (vale para o perfil pessoal e para o NC Advogados)
+1. Transcrição com Whisper (modelo small, pt) para cortar repetições e tropeços palavra por palavra. Conferir trechos suspeitos ouvindo de novo: o Whisper às vezes "engole" frases repetidas.
+2. Zoom de corte por frase (100%, 118%, 100%, 132%) e flash branco curto nas viradas (primeiro, segundo, terceiro).
+3. Legenda limpa em blocos de 1 a 3 palavras, sem tarja, com grifo nas palavras-chave (vinho no pessoal, preto com texto bege no NC).
+4. Imagens de apoio geradas no Runway (nano-banana-2, 9:16, 7 créditos cada), 1,5 s com zoom lento, no momento da fala. NC: imagens sóbrias, sem algemas, sangue, viatura em ação ou qualquer cena sensacionalista; nunca cliente, pessoa real ou lugar identificável.
+5. Velocidade final 1,1x.
+6. Gancho no topo nos 3 primeiros segundos, ficha de nome e cargo, CTA final e @.
