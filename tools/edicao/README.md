@@ -54,3 +54,12 @@ Regras novas: nada de imagem de autoridade ou pessoa real identificável (minist
 
 ## Ficha de nome (04/11/2026)
 Nome sempre em UMA fonte só (Archivo 700, 58px), nunca misturando com itálico. Cargo embaixo em Archivo 600 espaçado (.28em). Cartão off-white com barra lateral na cor da marca (vinho no pessoal, preto no NC). Modelo: ficha-nome.html.
+
+## Ajustes de 04/11/2026 (Núbia achou feio na v2, valem para tudo)
+1. Sem contorno claro em volta da pessoa: máscara dilatada (dilation x7 + gblur 4) e fundo com gblur sigma 6, não 9.
+2. Primeiro quadro com olhos abertos: começar o corte no primeiro quadro de olho aberto antes da primeira palavra (conferir o silêncio no áudio).
+3. Gancho visível já no quadro 0, sem entrar com fade.
+4. Sem legenda enquanto o gancho está na tela (texto repetido duas vezes fica amador).
+5. Ficha de nome discreta: cartão escuro translúcido (#111 a 82%), nome 46px claro, cargo 19px bege, barra fina bege, sem sombra.
+6. CTA final no estilo do gancho (caixa escura + itálico no grifo claro + @ pequeno embaixo), sobre a mesa/parte escura, e sem legenda ao mesmo tempo.
+7. Grifo da palavra-chave sempre sólido; antes de ser falada, só o texto fica apagado.
