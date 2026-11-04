@@ -1,5 +1,7 @@
 # Padrão de edição "cinema" (aprovado pela Núbia em 04/11/2026)
 
+**Antes de editar numa sessão nova: rode `bash tools/edicao/setup.sh`** (instala Whisper e o recorte e baixa o modelo).
+
 1. Recorte da pessoa (modelo selfie_multiclass_256x256 do MediaPipe, rodado com ai-edge-litert):
    `python3 recorte_fundo.py VIDEO INICIO DURACAO selfie_multiclass_256x256.tflite mascara.mp4`
    Modelo: https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite (não versionar).
