@@ -246,6 +246,7 @@ async function boot() {
   col('settings').doc('usage').onSnapshot(d => { S.usage = d.exists ? d.data() : null; render(); });
   col('settings').doc('rotina').onSnapshot(d => { S.rotina = d.exists ? d.data() : null; render(); });
   col('settings').doc('rotinaMkt').onSnapshot(d => { S.rotinaMkt = d.exists ? d.data() : null; render(); }, () => {});
+  col('settings').doc('modeloRecorte').onSnapshot(d => { S.modeloRecorte = d.exists ? d.data() : null; }, () => {});
   if (MARCA !== 'nc') col('settings').doc('estrategiaTiktok').onSnapshot(d => { S.tiktok = d.exists ? d.data() : null; render(); }, () => {});
   S.db.collection('settings').doc('buscaTrends').onSnapshot(d => { S.buscaTrends = d.exists ? d.data() : null; render(); }, () => {});
   setTimeout(() => { S.loaded = true; render(); }, 2500);
@@ -756,10 +757,47 @@ const EditorAnim = (() => {
       const n = buf.length, mono = new Float32Array(n);
       for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = 0; i < n; i++) mono[i] += d[i] / buf.numberOfChannels; }
       return { mono, sr: buf.sampleRate, duracao: buf.duration };
-    } catch (e) { throw new Error('Não consegui ler o áudio deste vídeo. Grave de novo pela câmera do celular (MP4 ou MOV) e tente outra vez.'); }
+    } catch (e) { throw Object.assign(new Error('Não consegui ler o áudio direto do arquivo.'), { code: 'sem_audio' }); }
     finally { try { ac.close(); } catch (e) { /* ok */ } }
   }
   const PASSO = 0.02;   // análise em janelas de 20 ms
+  // Segunda forma de ouvir (o Safari do iPhone não lê o áudio de alguns .mov direto do arquivo):
+  // toca o vídeo sem som, 2x mais rápido, e mede o volume enquanto toca.
+  // `prepararLeitura` precisa ser chamada dentro do toque (regra do iPhone para tocar vídeo).
+  function prepararLeitura(blob, acExistente) {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) throw new Error('Este navegador não consegue ouvir o áudio do vídeo.');
+    const ac = acExistente || new AC(); const v = document.createElement('video');
+    v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
+    v.style.cssText = 'position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none'; document.body.appendChild(v);
+    v.src = URL.createObjectURL(blob);
+    const src = ac.createMediaElementSource(v); const an = ac.createAnalyser(); an.fftSize = 1024;
+    const mudo = ac.createGain(); mudo.gain.value = 0; src.connect(an); an.connect(mudo); mudo.connect(ac.destination);   // passa pela análise, sai sem som
+    try { v.preservesPitch = false; v.webkitPreservesPitch = false; } catch (e) { /* ok */ }
+    v.playbackRate = 2; const tocando = v.play(); if (ac.state === 'suspended') ac.resume().catch(() => null);
+    return { ac, v, an, tocando, fechar: () => { try { v.pause(); v.remove(); URL.revokeObjectURL(v.src); src.disconnect(); if (!acExistente) ac.close(); } catch (e) { /* ok */ } } };
+  }
+  async function energiaAoVivo(prep, onProgresso) {
+    const { v, an } = prep;
+    try {
+      try { await prep.tocando; } catch (e) { throw new Error('O aparelho bloqueou a reprodução. Toque no botão de novo.'); }
+      if (!isFinite(v.duration) || !v.duration) await new Promise((ok) => { v.onloadedmetadata = ok; setTimeout(ok, 4000); });
+      v.playbackRate = 2; const dur = v.duration; if (!isFinite(dur) || !dur) throw new Error('Este aparelho não abriu o vídeo.');
+      const n = Math.ceil(dur / PASSO); const db = new Float32Array(n).fill(NaN); const buf = new Float32Array(an.fftSize); let ult = -1;
+      await new Promise((ok) => {
+        const passo = () => {
+          const t = v.currentTime; an.getFloatTimeDomainData(buf); let s = 0; for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i];
+          const val = 10 * Math.log10(s / buf.length + 1e-12); const k = Math.min(n - 1, Math.floor(t / PASSO));
+          for (let j = Math.max(0, ult + 1); j <= k; j++) db[j] = val; ult = Math.max(ult, k);
+          if (onProgresso) onProgresso(Math.min(1, t / dur));
+          if (v.ended || t >= dur - 0.05) ok(); else requestAnimationFrame(passo);
+        };
+        v.onended = ok; passo();
+      });
+      let ant = -120; for (let i = 0; i < n; i++) { if (isNaN(db[i])) db[i] = ant; ant = db[i]; }
+      if (Math.max(...db) < -70) throw new Error('Não encontrei som neste vídeo. Confira se ele tem áudio.');
+      return db;
+    } finally { prep.fechar(); }
+  }
   function energia(mono, sr) {
     const n = Math.floor(sr * PASSO), quadros = Math.floor(mono.length / n), db = new Float32Array(quadros);
     for (let q = 0; q < quadros; q++) { let s = 0; for (let i = q * n, f = i + n; i < f; i++) s += mono[i] * mono[i]; db[q] = 10 * Math.log10(s / n + 1e-12); }
@@ -960,6 +998,32 @@ const EditorAnim = (() => {
     nenhuma() {},
   };
   // Nome e área nos 3 primeiros segundos; @ no final (terço de baixo).
+  // Legenda feita no aparelho: o texto vem do roteiro e o tempo vem do casamento roteiro x fala
+  // (as palavras de cada bloco se espalham pela fala dele, pelo tamanho de cada palavra). Até 3 palavras por vez.
+  function montarLegenda(plano) {
+    const out = [];
+    plano.blocos.forEach((b, i) => {
+      const ini = b.inicio + 0.05, fim = (i + 1 < plano.blocos.length ? plano.blocos[i + 1].inicio : plano.total) - 0.12;
+      const ws = semAst(b.fala).split(' ').filter(Boolean); if (!ws.length || fim <= ini) return;
+      const peso = ws.map((w) => w.replace(/[^\wÀ-ú]/g, '').length + 2); const tot = peso.reduce((a, x) => a + x, 0);
+      let acc = 0; const pal = ws.map((w, k) => { const t0 = ini + (acc / tot) * (fim - ini); acc += peso[k]; return { w: w.replace(/[.,;:]+$/, ''), t0, t1: ini + (acc / tot) * (fim - ini) }; });
+      let g = []; pal.forEach((p, k) => { g.push(p); if (g.length === 3 || /[.,!?;:]$/.test(ws[k]) || k === pal.length - 1) { out.push({ ini: g[0].t0, fim: g[g.length - 1].t1, palavras: g }); g = []; } });
+    });
+    return out;
+  }
+  function legenda(ctx, t, plano, yc) {
+    if (plano.legenda === false) return;
+    const chave = plano.blocos.map((b) => b.inicio + ':' + b.fala.length).join('|') + plano.total;
+    if (plano._legChave !== chave) { Object.defineProperty(plano, '_leg', { value: montarLegenda(plano), writable: true, configurable: true, enumerable: false }); Object.defineProperty(plano, '_legChave', { value: chave, writable: true, configurable: true, enumerable: false }); }
+    const g = plano._leg.find((x) => t >= x.ini && t < x.fim); if (!g) return;
+    const T = tema(); let tam = 72; ctx.save(); ctx.font = `700 ${tam}px ${T.sans}`; const esp = () => ctx.measureText(' ').width;
+    const larg = () => g.palavras.reduce((a, p) => a + ctx.measureText(p.w).width, 0) + esp() * (g.palavras.length - 1);
+    while (larg() > W - 160 && tam > 36) { tam -= 4; ctx.font = `700 ${tam}px ${T.sans}`; }
+    const entra = ease((t - g.ini) / 0.12); let x = (W - larg()) / 2;
+    ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 3; ctx.fillStyle = '#FFFFFF';
+    for (const p of g.palavras) { ctx.globalAlpha = entra * (t >= p.t0 ? 1 : 0.6); ctx.fillText(p.w, x, yc + (1 - entra) * 10); x += ctx.measureText(p.w).width + esp(); }
+    ctx.restore();
+  }
   function rodape(ctx, t, total, info, T) {
     if (info.nome && t < 3) { const al = entraSai(t, 3, 0.35, 0.4); const x = 70, y = BASE.y + 120; ctx.save(); ctx.globalAlpha = al; ctx.translate((1 - ease(t / 0.4)) * -60, 0);
       ctx.font = `700 66px ${T.sans}`; const w1 = ctx.measureText(info.nome).width; ctx.font = `italic 600 46px ${T.serif}`; const w2 = info.area ? ctx.measureText(info.area).width : 0; const w = Math.max(w1, w2) + 80;
@@ -971,9 +1035,11 @@ const EditorAnim = (() => {
   }
   // Desenha um quadro: vídeo cobrindo 1080x1920 (recorte central) e as animações do tempo t (já cortado).
   function quadro(ctx, video, t, plano) {
+    if (plano.acabamento && plano.acabamento !== 'natural' && (typeof CinemaFX !== 'undefined')) return CinemaFX.quadro(ctx, video, t, plano);
     const T = tema(); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
     if (video && video.videoWidth) { const vw = video.videoWidth, vh = video.videoHeight, k = Math.max(W / vw, H / vh); const dw = vw * k, dh = vh * k; ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh); }
     plano.blocos.forEach((b, i) => { const ini = b.inicio, fim = i + 1 < plano.blocos.length ? plano.blocos[i + 1].inicio : plano.total; if (t >= ini && t < fim && b.anim && DESENHO[b.anim.tipo]) DESENHO[b.anim.tipo](ctx, b.anim, t - ini, fim - ini, T); });
+    legenda(ctx, t, plano, 1190);
     const ult = plano.blocos[plano.blocos.length - 1];
     rodape(ctx, t, plano.total, Object.assign({}, plano.info || {}, { handleNoTopo: !!(ult && ult.anim && ['cta', 'data'].includes(ult.anim.tipo)) }), T);
   }
@@ -1018,7 +1084,7 @@ const EditorAnim = (() => {
     rec.start(500); rec.pause(); laco();
     try {
       for (const c of plano.mapa.clipes) {
-        video.currentTime = c.orig;
+        video.currentTime = c.orig; if (typeof CinemaFX !== 'undefined') CinemaFX.reiniciar();
         await new Promise((ok, err) => { const to = setTimeout(() => err(new Error('O vídeo travou ao pular um trecho. Tente de novo com a tela ligada.')), 15000); video.onseeked = () => { clearTimeout(to); ok(); }; });
         desenhar(); rec.resume(); await video.play();
         await new Promise((ok) => { const fim = () => { if (video.currentTime >= c.fimOrig || video.ended) { video.pause(); ok(); } else requestAnimationFrame(fim); }; fim(); });
@@ -1045,7 +1111,8 @@ const EditorAnim = (() => {
     const total = blocos.length;
     const bs = blocos.map((b, i) => { const anim = sugerir(b, i, { ...ctx, total }); return { fala: semAst(b.fala), inicio: inicios[i] || 0, anim }; });
     bs.forEach((b, i) => { if (b.anim.tipo === 'lista') b.anim.tempos = temposDaLista(b.anim, b, (i + 1 < bs.length ? bs[i + 1].inicio : m.total) - b.inicio); });
-    return { trechos, mapa: m, total: m.total, blocos: bs, ganho: ganhoParaNormalizar(db, limiar), duracaoOriginal: db.length * PASSO };
+    const cin = (typeof CinemaFX !== 'undefined') ? CinemaFX.sugerir(bs, ctx) : []; bs.forEach((b, i) => { b.animCinema = cin[i] || null; });
+    return { acabamento: (typeof CinemaFX !== 'undefined') ? 'cinema' : 'natural', cinema: { desfoque: true, cartao: 'fume', wb: [1, 1, 1] }, legenda: true, trechos, mapa: m, total: m.total, blocos: bs, ganho: ganhoParaNormalizar(db, limiar), duracaoOriginal: db.length * PASSO };
   }
 
   // Animações que fazem sentido para o bloco (número e data só se existirem no texto) e o padrão de cada uma.
@@ -1071,7 +1138,323 @@ const EditorAnim = (() => {
     return { tipo: 'nenhuma' };
   }
 
-  return { NOMES, opcoes, padrao, W, H, decodificar, energia, trechosDeFala, mapa, casarBlocos, sugerir, numeroDoTexto, valida, planejar, quadro, temposDaLista, exportar, podeExportar, formatoGravacao, palavraForte, itensDaLista, PASSO };
+  return { prepararLeitura, energiaAoVivo, legenda, montarLegenda, NOMES, opcoes, padrao, W, H, decodificar, energia, trechosDeFala, mapa, casarBlocos, sugerir, numeroDoTexto, valida, planejar, quadro, temposDaLista, exportar, podeExportar, formatoGravacao, palavraForte, itensDaLista, PASSO };
+})();
+
+// ================= acabamento cinema (padrão aprovado em 04/11/2026) =================
+// Receita: Nc-insta/tools/edicao/README.md. Tudo no navegador:
+// recorte da pessoa (MediaPipe, modelo guardado como arquivo da própria Central), fundo desfocado,
+// cor natural (sem amarelar), brilho suave, escurecimento nas bordas, granulação leve,
+// letras editoriais e cartão de vidro. No máximo 2 animações por vídeo.
+const CinemaFX = (() => {
+  const W = 1080, H = 1920;
+  const MP_VERSAO = '0.10.14';
+  const MP_BASE = () => window.EDITOR_MP_BASE || `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSAO}`;
+  const MODELO_NOME = 'selfie_multiclass_256x256.tflite';
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const ease4 = (t) => 1 - Math.pow(1 - clamp(t, 0, 1), 4);
+  const semAst = (s) => String(s || '').replace(/\*/g, '').replace(/\s+/g, ' ').trim();
+
+  // ---------- recorte da pessoa ----------
+  let seg = null, segCarregando = null, mascAnt = null, ultimoTs = 0;
+  async function urlModelo() {
+    if (window.EDITOR_MODELO_URL) return window.EDITOR_MODELO_URL;          // testes
+    if (window.LEXUP) return '/modelos/' + MODELO_NOME;                     // app: arquivo do próprio app
+    if (typeof S !== 'undefined' && S.modeloRecorte && S.modeloRecorte.url) return S.modeloRecorte.url;   // Central: arquivo guardado na própria Central
+    return 'https://app.lexupsolucoesjuridicas.com.br/modelos/' + MODELO_NOME;   // reserva: o mesmo arquivo servido pelo app LexUp
+  }
+  async function carregarRecorte() {
+    if (seg) return seg; if (segCarregando) return segCarregando;
+    segCarregando = (async () => {
+      const url = await urlModelo();
+      if (!url) throw Object.assign(new Error('O recorte de fundo ainda não foi instalado nesta Central.'), { code: 'sem_modelo' });
+      const mp = await import(MP_BASE() + '/vision_bundle.mjs');
+      const fs = await mp.FilesetResolver.forVisionTasks(MP_BASE() + '/wasm');
+      const opc = (delegate) => ({ baseOptions: { modelAssetPath: url, delegate }, runningMode: 'VIDEO', outputCategoryMask: false, outputConfidenceMasks: true });
+      try { if (window.EDITOR_MP_DELEGATE === 'CPU') throw new Error('cpu'); seg = await mp.ImageSegmenter.createFromOptions(fs, opc('GPU')); }
+      catch (e) { seg = await mp.ImageSegmenter.createFromOptions(fs, opc('CPU')); }
+      return seg;
+    })();
+    try { return await segCarregando; } catch (e) { segCarregando = null; throw e; }
+  }
+  // Máscara da pessoa (0 a 255), com a borda suavizada e sem piscar entre quadros.
+  // O modelo trabalha em 256x256: entregar o vídeo reduzido (lado maior 384) evita ler milhões de pontos por quadro.
+  let mini = null;
+  function reduzido(video) {
+    const k = Math.min(1, 384 / Math.max(video.videoWidth, video.videoHeight)); const w = Math.max(2, Math.round(video.videoWidth * k)), h = Math.max(2, Math.round(video.videoHeight * k));
+    if (!mini) { mini = document.createElement('canvas'); mini.ctx = mini.getContext('2d'); }
+    if (mini.width !== w || mini.height !== h) { mini.width = w; mini.height = h; }
+    mini.ctx.drawImage(video, 0, 0, w, h); return mini;
+  }
+  function mascara(video) {
+    if (!seg || !video.videoWidth) return null;
+    let ts = performance.now(); if (ts <= ultimoTs) ts = ultimoTs + 1; ultimoTs = ts;
+    const r = seg.segmentForVideo(reduzido(video), ts);
+    const m0 = r && r.confidenceMasks && r.confidenceMasks[0]; if (!m0) return null;
+    const fundo = m0.getAsFloat32Array(); const w = m0.width, h = m0.height;
+    r.confidenceMasks.forEach((m) => m.close && m.close());
+    if (!mascAnt || mascAnt.length !== fundo.length) mascAnt = null;
+    const out = new Float32Array(fundo.length);
+    for (let i = 0; i < fundo.length; i++) {
+      const a = clamp((1 - fundo[i] - 0.3) / 0.4, 0, 1);                   // mesma rampa da receita
+      out[i] = mascAnt ? 0.55 * a + 0.45 * mascAnt[i] : a;                  // suaviza a variação entre quadros
+    }
+    mascAnt = out;
+    const u8 = new Uint8Array(out.length); for (let i = 0; i < out.length; i++) u8[i] = out[i] * 255;
+    return { dados: u8, w, h };
+  }
+  // Mede se o aparelho dá conta do recorte (ms por quadro).
+  // Depois de pular para outro ponto do vídeo, a máscara anterior não serve para suavizar.
+  function reiniciar() { mascAnt = null; }
+  // Conta o quadro inteiro (recorte + acabamento), que é o que pesa na exportação.
+  async function medirVelocidade(video) {
+    await carregarRecorte(); for (let i = 0; i < 3; i++) { renderizar(video, { desfoque: true }, null); GL.gl.finish(); }   // aquece (o 1º quadro compila tudo)
+    const t0 = performance.now(); let n = 0;
+    for (; n < 6; n++) { renderizar(video, { desfoque: true }, null); GL.gl.finish(); }
+    return (performance.now() - t0) / n;
+  }
+  // Acima disso o aparelho não acompanha 30 quadros por segundo com o recorte.
+  const LENTO_MS = 60;   // abaixo de ~16 quadros por segundo o vídeo fica travado
+
+  // ---------- WebGL: fundo desfocado, cor, brilho, bordas, granulação e vidro ----------
+  const VS = 'attribute vec2 p; varying vec2 uv; void main(){ uv = p*0.5+0.5; gl_Position = vec4(p,0.,1.); }';
+  const FS_COPIA = 'precision mediump float; varying vec2 uv; uniform sampler2D t; uniform vec2 sc, of; void main(){ gl_FragColor = texture2D(t, uv*sc+of); }';
+  const FS_BLUR = `precision mediump float; varying vec2 uv; uniform sampler2D t; uniform vec2 d;
+    void main(){ vec4 c = texture2D(t, uv)*0.2270270;
+      c += (texture2D(t, uv+d*1.3846154)+texture2D(t, uv-d*1.3846154))*0.3162162;
+      c += (texture2D(t, uv+d*3.2307692)+texture2D(t, uv-d*3.2307692))*0.0702703; gl_FragColor = c; }`;
+  const FS_FINAL = `precision mediump float; varying vec2 uv;
+    uniform sampler2D tVid, tBg, tVidro, tMask; uniform vec2 sc, of, mTex, res; uniform float usaMask, quadro, cartaoA, cartaoClaro;
+    uniform vec3 wb; uniform vec4 cartao;
+    float luma(vec3 c){ return dot(c, vec3(0.2126,0.7152,0.0722)); }
+    float hash(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
+    float sdRR(vec2 p, vec2 b, float r){ vec2 q = abs(p)-b+r; return length(max(q,0.0))+min(max(q.x,q.y),0.0)-r; }
+    void main(){
+      vec2 vuv = uv*sc+of;
+      vec3 nitido = texture2D(tVid, vuv).rgb;
+      vec3 fundo = texture2D(tBg, uv).rgb; fundo = mix(vec3(luma(fundo)), fundo, 0.85) - 0.03;
+      float m = 1.0;
+      if (usaMask > 0.5) {
+        m = (2.0*texture2D(tMask, vuv).r + texture2D(tMask, vuv+vec2(mTex.x,0.)).r + texture2D(tMask, vuv-vec2(mTex.x,0.)).r
+          + texture2D(tMask, vuv+vec2(0.,mTex.y)).r + texture2D(tMask, vuv-vec2(0.,mTex.y)).r) / 6.0;
+        m = smoothstep(0.12, 0.88, m);
+      }
+      vec3 c = mix(fundo, nitido, m);
+      c *= wb;                                                   // correção de branco mínima e neutra
+      // contraste em curva S só na luz (a cor da pele não muda de tom: nunca amarela)
+      float l0 = luma(c); float l1 = mix(l0, l0*l0*(3.0-2.0*l0), 0.55); c += (l1 - l0);
+      c = mix(vec3(luma(c)), c, 1.05);                           // saturação leve
+      c = 0.012 + c*0.976;                                       // pretos um pouco abertos, sem lavar
+      vec3 halo = texture2D(tVidro, uv).rgb; float hl = smoothstep(0.55, 0.95, luma(halo));
+      c = 1.0 - (1.0-c)*(1.0-0.16*hl*halo);                      // brilho suave nas luzes
+      vec2 dv = (uv-0.5)*vec2(1.0, res.y/res.x); float rv = length(dv)/length(vec2(0.5, 0.5*res.y/res.x));
+      c *= 1.0 - 0.34*smoothstep(0.38, 1.0, rv);                 // escurecimento leve nas bordas
+      if (cartaoA > 0.001) {
+        vec2 px = vec2(uv.x*res.x, (1.0-uv.y)*res.y); vec2 cen = cartao.xy + cartao.zw*0.5;
+        float dd = sdRR(px-cen, cartao.zw*0.5, 44.0);
+        if (dd < 0.0) {
+          vec3 g = texture2D(tVidro, uv).rgb;
+          vec3 v = cartaoClaro > 0.5 ? mix(g, vec3(1.0), 0.16) : mix(g, vec3(0.07,0.055,0.06), 0.42);
+          float borda = 1.0 - smoothstep(-3.0, -1.0, dd);
+          v = mix(v, vec3(1.0), (1.0-borda)*(cartaoClaro > 0.5 ? 0.45 : 0.24));
+          c = mix(c, v, cartaoA);
+        }
+      }
+      c += (hash(uv*res + quadro*7.13) - 0.5) * 0.032;           // granulação de filme bem leve
+      gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
+    }`;
+  let GL = null;
+  function criarGL() {
+    if (GL) return GL;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const gl = cv.getContext('webgl', { preserveDrawingBuffer: true, premultipliedAlpha: false }) || cv.getContext('experimental-webgl', { preserveDrawingBuffer: true });
+    if (!gl) throw new Error('Este aparelho não tem aceleração gráfica para o acabamento Cinema. Use o acabamento Natural.');
+    const sh = (tipo, src) => { const s = gl.createShader(tipo); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('Cinema: ' + gl.getShaderInfoLog(s)); return s; };
+    const prog = (fs) => { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); const u = {}; const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+      for (let i = 0; i < n; i++) { const a = gl.getActiveUniform(p, i); u[a.name] = gl.getUniformLocation(p, a.name); } return { p, u, a: gl.getAttribLocation(p, 'p') }; };
+    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const tex = (w, h) => { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach((k) => gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR));
+      [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach((k) => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); if (w) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); return t; };
+    const fbo = (w, h) => { const t = tex(w, h); const f = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, f); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0); return { t, f, w, h }; };
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    const q4 = [W / 4, H / 4], q8 = [W / 8, H / 8];
+    GL = { cv, gl, buf, copia: prog(FS_COPIA), blur: prog(FS_BLUR), final: prog(FS_FINAL), tVid: tex(), tMask: tex(),
+      a1: fbo(...q4), a2: fbo(...q4), b1: fbo(...q8), b2: fbo(...q8) };
+    return GL;
+  }
+  function passo(P, alvo, uni) {
+    const { gl, buf } = GL; gl.bindFramebuffer(gl.FRAMEBUFFER, alvo ? alvo.f : null); gl.viewport(0, 0, alvo ? alvo.w : W, alvo ? alvo.h : H);
+    gl.useProgram(P.p); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.enableVertexAttribArray(P.a); gl.vertexAttribPointer(P.a, 2, gl.FLOAT, false, 0, 0);
+    let unit = 0;
+    for (const [k, v] of Object.entries(uni)) { const loc = P.u[k]; if (loc == null) continue;
+      if (v && v.tex) { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, v.tex); gl.uniform1i(loc, unit++); }
+      else if (Array.isArray(v)) gl['uniform' + v.length + 'fv'](loc, v); else gl.uniform1f(loc, v); }
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  function capa(video) { const vw = video.videoWidth || W, vh = video.videoHeight || H; const k = Math.max(W / vw, H / vh); const sx = (W / k) / vw, sy = (H / k) / vh; return { sc: [sx, sy], of: [(1 - sx) / 2, (1 - sy) / 2] }; }
+  let nQuadro = 0;
+  // Desenha o vídeo com o acabamento no canvas WebGL e devolve o canvas.
+  function renderizar(video, est, cartaoGeo) {
+    const G = criarGL(); const { gl } = G;
+    gl.bindTexture(gl.TEXTURE_2D, G.tVid); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+    const m = est.desfoque ? mascara(video) : null;
+    if (m) { gl.bindTexture(gl.TEXTURE_2D, G.tMask); gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1); gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, m.w, m.h, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, m.dados); gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4); }
+    const cp = capa(video);
+    passo(G.copia, G.a1, { t: { tex: G.tVid }, sc: cp.sc, of: cp.of });
+    passo(G.blur, G.a2, { t: { tex: G.a1.t }, d: [1 / G.a1.w, 0] }); passo(G.blur, G.a1, { t: { tex: G.a2.t }, d: [0, 1 / G.a1.h] });
+    passo(G.blur, G.a2, { t: { tex: G.a1.t }, d: [0.8 / G.a1.w, 0] }); passo(G.blur, G.a1, { t: { tex: G.a2.t }, d: [0, 0.8 / G.a1.h] });   // fundo (desfoque moderado, ~30% menor)
+    passo(G.copia, G.b1, { t: { tex: G.a1.t }, sc: [1, 1], of: [0, 0] });
+    for (let i = 0; i < 2; i++) { passo(G.blur, G.b2, { t: { tex: G.b1.t }, d: [2 / G.b1.w, 0] }); passo(G.blur, G.b1, { t: { tex: G.b2.t }, d: [0, 2 / G.b1.h] }); }   // vidro (sigma ~30)
+    const c = cartaoGeo || { x: 0, y: 0, w: 0, h: 0, a: 0 };
+    passo(G.final, null, { tVid: { tex: G.tVid }, tBg: { tex: G.a1.t }, tVidro: { tex: G.b1.t }, tMask: { tex: G.tMask }, sc: cp.sc, of: cp.of,
+      mTex: m ? [1 / m.w, 1 / m.h] : [0, 0], res: [W, H], usaMask: m ? 1 : 0, quadro: (nQuadro++ % 997), cartaoA: c.a, cartaoClaro: est.cartao === 'claro' ? 1 : 0,
+      wb: est.wb || [1, 1, 1], cartao: [c.x, c.y, c.w, c.h] });
+    return G.cv;
+  }
+  // Correção de branco mínima: puxa a média dos quadros para o neutro (no máximo 3% por canal). Nunca esquenta.
+  async function balancoDeBranco(video, tempos) {
+    const cv = document.createElement('canvas'); cv.width = 36; cv.height = 64; const ctx = cv.getContext('2d', { willReadFrequently: true });
+    let r = 0, g = 0, b = 0, n = 0;
+    for (const t of tempos) {
+      video.currentTime = t; await new Promise((ok) => { video.onseeked = ok; setTimeout(ok, 1500); });
+      try { ctx.drawImage(video, 0, 0, 36, 64); const d = ctx.getImageData(0, 0, 36, 64).data; for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; } } catch (e) { /* segue */ }
+    }
+    if (!n) return [1, 1, 1];
+    r /= n; g /= n; b /= n; const cinza = (r + g + b) / 3;
+    const ganho = (x) => clamp(1 + (cinza / Math.max(1, x) - 1) * 0.35, 0.97, 1.03);
+    return [ganho(r), ganho(g), ganho(b)];
+  }
+
+  // ---------- letras editoriais e cartão de vidro ----------
+  const tema = () => { const R = window.NCRender || {}; const C = R.C || {}; const F = R.F || {};
+    return { principal: C.vinho || '#6B1E2E', destaque: C.dourado || '#B08D57', sans: F.sans || 'Arial, sans-serif', serif: F.serif || 'Georgia, serif' }; };
+  // letra desfocada sem ctx.filter (o Safari antigo não tem): desenha a sombra borrada e esconde a letra
+  function letra(ctx, ch, x, y, desfoque, cor, alfa, sombraForte) {
+    if (alfa <= 0.01) return; ctx.save(); ctx.globalAlpha = alfa;
+    if (desfoque > 0.6) {
+      // desfoque por cópias em volta (funciona no Safari, que não desenha sombra muito deslocada)
+      ctx.fillStyle = cor; const r = desfoque * 0.75, N = 10; ctx.globalAlpha = alfa * 0.22;
+      for (let i = 0; i < N; i++) { const a = (i / N) * Math.PI * 2; ctx.fillText(ch, x + Math.cos(a) * r, y + Math.sin(a) * r); }
+      for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.5; ctx.fillText(ch, x + Math.cos(a) * r * 0.45, y + Math.sin(a) * r * 0.45); }
+      ctx.globalAlpha = alfa * Math.max(0, 0.35 - desfoque / 60); ctx.fillText(ch, x, y);
+    }
+    else { ctx.shadowColor = sombraForte ? 'rgba(0,0,0,.55)' : 'rgba(0,0,0,.30)'; ctx.shadowBlur = sombraForte ? 28 : 60; ctx.shadowOffsetY = sombraForte ? 4 : 12; ctx.fillStyle = cor; ctx.fillText(ch, x, y); }
+    ctx.restore();
+  }
+  // A cor de destaque da marca só entra no itálico se for clara o bastante para ler sobre o vídeo; senão, branco.
+  function legivel(hex) { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return '#FFFFFF'; const n = parseInt(m[1], 16);
+    const l = (0.2126 * (n >> 16 & 255) + 0.7152 * (n >> 8 & 255) + 0.0722 * (n & 255)) / 255; return l > 0.72 ? hex : '#FFFFFF'; }
+  function largura(ctx, txt, espaco) { let w = 0; for (const ch of txt) w += ctx.measureText(ch).width + espaco; return w - espaco; }
+  // Letras editoriais: palavra grande (letras juntas), itálico serifado sobreposto e subtítulo espaçado.
+  function editorial(ctx, a, t, dur) {
+    const T = tema(); const fimAt = Math.min(dur, 3.0) - 0.55; if (t > fimAt + 0.6) return;
+    const sai = ease4((t - fimAt) / 0.5); const topo = 200;
+    const grande = String(a.grande || '').toUpperCase(); if (!grande) return;
+    // 1) subtítulo em maiúsculas espaçadas (lido primeiro)
+    if (a.sub) { const sub = String(a.sub).toUpperCase(); ctx.font = `600 40px ${T.sans}`; const e2 = 40 * 0.42; let xs = (W - largura(ctx, sub, e2)) / 2;
+      [...sub].forEach((ch, i) => { const k = ease4((t - 0.05 - i * 0.03) / 0.5); letra(ctx, ch, xs, topo + 40 - sai * 70, (1 - k) * 8 + sai * 10, '#FFFFFF', k * (1 - sai) * 0.95); xs += ctx.measureText(ch).width + e2; });
+      // fio fino na cor de destaque da marca, crescendo do centro
+      const kf = ease4((t - 0.2) / 0.7); const lf = 140 * kf; ctx.save(); ctx.globalAlpha = kf * (1 - sai); ctx.fillStyle = T.destaque; ctx.fillRect((W - lf) / 2, topo + 64 - sai * 70, lf, 4); ctx.restore(); }
+    // 2) palavra grande, letras juntas, entrando letra a letra do desfoque
+    let tam = 230; ctx.font = `700 ${tam}px ${T.sans}`; while (largura(ctx, grande, -tam * 0.048) > W - 90 && tam > 90) { tam -= 8; ctx.font = `700 ${tam}px ${T.sans}`; }
+    const esp = -tam * 0.048; const x0 = (W - largura(ctx, grande, esp)) / 2; let x = x0; const yb = topo + 120 + tam * 0.86;
+    [...grande].forEach((ch, i) => { const k = ease4((t - 0.3 - i * 0.075) / 0.6); const w = ctx.measureText(ch).width;
+      ctx.save(); const cx = x + w / 2; ctx.translate(cx, yb - tam * 0.35 + (1 - k) * 110 - sai * 70); const s = 0.55 + 0.45 * k; ctx.scale(s, s);
+      letra(ctx, ch, -w / 2, tam * 0.35, (1 - k) * 20 + sai * 16, '#FFFFFF', k * (1 - sai)); ctx.restore(); x += w + esp; });
+    // 3) itálico serifado sobreposto no canto de cima da palavra grande, na cor de destaque da marca
+    if (a.italico) { const ks = ease4((t - 0.85) / 0.6); ctx.font = `italic 400 ${Math.round(tam * 0.7)}px ${T.serif}`;
+      letra(ctx, String(a.italico), x0 - 10 + (1 - ks) * -50, yb - tam * 0.66 - sai * 70, (1 - ks) * 12 + sai * 14, legivel(T.destaque), ks * (1 - sai), true); }
+  }
+  // Cartão de vidro (terço de baixo): entra com fade e sobe levemente.
+  function geoCartao(t, dur) {
+    const vida = Math.min(dur, 3.6); if (t < 0 || t > vida) return null;
+    const ck = ease4(t / 0.65), fora = ease4((t - (vida - 0.4)) / 0.4);
+    const s = 0.96 + 0.04 * ck, w = 940 * s, h = 350 * s;
+    return { x: (W - w) / 2, y: 1390 + (1 - ck) * 60 + (350 - h) / 2, w, h, a: ck * (1 - fora) };
+  }
+  function cartao(ctx, a, t, dur, est) {
+    const g = geoCartao(t, dur); if (!g || g.a < 0.01) return; const T = tema();
+    ctx.save(); ctx.globalAlpha = g.a; ctx.fillStyle = '#FFFFFF'; ctx.textBaseline = 'alphabetic';
+    ctx.save(); ctx.fillStyle = T.destaque; ctx.fillRect(g.x + 56, g.y + 36, 56 * g.a, 4); ctx.restore();
+    if (a.rotulo) { ctx.font = `600 28px ${T.sans}`; let x = g.x + 56; for (const ch of String(a.rotulo).toUpperCase()) { ctx.globalAlpha = g.a * 0.85; ctx.fillText(ch, x, g.y + 58 + 28); x += ctx.measureText(ch).width + 28 * 0.26; } ctx.globalAlpha = g.a; }
+    if (a.etiqueta) { ctx.font = `600 30px ${T.sans}`; const tw = ctx.measureText(a.etiqueta).width + 52; const px = g.x + g.w - 44 - tw, py = g.y + 36;
+      ctx.fillStyle = est.cartao === 'claro' ? 'rgba(20,16,17,.40)' : 'rgba(255,255,255,.16)'; ctx.beginPath(); ctx.arc(px + 30, py + 30, 30, Math.PI / 2, Math.PI * 1.5); ctx.arc(px + tw - 30, py + 30, 30, -Math.PI / 2, Math.PI / 2); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#FFFFFF'; ctx.fillText(a.etiqueta, px + 26, py + 41); }
+    const base = g.y + g.h - 44; let tam = 156; ctx.font = `700 ${tam}px ${T.sans}`; const dest = String(a.destaque || '');
+    while (largura(ctx, dest, -7) > g.w * 0.62 && tam > 70) { tam -= 6; ctx.font = `700 ${tam}px ${T.sans}`; }
+    let x = g.x + 56; for (const ch of dest) { ctx.fillText(ch, x, base); x += ctx.measureText(ch).width - 7; }
+    if (a.complemento) { ctx.font = `italic 400 ${Math.round(tam * 0.64)}px ${T.serif}`; ctx.fillText(String(a.complemento), x + 20, base); }
+    ctx.restore();
+  }
+  // Nome e @ em estilo discreto (maiúsculas espaçadas), fora do rosto.
+  function assinatura(ctx, t, total, info) {
+    const T = tema(); ctx.save(); ctx.textBaseline = 'alphabetic';
+    if (info.nome && t < 3.2) { const al = Math.min(ease4(t / 0.5), ease4((3.2 - t) / 0.5)); ctx.globalAlpha = al; ctx.fillStyle = '#FFFFFF'; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 24;
+      ctx.font = `600 34px ${T.sans}`; let x = 72; for (const ch of info.nome.toUpperCase()) { ctx.fillText(ch, x, 1760); x += ctx.measureText(ch).width + 34 * 0.3; }
+      if (info.area) { ctx.font = `italic 400 44px ${T.serif}`; ctx.fillText(info.area, 72, 1820); } }
+    if (info.handle && t > total - 2.4) { const al = ease4((t - (total - 2.4)) / 0.5); ctx.globalAlpha = al; ctx.fillStyle = '#FFFFFF'; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 24;
+      ctx.font = `600 40px ${T.sans}`; const h = info.handle; const lw = largura(ctx, h, 40 * 0.2); let x = (W - lw) / 2; for (const ch of h) { ctx.fillText(ch, x, 1790); x += ctx.measureText(ch).width + 8; } }
+    ctx.restore();
+  }
+  // Quadro completo no modo cinema.
+  function quadro(ctx, video, t, plano) {
+    const est = plano.cinema || {}; let geo = null;
+    const ativos = plano.blocos.map((b, i) => ({ b, ini: b.inicio, fim: i + 1 < plano.blocos.length ? plano.blocos[i + 1].inicio : plano.total }));
+    for (const x of ativos) if (x.b.animCinema && x.b.animCinema.tipo === 'vidro' && t >= x.ini) { const g = geoCartao(t - x.ini, x.fim - x.ini); if (g) geo = g; }
+    if (video && video.videoWidth) ctx.drawImage(renderizar(video, est, geo), 0, 0, W, H); else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); }
+    for (const x of ativos) { const a = x.b.animCinema; if (!a || t < x.ini) continue;
+      if (a.tipo === 'editorial') editorial(ctx, a, t - x.ini, x.fim - x.ini);
+      if (a.tipo === 'vidro') cartao(ctx, a, t - x.ini, x.fim - x.ini, est); }
+    if (typeof EditorAnim !== 'undefined') EditorAnim.legenda(ctx, t, plano, 1310);   // terço de baixo, acima do cartão de vidro
+    if (est.assinatura !== false) assinatura(ctx, t, plano.total, plano.info || {});
+  }
+
+  // ---------- escolha das animações (no máximo 2, nos pontos principais) ----------
+  const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const DIAS = /\b(segunda|terça|terca|quarta|quinta|sexta|sábado|sabado|domingo)\b/i;
+  function cartaoDoTexto(fala) {
+    const f = semAst(fala);
+    const dm = f.match(new RegExp(`\\b(\\d{1,2})\\s+de\\s+(${MESES.join('|')})\\b`, 'i')) || f.match(/\b(\d{1,2})\/(\d{1,2})\b/);
+    const hora = f.match(/\b(?:às|as)\s+(\d{1,2}h\d{0,2}|\d{1,2}:\d{2})\b/i) || f.match(/\b(\d{1,2}h\d{0,2})\b/);
+    const dia = f.match(DIAS);
+    if (dm) { const mes = isNaN(+dm[2]) ? MESES.indexOf(dm[2].toLowerCase()) + 1 : +dm[2];
+      return { tipo: 'vidro', rotulo: 'Anote a data', destaque: `${String(+dm[1]).padStart(2, '0')}/${String(mes).padStart(2, '0')}`, complemento: hora ? `às ${hora[1]}` : '', etiqueta: dia ? dia[1].toLowerCase() : '' }; }
+    const n = (typeof EditorAnim !== 'undefined') && EditorAnim.numeroDoTexto(f);
+    if (n) { const val = n.valor.toLocaleString('pt-BR', { maximumFractionDigits: n.casas }); return { tipo: 'vidro', rotulo: 'Guarde este número', destaque: `${n.antes}${val}${n.depois === '%' ? '%' : ''}`, complemento: n.depois && n.depois !== '%' ? n.depois.trim() : '', etiqueta: '' }; }
+    return null;
+  }
+  const CURTAS = new Set('a o e é de da do no na não nao sem com que se um uma pra para por mas só'.split(' '));
+  function editorialDoTexto(fala, capa) {
+    const forte = ((typeof EditorAnim !== 'undefined') ? EditorAnim.palavraForte(capa || fala) : '').replace(/[^\wÀ-ú]/g, '');
+    const ps = semAst(fala).replace(/[?!.,;:]/g, '').split(' ').filter(Boolean);
+    let i = ps.findIndex((p) => p.toLowerCase() === forte.toLowerCase()); if (i < 0) { i = ps.length - 1; }
+    const grande = forte || ps[i] || '';
+    let j = i, it = []; while (j - 1 >= 0 && it.length < 2 && CURTAS.has(ps[j - 1].toLowerCase())) { it.unshift(ps[j - 1].toLowerCase()); j--; }
+    const antes = ps.slice(Math.max(0, j - 3), j); while (antes.length && CURTAS.has(antes[0].toLowerCase())) antes.shift(); const sub = antes.join(' ');
+    return { tipo: 'editorial', grande, italico: it.join(' '), sub };
+  }
+  function sugerir(blocos, ctx = {}) {
+    const out = blocos.map(() => null);
+    if (blocos.length) out[0] = editorialDoTexto(blocos[0].fala, ctx.gancho);
+    for (let i = 1; i < blocos.length; i++) { const c = cartaoDoTexto(blocos[i].fala); if (c) { out[i] = c; break; } }
+    return out;
+  }
+  function padrao(tipo, bloco, i, ctx = {}) {
+    if (tipo === 'editorial') return editorialDoTexto(bloco.fala, i === 0 ? ctx.gancho : '');
+    if (tipo === 'vidro') return cartaoDoTexto(bloco.fala);
+    return null;
+  }
+
+  // Nenhum número (data, hora, valor) que não esteja na fala do bloco.
+  function valida(a, bloco) {
+    if (!a) return true; const f = semAst(bloco.fala).toLowerCase();
+    const permitidos = new Set((f.match(/\d+/g) || []).map(Number));
+    MESES.forEach((m, i) => { if (f.includes(m)) permitidos.add(i + 1); });
+    const campos = [a.grande, a.italico, a.sub, a.rotulo, a.destaque, a.complemento, a.etiqueta].map((x) => String(x || '')).join(' ');
+    return (campos.match(/\d+/g) || []).every((n) => permitidos.has(Number(n)));
+  }
+  const NOMES = { nenhuma: 'Sem animação', editorial: 'Letras editoriais', vidro: 'Cartão de vidro' };
+  return { W, H, LENTO_MS, NOMES, valida, reiniciar, MODELO_NOME, MP_VERSAO, carregarRecorte, medirVelocidade, balancoDeBranco, quadro, sugerir, padrao, cartaoDoTexto, editorialDoTexto, renderizar, criarGL };
 })();
 
 // Tela do editor com animações (abre pelo card do Reel falado em Gravar).
@@ -1099,6 +1482,11 @@ function openEditorAnim(c) {
     </div>
     <div id="ea-ed" hidden>
       <p class="small" id="ea-resumo"></p>
+      <div class="grid2"><label for="ea-acab">Acabamento<select id="ea-acab"><option value="cinema">Cinema</option><option value="cinema-sem">Cinema sem desfoque de fundo</option><option value="natural">Natural (só corta pausas e acerta o volume)</option></select></label>
+        <label for="ea-cartao" id="ea-cartao-l">Cartão de vidro<select id="ea-cartao"><option value="fume">Fumê</option><option value="claro">Claro</option></select></label></div>
+      <label class="row small" for="ea-leg" style="gap:8px"><input type="checkbox" id="ea-leg" checked style="width:auto"> Legenda (texto do roteiro, no tempo da fala)</label>
+      <p class="small muted">A legenda usa o texto do roteiro. Se você mudou alguma frase na hora de gravar, ajuste o texto do bloco no roteiro antes de exportar.</p>
+      <p class="small" id="ea-cin-msg" role="status"></p>
       <canvas id="ea-prev" width="1080" height="1920" style="width:min(62vw,280px);aspect-ratio:9/16;border-radius:16px;background:#000;display:block;margin:6px auto"></canvas>
       <div class="row" style="justify-content:center"><button class="btn" id="ea-play">▶ Ver prévia</button><span class="small muted" id="ea-tempo">0:00</span></div>
       <div id="ea-linha" style="position:relative;height:58px;margin:10px 0 4px;border-radius:12px;background:var(--line);touch-action:none;user-select:none;cursor:pointer"></div>
@@ -1115,19 +1503,39 @@ function openEditorAnim(c) {
       arquivo = blob; msg.innerHTML = '<span class="spin"></span> Ouvindo o áudio e achando as frases…';
       try {
         await (window.NCRender && NCRender.ready ? NCRender.ready().catch(() => null) : null);
-        const d = await EditorAnim.decodificar(blob);
-        const db = EditorAnim.energia(d.mono, d.sr);
+        let db;
+        try { const d = await EditorAnim.decodificar(blob); db = EditorAnim.energia(d.mono, d.sr); }
+        catch (e) {
+          if (e.code !== 'sem_audio') throw e;
+          // iPhone com .mov: lê o áudio tocando o vídeo sem som (precisa de um toque)
+          db = await new Promise((ok, err) => {
+            msg.innerHTML = `Este arquivo precisa ser ouvido tocando, sem som (leva metade do tempo do vídeo). <div class="row"><button class="btn primary" id="ea-ouvir">Ouvir o vídeo</button></div>`;
+            $('#ea-ouvir', el).addEventListener('click', () => {
+              let prep; try { prep = EditorAnim.prepararLeitura(blob); } catch (e2) { err(e2); return; }
+              msg.innerHTML = '<span class="spin"></span> Ouvindo o vídeo… 0%';
+              EditorAnim.energiaAoVivo(prep, (p) => { msg.innerHTML = `<span class="spin"></span> Ouvindo o vídeo… ${Math.round(p * 100)}%`; }).then(ok, err);
+            }, { once: true });
+          });
+          msg.innerHTML = '<span class="spin"></span> Achando as frases…';
+        }
         plano = EditorAnim.planejar(db, blocos, { gancho: (c.payload && (c.payload.textoCapa || c.payload.gancho)) || '' });
         if (!plano.trechos.length) throw new Error('Não encontrei fala neste vídeo. Confira se ele tem som.');
         // edição salva antes: mantém os ajustes da pessoa
-        const salvo = c.edicaoAnimada; if (salvo && Array.isArray(salvo.blocos) && salvo.blocos.length === plano.blocos.length && salvo.fonte === `${blob.size}`) salvo.blocos.forEach((b, i) => { plano.blocos[i].inicio = b.inicio; if (b.anim) plano.blocos[i].anim = b.anim; });
+        const salvo = c.edicaoAnimada; if (salvo && Array.isArray(salvo.blocos) && salvo.blocos.length === plano.blocos.length && salvo.fonte === `${blob.size}`) { salvo.blocos.forEach((b, i) => { plano.blocos[i].inicio = b.inicio; if (b.anim) plano.blocos[i].anim = b.anim; if ('animCinema' in b) plano.blocos[i].animCinema = b.animCinema; }); if (salvo.acabamento) plano.acabamento = salvo.acabamento; if (salvo.cinema) Object.assign(plano.cinema, salvo.cinema); }
         url = URL.createObjectURL(blob);
         vPrev = document.createElement('video'); vPrev.playsInline = true; vPrev.setAttribute('playsinline', ''); vPrev.preload = 'auto'; vPrev.src = url;
+        // o Safari do iPhone só entrega os quadros de um vídeo que está na página
+        vPrev.style.cssText = 'position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none'; el.appendChild(vPrev);
         await new Promise((ok, err) => { vPrev.onloadeddata = ok; vPrev.onerror = () => err(new Error('Este aparelho não abriu o vídeo. Grave em MP4 ou MOV e tente de novo.')); setTimeout(ok, 8000); });
         $('#ea-p1', el).hidden = true; $('#ea-ed', el).hidden = false;
         const pausas = Math.max(0, plano.trechos.length - 1);
         $('#ea-resumo', el).innerHTML = `Encontrei <b>${plano.trechos.length}</b> trecho(s) de fala e cortei <b>${pausas}</b> pausa(s) longa(s): de ${mmssEA(plano.duracaoOriginal)} para <b>${mmssEA(plano.total)}</b>. Volume ajustado.`;
+        if (plano.acabamento === 'cinema' && plano.cinema.desfoque === false) plano.acabamento = 'cinema-sem';
+        if (salvo && salvo.legenda === false && salvo.fonte === `${blob.size}`) plano.legenda = false; $('#ea-leg', el).checked = plano.legenda !== false;
+        $('#ea-leg', el).onchange = (ev) => { plano.legenda = ev.target.checked; irPara(0.5); };
+        $('#ea-acab', el).value = plano.acabamento; $('#ea-cartao', el).value = plano.cinema.cartao || 'fume';
         montarBlocos(); desenharLinha(); irPara(0);
+        prepararCinema();
       } catch (e) { msg.textContent = e.message || 'Não consegui ler este vídeo.'; }
     }
     if (bruto) $('#ea-usar', el).addEventListener('click', async () => {
@@ -1138,7 +1546,59 @@ function openEditorAnim(c) {
     $('#ea-file', el).addEventListener('change', (ev) => { const f = ev.target.files[0]; if (f) carregar(f); });
 
     const fim = (i) => (i + 1 < plano.blocos.length ? plano.blocos[i + 1].inicio : plano.total);
+    const ehCinema = () => plano && plano.acabamento !== 'natural';
+    // Cinema: cor neutra medida no próprio vídeo, recorte da pessoa e teste de velocidade do aparelho.
+    let wbPronto = false, recorteTestado = false;
+    async function prepararCinema() {
+      const cm = $('#ea-cin-msg', el); $('#ea-cartao-l', el).hidden = !ehCinema();
+      plano.cinema.desfoque = plano.acabamento === 'cinema';
+      if (!ehCinema()) { cm.textContent = ''; irPara(0); return; }
+      cm.innerHTML = '<span class="spin"></span> Preparando o acabamento Cinema…';
+      if (!wbPronto) {
+        try { CinemaFX.criarGL(); } catch (e) { plano.acabamento = 'natural'; $('#ea-acab', el).value = 'natural'; cm.textContent = e.message; montarBlocos(); irPara(0); return; }
+        try { plano.cinema.wb = await CinemaFX.balancoDeBranco(vPrev, [0.15, 0.4, 0.65, 0.9].map(f => f * (vPrev.duration || 10))); } catch (e) { plano.cinema.wb = [1, 1, 1]; }
+        wbPronto = true;
+      }
+      if (plano.acabamento === 'cinema' && !recorteTestado) {
+        try {
+          const ms = await CinemaFX.medirVelocidade(vPrev); recorteTestado = true;
+          if (ms > CinemaFX.LENTO_MS) { plano.acabamento = 'cinema-sem'; plano.cinema.desfoque = false; $('#ea-acab', el).value = 'cinema-sem';
+            cm.innerHTML = '<b>Este aparelho é lento para recortar a pessoa em tempo real</b> (o vídeo sairia travado). Deixei em "Cinema sem desfoque de fundo". Para o fundo desfocado, exporte num celular mais novo ou no computador.'; irPara(0); return; }
+        } catch (e) {
+          plano.acabamento = 'cinema-sem'; plano.cinema.desfoque = false; $('#ea-acab', el).value = 'cinema-sem';
+          cm.innerHTML = 'Não consegui carregar o recorte de fundo. Deixei em "Cinema sem desfoque de fundo".'
+            + (window.LEXUP ? '' : ` <label class="small">Instalar o recorte nesta Central (arquivo ${esc(CinemaFX.MODELO_NOME)}, uma vez só)<input type="file" id="ea-modelo" accept=".tflite"></label>`);
+          const im = $('#ea-modelo', el); if (im) im.addEventListener('change', async () => { const f = im.files[0]; if (!f) return;
+            if (f.name !== CinemaFX.MODELO_NOME || f.size < 1e6) { cm.textContent = `Escolha o arquivo ${CinemaFX.MODELO_NOME}.`; return; }
+            cm.innerHTML = '<span class="spin"></span> Instalando o recorte…';
+            try { const up = await S.assets.upload(f, { type: 'application/octet-stream' }); S.modeloRecorte = { url: up.url, assetId: up.id, nome: f.name, em: now() };
+              await col('settings').doc('modeloRecorte').set(S.modeloRecorte); recorteTestado = false; plano.acabamento = 'cinema'; $('#ea-acab', el).value = 'cinema'; prepararCinema(); }
+            catch (e2) { cm.textContent = 'A Central não aceitou o arquivo do recorte. O Cinema segue sem desfoque de fundo.'; } });
+          irPara(0); return;
+        }
+      }
+      cm.textContent = plano.acabamento === 'cinema' ? 'Cinema pronto: fundo desfocado, cor natural e no máximo 2 animações.' : 'Cinema sem desfoque: cor natural, brilho, bordas e animações, com o fundo original.';
+      irPara(0);
+    }
+    $('#ea-acab', el).addEventListener('change', (ev) => { plano.acabamento = ev.target.value; montarBlocos(); prepararCinema(); });
+    $('#ea-cartao', el).addEventListener('change', (ev) => { plano.cinema.cartao = ev.target.value; const i = plano.blocos.findIndex(b => b.animCinema && b.animCinema.tipo === 'vidro'); irPara(i >= 0 ? plano.blocos[i].inicio + 1 : 0); });
+    function montarCinema() {
+      const usadas = plano.blocos.filter(b => b.animCinema).length;
+      $('#ea-blocos', el).innerHTML = `<p class="small muted">No Cinema entram no máximo 2 animações, nos pontos principais da fala. Letras editoriais e textos ficam no terço de cima ou de baixo, longe do rosto.</p>` + plano.blocos.map((b, i) => {
+        const a = b.animCinema; const temCartao = !!CinemaFX.cartaoDoTexto(b.fala);
+        const ops = ['nenhuma', 'editorial'].concat(temCartao ? ['vidro'] : []);
+        const bloqueada = (o) => o !== 'nenhuma' && !a && usadas >= 2;
+        const campo = (k, rot) => `<label class="small">${rot}<input data-cc="${i}" data-k="${k}" value="${esc((a && a[k]) || '')}"></label>`;
+        const campos = !a ? '' : a.tipo === 'editorial' ? `<div class="grid2">${campo('grande', 'Palavra grande')}${campo('italico', 'Itálico no canto')}</div>${campo('sub', 'Subtítulo')}`
+          : `<div class="grid2">${campo('rotulo', 'Rótulo')}${campo('etiqueta', 'Etiqueta (opcional)')}</div><p class="small muted">Destaque do roteiro: <b>${esc(a.destaque)}</b> ${esc(a.complemento || '')}</p>`;
+        return `<div class="box"><div class="row between"><b class="small">Bloco ${i + 1} · ${mmssEA(b.inicio)}</b><select data-ctipo="${i}">${ops.map(o => `<option value="${o}" ${(a ? a.tipo : 'nenhuma') === o ? 'selected' : ''} ${bloqueada(o) ? 'disabled' : ''}>${CinemaFX.NOMES[o]}${bloqueada(o) ? ' (limite de 2)' : ''}</option>`).join('')}</select></div>
+          <p class="small muted">${esc(b.fala.slice(0, 120))}${b.fala.length > 120 ? '…' : ''}</p>${campos}</div>`;
+      }).join('');
+      el.querySelectorAll('[data-ctipo]').forEach(sl => sl.addEventListener('change', () => { const i = +sl.dataset.ctipo; plano.blocos[i].animCinema = sl.value === 'nenhuma' ? null : CinemaFX.padrao(sl.value, plano.blocos[i], i, { gancho: (c.payload && (c.payload.textoCapa || c.payload.gancho)) || '' }); montarBlocos(); irPara(plano.blocos[i].inicio + 1.2); }));
+      el.querySelectorAll('[data-cc]').forEach(inp => inp.addEventListener('input', () => { const i = +inp.dataset.cc; plano.blocos[i].animCinema[inp.dataset.k] = inp.value; irPara(plano.blocos[i].inicio + 1.2); }));
+    }
     function montarBlocos() {
+      if (ehCinema()) return montarCinema();
       $('#ea-blocos', el).innerHTML = plano.blocos.map((b, i) => {
         const ops = EditorAnim.opcoes(b); const a = b.anim || { tipo: 'nenhuma' };
         const campo = a.tipo === 'gancho' || a.tipo === 'cta' ? `<input data-campo="${i}" value="${esc(a.palavra || '')}" aria-label="Palavra">`
@@ -1166,7 +1626,7 @@ function openEditorAnim(c) {
     function irPara(t) {
       if (!plano || !vPrev) return; const tt = Math.max(0, Math.min(plano.total - 0.05, t));
       vPrev.currentTime = plano.mapa.paraOrig(tt);
-      const desenha = () => { const cv = $('#ea-prev', el); if (cv) EditorAnim.quadro(cv.getContext('2d'), vPrev, tt, comInfo()); };
+      const desenha = () => { const cv = $('#ea-prev', el); if (!cv) return; try { EditorAnim.quadro(cv.getContext('2d'), vPrev, tt, comInfo()); } catch (e) { $('#ea-cin-msg', el).textContent = 'A prévia falhou: ' + (e && e.message || e); } };
       vPrev.onseeked = desenha; setTimeout(desenha, 250);
       const cur = $('#ea-cursor', el); if (cur) cur.style.left = (tt / plano.total) * 100 + '%'; const te = $('#ea-tempo', el); if (te) te.textContent = `${mmssEA(tt)} / ${mmssEA(plano.total)}`;
     }
@@ -1183,8 +1643,10 @@ function openEditorAnim(c) {
       tocandoPrev = true; ev.currentTarget.textContent = '❚❚ Pausar'; const bt = ev.currentTarget; const p0 = vPrev.play().catch(() => null);
       await p0; const cv = $('#ea-prev', el); const ctx = cv.getContext('2d');
       for (const k of plano.mapa.clipes) {
-        if (!tocandoPrev) break; vPrev.currentTime = k.orig; await new Promise(ok => { vPrev.onseeked = ok; setTimeout(ok, 1500); }); try { await vPrev.play(); } catch (e) { break; }
-        await new Promise(ok => { const passo = () => { if (!tocandoPrev) return ok(); const t = k.saida + (vPrev.currentTime - k.orig); EditorAnim.quadro(ctx, vPrev, t, comInfo()); const cur = $('#ea-cursor', el); if (cur) cur.style.left = (t / plano.total) * 100 + '%';
+        if (!tocandoPrev) break; vPrev.currentTime = k.orig; CinemaFX.reiniciar(); await new Promise(ok => { vPrev.onseeked = ok; setTimeout(ok, 1500); }); try { await vPrev.play(); } catch (e) { break; }
+        await new Promise(ok => { const passo = () => { if (!tocandoPrev) return ok(); const t = k.saida + (vPrev.currentTime - k.orig);
+          try { EditorAnim.quadro(ctx, vPrev, t, comInfo()); } catch (e) { tocandoPrev = false; vPrev.pause(); $('#ea-cin-msg', el).textContent = 'A prévia parou: ' + (e && e.message || e); return ok(); }
+          const cur = $('#ea-cursor', el); if (cur) cur.style.left = (t / plano.total) * 100 + '%'; const te = $('#ea-tempo', el); if (te) te.textContent = `${mmssEA(t)} / ${mmssEA(plano.total)}`;
           if (vPrev.currentTime >= k.fimOrig || vPrev.ended) { vPrev.pause(); ok(); } else requestAnimationFrame(passo); }; passo(); });
       }
       tocandoPrev = false; vPrev.pause(); bt.textContent = '▶ Ver prévia';
@@ -1192,7 +1654,9 @@ function openEditorAnim(c) {
     // exportar: o áudio e o play nascem dentro do toque (regra do iPhone)
     $('#ea-exp', el).addEventListener('click', async (ev) => {
       const m = $('#ea-exp-msg', el); const motivo2 = EditorAnim.podeExportar(); if (motivo2) { m.textContent = motivo2; return; }
-      for (let i = 0; i < plano.blocos.length; i++) if (!EditorAnim.valida(plano.blocos[i].anim || { tipo: 'nenhuma' }, plano.blocos[i])) { m.textContent = `O bloco ${i + 1} tem um número ou uma data que não estão no roteiro. Troque a animação.`; return; }
+      if (ehCinema()) { for (let i = 0; i < plano.blocos.length; i++) if (!CinemaFX.valida(plano.blocos[i].animCinema, plano.blocos[i])) { m.textContent = `O bloco ${i + 1} tem um número que não está no roteiro. Corrija o texto da animação.`; return; }
+        if (plano.blocos.filter(b => b.animCinema).length > 2) { m.textContent = 'No Cinema entram no máximo 2 animações.'; return; } }
+      else for (let i = 0; i < plano.blocos.length; i++) if (!EditorAnim.valida(plano.blocos[i].anim || { tipo: 'nenhuma' }, plano.blocos[i])) { m.textContent = `O bloco ${i + 1} tem um número ou uma data que não estão no roteiro. Troque a animação.`; return; }
       tocandoPrev = false; if (vPrev) vPrev.pause();
       const bt = ev.currentTarget; bt.disabled = true;
       let ac, v, tocando, wake = null;
@@ -1214,7 +1678,7 @@ function openEditorAnim(c) {
         m.innerHTML = '<span class="spin"></span> Salvando no card…';
         const up = await S.assets.upload(r.blob, { type: r.tipo });
         const files = [...(c.files || []).filter(f => f.grupo !== 'editado'), { name: nome, url: up.url, assetId: up.id, kind: 'video', w: 1080, h: 1920, grupo: 'editado', editadoNoApp: true }];
-        const salvo = { fonte: `${arquivo.size}`, em: now(), total: plano.total, blocos: plano.blocos.map(b => ({ inicio: b.inicio, anim: b.anim })) };
+        const salvo = { fonte: `${arquivo.size}`, em: now(), total: plano.total, legenda: plano.legenda !== false, acabamento: plano.acabamento, cinema: { cartao: plano.cinema.cartao, desfoque: plano.cinema.desfoque }, blocos: plano.blocos.map(b => ({ inicio: b.inicio, anim: b.anim, animCinema: b.animCinema || null })) };
         await col('contents').doc(c.id).update({ files, status: 'aprovar', edicaoAnimada: salvo, updatedAt: now() });
         log('editou com animações', plain(c.title));
         if (aviso) { m.innerHTML = '<b>Vídeo salvo. Está em Aprovar.</b>' + esc(aviso); bt.hidden = true; return; }
