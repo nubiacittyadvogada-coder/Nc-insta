@@ -14,10 +14,13 @@
 
 ## Biblioteca de modelos (biblioteca-modelos.html)
 `node render_frames.js biblioteca-modelos.html PASTA_FRAMES QTD_FRAMES` (30 fps). Cada modelo tem uma janela de tempo em `setT(s)`; troque textos e tempos por vídeo.
-1. Cartão da série: "SÉRIE · NOME", etiqueta "DIA X · AGORA", fileira de episódios, barra de progresso com placar real.
-2. Contador: etiqueta + número em itálico serifado contando + sublinhado que se desenha.
+1. Ficha da série: aba vinho "DIA 01 / 07", título com itálico Bodoni, linha do tempo de pontos e placar real.
+2. Contador: etiqueta + número em Bodoni itálico contando, com grifo vinho passando por baixo.
 3. Etiquetas numeradas 01, 02, 03 (fumê), entrando uma a uma no lado direito.
 4. Tipografia empilhada: palavra em caixa preta / itálico / palavra em caixa preta, no terço de cima.
 5. Ícone de app que salta com rótulo.
-6. Carimbo inclinado com veredito (ex.: "DARIA CADEIA").
+6. Faixa de veredito: barra vinho de ponta a ponta entrando da esquerda, "VEREDITO" e o texto datilografado em Bodoni itálico.
 Falta: legenda palavra a palavra (depende de transcrição) e vídeo dentro do vídeo (depende de clipes extras).
+
+## Identidade própria (decisão da Núbia, 04/11/2026)
+Referências servem para medir qualidade, nunca para copiar. Proibido: carimbo inclinado verde e creme, fileira de miniaturas de episódios, cartão de número com linha de gráfico, palavra solta flutuando ao lado do rosto. Assinatura nossa: vinho #6B1E2E, off-white #F6F1EA, Bodoni itálico, linguagem de ficha, grifo e sentença.
