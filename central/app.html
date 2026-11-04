@@ -336,6 +336,7 @@ function detail(c) {
   }
   if (c.type === 'reelFalado') {
     out.push(`<div class="box"><span class="eyebrow">Gancho · 3 primeiros segundos</span><p class="quote" style="font-size:17px">${esc(p.gancho)}</p></div>`);
+    if (p.fraseSerie) out.push(`<div class="box"><span class="eyebrow">Frase da série · sempre igual</span><p class="quote" style="font-size:17px">${esc(p.fraseSerie)}</p></div>`);
     if ((p.roteiro || []).length) out.push(`<div class="row"><button class="btn small" data-tp="${esc(c.id)}">Copiar para teleprompter</button><button class="btn ghost small" data-tpopen="${esc(c.id)}">Abrir teleprompter</button></div>`);
     out.push(`<details><summary>Roteiro completo (${p.duracao || 60}s)</summary><div class="script" style="margin-top:10px">${(p.roteiro || []).map(b => `<div><span>${b.inicio}–${b.fim}s</span><p>${esc(b.fala)}</p></div>`).join('')}</div></details>`);
     if (p.orientacoes?.length) out.push(`<details><summary>Como gravar</summary><ul>${p.orientacoes.map(o => `<li>${esc(o)}</li>`).join('')}</ul></details>`);
