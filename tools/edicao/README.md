@@ -63,3 +63,11 @@ Nome sempre em UMA fonte só (Archivo 700, 58px), nunca misturando com itálico.
 5. Ficha de nome discreta: cartão escuro translúcido (#111 a 82%), nome 46px claro, cargo 19px bege, barra fina bege, sem sombra.
 6. CTA final no estilo do gancho (caixa escura + itálico no grifo claro + @ pequeno embaixo), sobre a mesa/parte escura, e sem legenda ao mesmo tempo.
 7. Grifo da palavra-chave sempre sólido; antes de ser falada, só o texto fica apagado.
+
+## Estética enxuta v4 (04/11/2026, em teste: Núbia achou a v2/v3 com informação demais, grande e pesada)
+Modelo: overlay_min.py (configs a, b, jr como exemplo). Regras:
+1. Uma camada de texto por vez: gancho sozinho até 3s, ficha de nome depois (nunca sobre imagem de apoio), legenda some no gancho e no CTA.
+2. Sem caixas nem tarjas. Texto branco com sombra suave; destaque só com Bodoni itálico na cor de acento (rosa claro #F0C3CC no pessoal, bege #E3D2C3 no NC).
+3. Tamanhos: gancho 62px em frase normal (não maiúsculas), legenda Archivo 600 54px em frase normal, nome 40px, cargo 16px espaçado, número de lista 130px.
+4. Linha divisória da tela dividida com 4px, etiqueta 18px sem fundo. Flash a 30%.
+5. CTA em duas linhas (frase + itálico) e @ pequeno embaixo.
