@@ -51,3 +51,6 @@ Regras novas: nada de imagem de autoridade ou pessoa real identificável (minist
 - Legenda editorial: Archivo 700 em maiúsculas, 82px, letter-spacing -3px, a palavra falada em branco e as seguintes a 55%; expressão-chave em Bodoni itálico 600 dentro do grifo (vinho no pessoal; preto com texto bege no NC). Degradê escuro na metade de baixo.
 - Listas (primeiro, segundo, terceiro): número grande em Bodoni itálico ("01") no topo, rótulo pequeno espaçado e título curto, com barra de progresso de 3 traços que acende a cada ponto.
 - Imagens de apoio em tela dividida: pessoa em cima (960px), imagem embaixo (960px), linha fina na cor da marca entre as duas, etiqueta com a ação da cena, legenda na divisa.
+
+## Ficha de nome (04/11/2026)
+Nome sempre em UMA fonte só (Archivo 700, 58px), nunca misturando com itálico. Cargo embaixo em Archivo 600 espaçado (.28em). Cartão off-white com barra lateral na cor da marca (vinho no pessoal, preto no NC). Modelo: ficha-nome.html.
