@@ -310,12 +310,20 @@ function previewSrc(c, item) {
 }
 function strip(c) {
   const items = NCRender.specsFor(c);
-  const vids = (c.files || []).filter(f => f.kind === 'video' && f.url);
-  if (!items.length && !vids.length) return '';
+  const allVids = (c.files || []).filter(f => f.kind === 'video' && f.url);
+  const drive = allVids.filter(f => f.fonte === 'drive' || /drive\.google\.com/.test(f.url));
+  const playable = allVids.filter(f => !drive.includes(f));
+  const editados = playable.filter(f => f.grupo === 'editado');
+  // com vídeo editado, mostra só o editado (o bruto fica fora para não confundir)
+  const vids = editados.length ? editados.slice(-1) : playable;
+  const driveLink = !editados.length && drive.length
+    ? `<a class="btn small" href="${esc(drive[drive.length - 1].url)}" target="_blank" rel="noopener">Vídeo bruto no Drive · em edição</a>` : '';
+  if (!items.length && !vids.length && !driveLink) return '';
+  if (!items.length && !vids.length) return `<div class="row">${driveLink}</div>`;
   return `<div class="strip">${items.map(it => it.spec.format === 'overlay'
     ? `<div class="ov"><img src="${previewSrc(c, it)}" alt="Texto na tela do Reel"></div>`
     : `<img src="${previewSrc(c, it)}" alt="${esc(it.name)}" loading="lazy">`).join('')}
-    ${vids.map(v => `<video src="${esc(v.url)}" controls playsinline preload="metadata"></video>`).join('')}</div>`;
+    ${vids.map(v => `<video src="${esc(v.url)}" controls playsinline preload="metadata"></video>`).join('')}</div>${driveLink ? `<div class="row">${driveLink}</div>` : ''}`;
 }
 
 // ================= cartão de conteúdo =================
