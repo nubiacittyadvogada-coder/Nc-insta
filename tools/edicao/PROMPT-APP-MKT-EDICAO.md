@@ -68,6 +68,11 @@ Sem o `format=rgb24` no início o filtro não tem efeito. Fundo: `eq=brightness=
 
 **3.9 Conferência automática antes de entregar.** Extraia quadros nos pontos críticos (0s, gancho, cada tela dividida, cada número de lista, CTA) e confira texto cortado ou sobreposto, rosto coberto e legenda atravessando a divisa. Transcreva o áudio final para garantir que nenhuma repetição ficou.
 
+
+### 3.1 Duas regras novas (05/11/2026)
+- **Nunca picotar a voz.** Cada fala é um trecho contínuo; só sai silêncio real medido por energia (pausa maior que 0,6s, com 0,2s de folga de cada lado). Cortar nos intervalos de palavra do Whisper come sílabas, porque os tempos dele erram de 0,2 a 0,5s.
+- **Assinatura da marca no fim.** Se o cliente subir a logo no perfil de marca, todo vídeo daquela marca termina com 1,8s de cartão liso na cor escura da marca e a logo entrando em fade, depois do CTA.
+
 ### 4. De onde vêm as imagens de apoio (b-roll)
 Ordem de preferência, configurável por cliente:
 1. **Imagens da própria equipe** (biblioteca do cliente: escritório, mãos digitando, rotina). São as mais autênticas.

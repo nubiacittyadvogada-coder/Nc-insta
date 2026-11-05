@@ -79,3 +79,13 @@ Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os aju
 - Legendas e etiquetas: Archivo 500 (legenda 48px em frase normal; etiquetas 15 a 18px em maiúsculas espaçadas).
 - Sem caixas, tarjas ou grifos coloridos. Texto branco com sombra suave.
 - Uma camada por vez: gancho sozinho até 3s, nome depois (nunca sobre imagem de apoio), sem legenda no gancho e no CTA.
+
+## Cortes sem picotar a voz (05/11/2026, Núbia: "a voz do Daniel ficou cortada")
+- Cada fala é UM trecho contínuo, do começo da primeira palavra ao fim da última. Nunca cortar nos intervalos entre palavras do Whisper: os tempos dele erram 0,2 a 0,5s e o corte come sílaba.
+- Só sai silêncio real, medido pela energia do áudio: pausa maior que 0,6s, deixando 0,2s antes e depois.
+- Cortar segmento por segmento (ffmpeg com -ss por trecho e concat). Um filter_complex único com muitos trims estoura a memória.
+- Conferência: o Whisper costuma "engolir" o fim de frase em arquivo longo. Para checar, transcreva cada trecho separado; se a frase aparece inteira no trecho, ela está no vídeo.
+
+## Assinatura com a logo do NC (05/11/2026, pedido da Núbia)
+- TODO vídeo do NC Advogados termina com 1,8s de cartão escuro liso (#0F0D0C) e a logo completa branca entrando em fade, depois do CTA.
+- Comando: `python3 tools/edicao/endcard.py editado.mp4 final.mp4`. Logos em `tools/edicao/marca/` (completa e monograma, brancas com transparência).
