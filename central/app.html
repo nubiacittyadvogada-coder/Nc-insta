@@ -755,7 +755,7 @@ function textoTeleprompter(c) {
 function abrirTeleprompter(c) {
   const t = textoTeleprompter(c); if (!t) return;
   const box = document.createElement('div'); box.className = 'tp';
-  box.innerHTML = `<div class="tp-bar"><button class="btn small" data-tpx="fechar">Fechar</button><button class="btn small primary" data-tpx="play">Iniciar</button><button class="btn small" data-tpx="lento" aria-label="Mais devagar">−</button><span class="tp-vel small">vel. 3</span><button class="btn small" data-tpx="rapido" aria-label="Mais rápido">+</button><button class="btn small" data-tpx="menor" aria-label="Letra menor">A−</button><button class="btn small" data-tpx="maior" aria-label="Letra maior">A+</button></div>
+  box.innerHTML = `<div class="tp-bar"><button class="btn small" data-tpx="fechar">Fechar</button><button class="btn small primary" data-tpx="play">Iniciar</button><button class="btn small" data-tpx="lento" aria-label="Mais devagar">−</button><span class="tp-vel small">vel. 3</span><button class="btn small" data-tpx="rapido" aria-label="Mais rápido">+</button><button class="btn small" data-tpx="menor" aria-label="Letra menor">A−</button><button class="btn small" data-tpx="maior" aria-label="Letra maior">A+</button><button class="btn small primary" data-tpx="enviar">Enviar vídeo</button></div>
     <div class="tp-scroll"><div class="tp-txt">${t.split('\n\n').map(x => `<p>${esc(x)}</p>`).join('')}</div></div>`;
   document.body.appendChild(box); document.body.style.overflow = 'hidden';
   const sc = box.querySelector('.tp-scroll'), txt = box.querySelector('.tp-txt'), vel = box.querySelector('.tp-vel'), play = box.querySelector('[data-tpx="play"]');
@@ -769,6 +769,7 @@ function abrirTeleprompter(c) {
   box.addEventListener('click', (e) => { const a = e.target.closest('[data-tpx]')?.dataset.tpx;
     if (!a) { if (e.target.closest('.tp-scroll')) play.click(); return; }
     if (a === 'fechar') { on = false; cancelAnimationFrame(raf); box.remove(); document.body.style.overflow = ''; return; }
+    if (a === 'enviar') { on = false; cancelAnimationFrame(raf); box.remove(); document.body.style.overflow = ''; openVideo(c); return; }
     if (a === 'play') { if (play.textContent === 'Recomeçar') sc.scrollTop = 0; on = !on; play.textContent = on ? 'Pausar' : 'Continuar'; last = 0; if (on) raf = requestAnimationFrame(step); }
     if (a === 'lento') v = Math.max(1, v - 1); if (a === 'rapido') v = Math.min(10, v + 1);
     if (a === 'menor') fs = Math.max(24, fs - 4); if (a === 'maior') fs = Math.min(72, fs + 4);
