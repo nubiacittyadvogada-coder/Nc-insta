@@ -74,9 +74,11 @@ Sem o `format=rgb24` no início o filtro não tem efeito. Fundo: `eq=brightness=
 - **Corte colado na voz.** O fim de cada trecho é o fim real da voz (energia do áudio) mais 0,06s, e o começo é o início real da voz menos 0,04s. Folga maior pega a pessoa olhando para o lado ou começando a próxima tentativa. Confira o último quadro de cada trecho.
 - **Assinatura da marca no fim.** Se o cliente subir a logo no perfil de marca, todo vídeo daquela marca termina com 1,8s de cartão liso na cor escura da marca e a logo entrando em fade, depois do CTA.
 
-### 3.2 Imagem de apoio não é obrigatória (05/11/2026)
-- B-roll só entra quando a imagem explica a fala. Imagem genérica (livro, cadeira vazia) é proibida.
-- Alternativa padrão: a ideia-chave em texto animado atrás da pessoa (camada entre o fundo desfocado e a pessoa recortada), no lado livre do quadro, entrando junto com a palavra falada. A palavra-chave nunca pode ficar escondida atrás da cabeça: meça a máscara na janela inteira do evento. Durante a animação, some a legenda. No máximo 3 por vídeo.
+### 3.2 Recursos visuais decididos vídeo a vídeo (05/11/2026)
+- Não existe regra fixa: nem b-roll obrigatório, nem número fixo de animações. Para cada trecho do roteiro, o editor escolhe o que ajuda a entender ou lembrar aquela fala: animação de texto atrás da pessoa, gráfico, número, imagem que explica, zoom, ou nada.
+- B-roll só quando a imagem explica a fala; imagem genérica é proibida.
+- Texto atrás da pessoa: lado livre do quadro, palavra-chave nunca escondida pela cabeça (medir a máscara na janela inteira). Uma camada por vez.
+- O app registra na entrega quais recursos usou e por quê, para o cliente aprovar ou pedir outro.
 
 ### 4. De onde vêm as imagens de apoio (b-roll)
 Ordem de preferência, configurável por cliente:

@@ -98,10 +98,10 @@ Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os aju
 - Os tempos do Whisper servem só para achar a palavra; o ponto do corte vem da energia do áudio.
 - Conferência visual obrigatória: tirar quadro do começo e dos últimos 0,45s / 0,2s / 0,03s de cada trecho e olhar. Se a pessoa estiver olhando para fora da câmera, de olho fechado ou começando outra fala, puxar o corte para antes.
 
-## Imagem de apoio NÃO é obrigatória: animação atrás da pessoa (05/11/2026, Núbia: "o b-roll da Lívia ficou sem sentido, fraco")
-- B-roll só entra quando a imagem EXPLICA a fala (ex.: capacete e luvas para "atividade insalubre"). Imagem genérica (livro, cadeira vazia) é proibida: tira força.
-- Padrão preferido: a ideia-chave da fala em texto animado ATRÁS da pessoa (camada entre o fundo desfocado e a pessoa recortada pela máscara). Exemplos do vídeo da Lívia: "LEI / 15.240 / OUTUBRO DE 2025"; "amar" riscado e depois "cuidar · É DEVER"; "ausência + dano · PRECISA DOS DOIS".
-- Modelo: `tools/edicao/atras-da-pessoa.html` (Bodoni, entra junto com a palavra falada) e `render_atras.js` (gera os quadros de cada evento). Na composição, sobrepor os quadros no fundo desfocado ANTES do maskedmerge com a máscara da pessoa.
-- Posição: no lado livre do quadro, ao lado da cabeça. Antes de fixar, medir a máscara em toda a janela do evento: a palavra-chave nunca pode ficar escondida atrás da cabeça. Se a pessoa se inclinar, mova o tempo da palavra para quando o lado estiver livre.
-- Uma camada por vez: durante a animação atrás, some a legenda, a ficha e o número do ponto.
-- No máximo 3 animações por vídeo, só nos conceitos que a pessoa precisa lembrar.
+## Recursos visuais: decididos vídeo a vídeo (05/11/2026, Núbia: "não há regra fixa; não precisa sempre ter b-roll")
+- NÃO existe cota nem fórmula: nem b-roll obrigatório, nem número fixo de animações. Para cada vídeo, leia o roteiro e pergunte em cada trecho: o que ajuda a pessoa a entender ou lembrar ESTA fala? A resposta pode ser uma animação atrás da pessoa, um gráfico, um número, uma imagem que explica, um zoom, ou nada (só a pessoa falando, quando a fala se sustenta sozinha).
+- B-roll só quando a imagem explica a fala (ex.: capacete e luvas para "atividade insalubre"). Imagem genérica (livro, cadeira vazia) é proibida: tira força.
+- Animação atrás da pessoa (camada entre o fundo desfocado e a pessoa recortada) é UMA das ferramentas. Exemplo no vídeo da Lívia: "LEI 15.240 · OUTUBRO DE 2025"; "amar" riscado e depois "cuidar · É DEVER"; "ausência + dano · PRECISA DOS DOIS". Modelo: `atras-da-pessoa.html` + `render_atras.js` (sobrepor os quadros no fundo desfocado ANTES do maskedmerge). O texto e o desenho de cada animação são criados para aquele vídeo, não copiados.
+- Sempre que houver texto atrás: lado livre do quadro, medindo a máscara na janela inteira do evento; a palavra-chave nunca pode ficar escondida atrás da cabeça (se a pessoa se inclinar, ajuste o tempo ou a posição).
+- Uma camada por vez: durante uma animação, some a legenda, a ficha e o número do ponto.
+- Na mensagem de entrega, diga em uma linha quais recursos usou e por quê.
