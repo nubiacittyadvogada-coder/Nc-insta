@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:S;src:url("file:///home/user/Nc-insta/modelos/fontes/bodoni-moda-latin-400-normal.woff2")}
+@font-face{font-family:S;font-style:italic;src:url("file:///home/user/Nc-insta/modelos/fontes/bodoni-moda-latin-400-italic.woff2")}
+@font-face{font-family:A;font-weight:500;src:url("file:///home/user/Nc-insta/modelos/fontes/archivo-latin-500-normal.woff2")}
+html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden}
+.e{position:absolute;right:40px;top:200px;text-align:right;color:#F4EDE6;opacity:0}
+.k{font-family:A;font-weight:500;font-size:19px;letter-spacing:.34em;opacity:.8;margin-bottom:6px}
+.b{font-family:S;font-size:100px;line-height:.95;letter-spacing:-2px}
+.i{font-family:S;font-style:italic;font-size:84px;line-height:1}
+.s{font-family:A;font-weight:500;font-size:19px;letter-spacing:.18em;opacity:.85;margin-top:14px}
+.l{position:relative;display:inline-block}
+.l .x{position:absolute;left:-4%;top:54%;height:5px;background:#C9A99A;width:0}
+.ln{display:block;opacity:0;transform:translateY(24px)}
+.sh{text-shadow:0 4px 30px rgba(0,0,0,.35)}
+</style></head><body>
+<div class="e sh" id="e1"><div class="k">LEI</div><div class="b ln" id="e1a">15.240</div><div class="s ln" id="e1b">OUTUBRO DE 2025</div></div>
+<div class="e sh" id="e2"><div class="i ln l" id="e2a">amar<span class="x" id="e2x"></span></div><br><div class="i ln" id="e2b" style="color:#fff">cuidar</div><div class="s ln" id="e2c">É DEVER</div></div>
+<div class="e sh" id="e3" style="transform:scale(.86);transform-origin:right top"><div class="i ln" id="e3a">ausência</div><br><div class="i ln" id="e3b">+ dano</div><div class="s ln" id="e3c">PRECISA DOS DOIS</div></div>
+<script>
+const E={e1:{a:0,b:3.9,parts:[['e1a',0.1],['e1b',1.4]]},e2:{a:0,b:6.8,parts:[['e2a',0.05,2.9],['e2b',4.6],['e2c',4.9]],x:['e2x',1.2]},e3:{a:0,b:4.9,parts:[['e3a',0.05],['e3b',3.4],['e3c',3.8]]}};
+const ease=t=>t<0?0:t>1?1:1-Math.pow(1-t,3);
+let cur='e1';function setE(k){cur=k}
+function setT(t){for(const k in E){const el=document.getElementById(k);if(k!==cur){el.style.opacity=0;continue}
+ const e=E[k];const out=1-ease((t-(e.b-0.45))/0.45);el.style.opacity=Math.min(ease(t/0.35),out);
+ for(const [id,t0,t1] of e.parts){let p=ease((t-t0)/0.5);if(t1)p*=1-ease((t-(t1-0.35))/0.35);const n=document.getElementById(id);n.style.opacity=p;n.style.transform=`translateY(${(1-p)*24}px)`}
+ if(e.x){const p=ease((t-e.x[1])/0.45);document.getElementById(e.x[0]).style.width=(108*p)+'%'}}}
+</script></body></html>

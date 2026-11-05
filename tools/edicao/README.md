@@ -97,3 +97,11 @@ Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os aju
 - O COMEÇO é o começo real da voz da primeira palavra, menos 0,04s. Nunca pegar o fim da tentativa anterior.
 - Os tempos do Whisper servem só para achar a palavra; o ponto do corte vem da energia do áudio.
 - Conferência visual obrigatória: tirar quadro do começo e dos últimos 0,45s / 0,2s / 0,03s de cada trecho e olhar. Se a pessoa estiver olhando para fora da câmera, de olho fechado ou começando outra fala, puxar o corte para antes.
+
+## Imagem de apoio NÃO é obrigatória: animação atrás da pessoa (05/11/2026, Núbia: "o b-roll da Lívia ficou sem sentido, fraco")
+- B-roll só entra quando a imagem EXPLICA a fala (ex.: capacete e luvas para "atividade insalubre"). Imagem genérica (livro, cadeira vazia) é proibida: tira força.
+- Padrão preferido: a ideia-chave da fala em texto animado ATRÁS da pessoa (camada entre o fundo desfocado e a pessoa recortada pela máscara). Exemplos do vídeo da Lívia: "LEI / 15.240 / OUTUBRO DE 2025"; "amar" riscado e depois "cuidar · É DEVER"; "ausência + dano · PRECISA DOS DOIS".
+- Modelo: `tools/edicao/atras-da-pessoa.html` (Bodoni, entra junto com a palavra falada) e `render_atras.js` (gera os quadros de cada evento). Na composição, sobrepor os quadros no fundo desfocado ANTES do maskedmerge com a máscara da pessoa.
+- Posição: no lado livre do quadro, ao lado da cabeça. Antes de fixar, medir a máscara em toda a janela do evento: a palavra-chave nunca pode ficar escondida atrás da cabeça. Se a pessoa se inclinar, mova o tempo da palavra para quando o lado estiver livre.
+- Uma camada por vez: durante a animação atrás, some a legenda, a ficha e o número do ponto.
+- No máximo 3 animações por vídeo, só nos conceitos que a pessoa precisa lembrar.
