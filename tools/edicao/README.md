@@ -91,3 +91,9 @@ Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os aju
 - Comando: `python3 tools/edicao/endcard.py editado.mp4 final.mp4`. Logos em `tools/edicao/marca/` (completa e monograma, brancas com transparência).
 - ERRO REAL de 05/11 (áudio mudo no fim de cada trecho): nunca usar `-ss` duplo (antes e depois do -i) com `afade=...:st=`; o st conta no tempo original e emudece os últimos segundos. Use só `-ss INICIO -i bruto -t DURACAO`, ou `asetpts=PTS-STARTPTS` antes do afade.
 - Conferência obrigatória do arquivo FINAL antes de subir: `ffmpeg -i final.mp4 -af silencedetect=n=-45dB:d=0.9 -f null -` (o único silêncio longo permitido é o cartão da logo) e transcrição do arquivo final inteiro, conferida contra o roteiro.
+
+## Fim e começo de cada bloco (05/11/2026, Núbia: "cada final de bloco ela olhando pro lado, ou terminando o outro")
+- O FIM de cada trecho é o fim real da voz da última palavra (energia do áudio caindo e ficando baixa por 0,12s), mais 0,06s. Nada de folga longa: logo depois de falar a pessoa olha para o lado, para o teleprompter, ou já começa a próxima tentativa.
+- O COMEÇO é o começo real da voz da primeira palavra, menos 0,04s. Nunca pegar o fim da tentativa anterior.
+- Os tempos do Whisper servem só para achar a palavra; o ponto do corte vem da energia do áudio.
+- Conferência visual obrigatória: tirar quadro do começo e dos últimos 0,45s / 0,2s / 0,03s de cada trecho e olhar. Se a pessoa estiver olhando para fora da câmera, de olho fechado ou começando outra fala, puxar o corte para antes.

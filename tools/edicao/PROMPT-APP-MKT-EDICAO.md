@@ -71,6 +71,7 @@ Sem o `format=rgb24` no início o filtro não tem efeito. Fundo: `eq=brightness=
 
 ### 3.1 Duas regras novas (05/11/2026)
 - **Nunca picotar a voz.** Cada fala é um trecho contínuo; só sai silêncio real medido por energia (pausa maior que 0,6s, com 0,2s de folga de cada lado). Cortar nos intervalos de palavra do Whisper come sílabas, porque os tempos dele erram de 0,2 a 0,5s.
+- **Corte colado na voz.** O fim de cada trecho é o fim real da voz (energia do áudio) mais 0,06s, e o começo é o início real da voz menos 0,04s. Folga maior pega a pessoa olhando para o lado ou começando a próxima tentativa. Confira o último quadro de cada trecho.
 - **Assinatura da marca no fim.** Se o cliente subir a logo no perfil de marca, todo vídeo daquela marca termina com 1,8s de cartão liso na cor escura da marca e a logo entrando em fade, depois do CTA.
 
 ### 4. De onde vêm as imagens de apoio (b-roll)
