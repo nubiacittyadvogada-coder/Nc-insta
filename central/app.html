@@ -1353,6 +1353,7 @@ function openVideo(c) {
     <label for="vd-link">Link do vídeo no Drive<input type="url" id="vd-link" placeholder="https://drive.google.com/file/d/..."></label>
     <div class="row"><button class="btn primary" id="vd-link-ok">Enviar link</button></div><p class="small" id="vd-link-msg"></p></div>
     <p class="small muted">Ou envie o arquivo direto por aqui (vídeos curtos):</p>`}
+    ${isReel7 ? '' : `<div class="row"><label class="btn" for="vd-cam" style="cursor:pointer">Gravar agora com a câmera</label><input type="file" id="vd-cam" accept="video/*" capture="user" style="display:none"></div><p class="small muted" id="vd-cam-msg">Abre a câmera do celular. Quando terminar, toque em Usar vídeo e depois em Enviar: o vídeo vem direto para este card, sem passar pelo Fotos.</p>`}
     <label for="vd-file">Vídeo<input type="file" id="vd-file" accept="video/*"></label>
     <p class="small muted">${isReel7 ? 'Limite de envio: 20 MB. No iPhone, grave em 1080p (Ajustes, Câmera, Gravar Vídeo) para caber.' : '<strong>Antes de enviar, corte o vídeo no app Fotos</strong> (Editar, arrastar o início e o fim) deixando só a tomada boa: o envio leva o mesmo tempo do vídeo, então 1 minuto cortado sobe em 1 minuto, e 5 minutos brutos levam 5. Deixe a Central aberta na tela até aparecer \'Vídeo guardado\'. Se parar no meio, escolha o mesmo vídeo de novo que eu continuo de onde parou.'}</p>
     <div class="row"><button class="btn primary" id="vd-ok">${isReel7 ? 'Montar Reel' : 'Enviar'}</button></div><p class="small" id="vd-msg"></p>`, (el) => {
@@ -1371,8 +1372,9 @@ function openVideo(c) {
         closeSheet(); toast('Link enviado. O diretor baixa e edita.');
       } catch (e) { m.textContent = e.message || 'Não consegui salvar o link.'; ev.currentTarget.disabled = false; }
     });
+    const camIn = $('#vd-cam', el); if (camIn) camIn.addEventListener('change', () => { const f = camIn.files[0]; const m = $('#vd-cam-msg', el); if (f && m) m.innerHTML = `<strong>Vídeo gravado (${(f.size / 1048576).toFixed(0)} MB).</strong> Marque quem gravou e toque em Enviar. Deixe a Central aberta até aparecer "Vídeo guardado".`; });
     $('#vd-ok', el).addEventListener('click', async (ev) => {
-      const file = $('#vd-file', el).files[0]; const msg = $('#vd-msg', el);
+      const cam = $('#vd-cam', el); const file = (cam && cam.files[0]) || $('#vd-file', el).files[0]; const msg = $('#vd-msg', el);
       if (!file) { msg.textContent = 'Escolha o vídeo primeiro.'; return; }
       if (!S.assets || !needDb()) { msg.textContent = 'Envio disponível apenas pelo claude.ai.'; return; }
       const btn = ev.currentTarget; btn.disabled = true;
