@@ -3,7 +3,8 @@ R='/tmp/claude-0/-home-user/35e900c0-5567-55e2-9b5c-894faf2df1c8/scratchpad/'
 C={
 'a':dict(js=R+'reed/a-v2.json',acc='#F0C3CC',bar='#8E2A3E',hook='Se prenderem alguém<br>da sua <i>família</i>',name='Núbia Citty',role='ADVOGADA CRIMINALISTA',cta='Salva e manda<br><i>para quem você ama</i>',at='@NUBIACITTY',serie=None),
 'b':dict(js=R+'reed/b-v2.json',acc='#F0C3CC',bar='#8E2A3E',hook='A Constituição<br><i>só vale</i> pro seu primo?',name='Núbia Citty',role='ADVOGADA CRIMINALISTA',cta='Me conta<br><i>nos comentários</i>',at='@NUBIACITTY',serie=None),
-'jr':dict(js=R+'jr/jr-v2.json',acc='#E3D2C3',bar='#D8C4B6',hook='Trabalhou na roça?<br>Esse tempo <i>pode contar</i>',name='José Matheus',role='ADVOGADO · NC ADVOGADOS',cta='Salve e mande<br><i>pra quem trabalhou na roça</i>',at='@NUBIACITTYADVOGADOS',nm=(7.0,10.2),serie=('PLANTÃO DO INSS','O que mexe na sua aposentadoria, explicado em um minuto.'))}
+'jr':dict(js=R+'jr/jr-v2.json',acc='#E3D2C3',bar='#D8C4B6',hook='Trabalhou na roça?<br>Esse tempo <i>pode contar</i>',name='José Matheus',role='ADVOGADO · NC ADVOGADOS',cta='Salve e mande<br><i>pra quem trabalhou na roça</i>',at='@NUBIACITTYADVOGADOS',nm=(7.0,10.2),serie=('PLANTÃO DO INSS','O que mexe na sua aposentadoria, explicado em um minuto.')),
+'ap':dict(js=R+'nc-aposentado/ap.json',acc='#E3D2C3',bar='#D8C4B6',hook='Aposentado que volta<br>a trabalhar <i>pode perder<br>o benefício?</i>',name='Daniel',role='ADVOGADO · NC ADVOGADOS',cta='Mande para<br><i>um aposentado</i>',at='@NUBIACITTYADVOGADOS',nm=(11.9,15.6),serie=('PLANTÃO DO INSS','O que mexe na sua aposentadoria, explicado em um minuto.'))}
 k=sys.argv[1];V=sys.argv[2] if len(sys.argv)>2 else 'A';c=C[k];D=json.load(open(c['js']))
 D.setdefault('steps',[]);D.setdefault('flash',[])
 F='file:///home/user/Nc-insta/modelos/fontes/'
