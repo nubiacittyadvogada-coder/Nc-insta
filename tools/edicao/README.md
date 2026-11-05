@@ -89,3 +89,5 @@ Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os aju
 ## Assinatura com a logo do NC (05/11/2026, pedido da Núbia)
 - TODO vídeo do NC Advogados termina com 1,8s de cartão escuro liso (#0F0D0C) e a logo completa branca entrando em fade, depois do CTA.
 - Comando: `python3 tools/edicao/endcard.py editado.mp4 final.mp4`. Logos em `tools/edicao/marca/` (completa e monograma, brancas com transparência).
+- ERRO REAL de 05/11 (áudio mudo no fim de cada trecho): nunca usar `-ss` duplo (antes e depois do -i) com `afade=...:st=`; o st conta no tempo original e emudece os últimos segundos. Use só `-ss INICIO -i bruto -t DURACAO`, ou `asetpts=PTS-STARTPTS` antes do afade.
+- Conferência obrigatória do arquivo FINAL antes de subir: `ffmpeg -i final.mp4 -af silencedetect=n=-45dB:d=0.9 -f null -` (o único silêncio longo permitido é o cartão da logo) e transcrição do arquivo final inteiro, conferida contra o roteiro.
