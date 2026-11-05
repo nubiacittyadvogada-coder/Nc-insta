@@ -20,6 +20,8 @@ W, H = v['width'], v['height']
 has_a = any(s['codec_type'] == 'audio' for s in info['streams'])
 lw = int(W * 0.46) // 2 * 2
 br = int(os.path.getsize(src) * 8 / T * 0.95)
+# teto para o arquivo final ficar abaixo de ~19 MiB (limite de 20 MiB do app)
+br = min(br, int(19 * 2**20 * 8 / (T + dur)) - 160_000)
 
 fc = (
     f"[0:v]fps=30,format=yuv420p,setsar=1[main];"
