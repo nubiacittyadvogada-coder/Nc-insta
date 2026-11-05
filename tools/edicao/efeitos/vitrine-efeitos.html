@@ -1,0 +1,107 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:S;src:url("file:///home/user/Nc-insta/modelos/fontes/bodoni-moda-latin-400-normal.woff2")}@font-face{font-family:S;font-style:italic;src:url("file:///home/user/Nc-insta/modelos/fontes/bodoni-moda-latin-400-italic.woff2")}
+@font-face{font-family:S;font-weight:700;src:url("file:///home/user/Nc-insta/modelos/fontes/bodoni-moda-latin-700-normal.woff2")}
+@font-face{font-family:A;font-weight:500;src:url("file:///home/user/Nc-insta/modelos/fontes/archivo-latin-500-normal.woff2")}@font-face{font-family:A;font-weight:600;src:url("file:///home/user/Nc-insta/modelos/fontes/archivo-latin-600-normal.woff2")}@font-face{font-family:A;font-weight:700;src:url("file:///home/user/Nc-insta/modelos/fontes/archivo-latin-700-normal.woff2")}
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:transparent;font-family:A}
+.ab{position:absolute}#bg,#fg,#g1,#g2,#g4,#g6,#g7,#g9,#b3,#b5,#f1,#f3,#f5,#f6,#f8{left:0;top:0;width:1080px;height:1920px}.L{opacity:0}
+.sh{text-shadow:0 0 3px rgba(0,0,0,.45),0 2px 10px rgba(0,0,0,.5),0 8px 30px rgba(0,0,0,.45)}
+/* E1 capa */
+#cap1{left:0;right:0;top:120px;text-align:center;color:#fff;font-family:S;font-weight:400;font-size:200px;letter-spacing:-4px;line-height:1}
+#cap1s{left:70px;right:70px;top:400px;display:flex;justify-content:space-between;color:#fff;font-weight:600;font-size:22px;letter-spacing:.32em}
+#frame{left:34px;top:34px;right:34px;bottom:34px;border:2px solid rgba(255,255,255,.75)}
+#cap1b{left:70px;bottom:120px;color:#fff}#cap1b .k{font-weight:600;font-size:18px;letter-spacing:.32em;opacity:.85}#cap1b .h{font-family:S;font-style:italic;font-size:64px;margin-top:6px}
+/* E2 */
+#big2{left:-40px;right:-40px;top:250px;text-align:center;font-family:S;font-style:italic;font-size:300px;color:rgba(255,255,255,.92);letter-spacing:-8px}
+/* notes */
+.note{position:absolute;background:#F6F1EA;color:#141011;font-family:S;font-size:50px;line-height:1.08;padding:24px 30px;box-shadow:0 18px 40px rgba(0,0,0,.25);border-radius:4px}
+.note .tp{position:absolute;top:-16px;left:40%;width:110px;height:32px;background:rgba(220,210,195,.85)}
+.note b{background:#F0C3CC;font-weight:400}
+/* phone */
+.ph{position:absolute;width:430px;height:900px;border-radius:56px;background:#111;padding:16px;box-shadow:0 40px 90px rgba(0,0,0,.4)}
+.ph .sc{width:100%;height:100%;border-radius:42px;overflow:hidden;background:#fff;position:relative}.ph .sc img{width:100%;position:absolute;left:0;top:0}
+.card{position:absolute;width:300px;height:620px;border-radius:30px;overflow:hidden;background:#fff;box-shadow:0 24px 60px rgba(0,0,0,.35);border:8px solid #111}.card img{width:100%}
+/* paper */
+#paper{left:0;top:0;width:1080px;height:1920px;background:#EFE9DF}
+.torn{position:absolute}
+.tile{display:inline-block;font-family:S;font-weight:700;font-size:96px;padding:4px 22px;margin:0 6px;box-shadow:0 8px 18px rgba(0,0,0,.18)}
+/* checklist */
+#chk{left:60px;top:240px;width:560px;background:rgba(20,16,17,.86);border-radius:28px;padding:28px 34px;color:#fff}
+#chk .t{display:flex;justify-content:space-between;font-weight:600;font-size:20px;letter-spacing:.24em;color:#E8D9DC}
+#chk .bar{display:flex;gap:10px;margin:16px 0 18px}#chk .bar i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.25)}#chk .bar i.on{background:#F0C3CC}
+#chk .it{display:flex;align-items:center;gap:20px;font-family:S;font-size:46px;margin:14px 0;opacity:.35}#chk .it.on{opacity:1}
+#chk .ck{width:46px;height:46px;border-radius:50%;border:3px solid #F0C3CC;display:flex;align-items:center;justify-content:center;font-family:A;font-weight:700;color:#141011;font-size:28px}#chk .it.on .ck{background:#F0C3CC}
+/* grid */
+#grid{left:-60px;top:-80px;width:1200px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+#grid img{width:100%;height:500px;object-fit:cover;border-radius:18px}
+#dim{left:0;top:0;width:1080px;height:1920px;background:rgba(10,8,9,.55)}
+/* fan title */
+#fant{left:0;right:0;top:210px;text-align:center;color:#141011;font-family:S;font-size:76px;line-height:1.05}#fant i{color:#8E2A3E}
+/* labels & header */
+#hdr{left:0;right:0;top:96px;text-align:center;color:#fff}#hdr .a{font-family:S;font-size:50px}#hdr .a i{color:#F0C3CC}#hdr .b{font-weight:600;font-size:18px;letter-spacing:.32em;margin-top:6px;opacity:.9}
+#lab{left:0;right:0;top:1250px;text-align:center;color:#fff}#lab .n{font-weight:600;font-size:26px;letter-spacing:.3em}#lab .m{font-family:S;font-style:italic;font-size:84px;line-height:1;margin-top:6px;color:#F0C3CC}
+#cap{position:absolute;left:100px;right:100px;top:1500px;text-align:center;line-height:1.15}
+#cap span{display:inline-block;font-weight:500;font-size:46px;color:rgba(255,255,255,.65);margin:0 5px}#cap span.on{color:#fff}
+#cta{left:70px;right:70px;top:1240px;text-align:center;color:#fff;font-family:S;font-size:66px;line-height:1.1}#cta i{color:#F0C3CC}#cta .at{font-family:A;font-weight:600;font-size:22px;letter-spacing:.3em;margin-top:22px}
+#grad{left:0;right:0;bottom:0;height:760px;background:linear-gradient(transparent,rgba(0,0,0,.45))}
+</style></head><body>
+<div class="ab L" id="bg">
+ <div class="ab L" id="g9"><div class="ab" id="grid"></div><div class="ab" id="dim"></div></div>
+ <div class="ab L" id="g7"><div class="ab" id="paper"></div>
+   <svg class="torn" style="left:-20px;top:620px" width="560" height="380"><path d="M0 40 L540 10 L520 80 L560 140 L530 380 L0 360 Z" fill="#C9A88C"/></svg>
+   <svg class="torn" style="left:560px;top:540px" width="540" height="360"><path d="M20 30 L540 0 L540 330 L40 360 L0 200 L30 120 Z" fill="#F0C3CC"/></svg>
+   <div class="ab" style="left:60px;top:110px;width:960px;text-align:center"><span class="tile" style="background:#141011;color:#F6F1EA;transform:rotate(-4deg)">E</span><span class="tile" style="background:#F6F1EA;color:#141011;transform:rotate(3deg)">Q</span><span class="tile" style="background:#8E2A3E;color:#F6F1EA;transform:rotate(-2deg)">U</span><span class="tile" style="background:#F0C3CC;color:#141011;transform:rotate(4deg)">I</span><span class="tile" style="background:#F6F1EA;color:#141011;transform:rotate(-3deg)">P</span><span class="tile" style="background:#141011;color:#F6F1EA;transform:rotate(2deg)">E</span></div>
+ </div>
+ <div class="ab L" id="g6"><div class="ab" style="left:0;top:0;width:1080px;height:1920px;background:#F3EEE6"></div></div>
+ <div class="ab L" id="g1"><div class="ab sh" id="cap1">Central</div><div class="ab sh" id="cap1s"><span>A EDIÇÃO DA IA</span><span>SEM EDITOR</span></div></div>
+ <div class="ab L" id="g2"><div class="ab sh" id="big2">sozinha</div></div>
+ <div class="ab L" id="g4"><div class="ph" id="ph4" style="left:600px;top:420px;transform:rotate(9deg)"><div class="sc"><img id="im4" src="./shots/radar.png"></div></div></div>
+ <div class="ab" id="b3"></div><div class="ab" id="b5"></div>
+</div>
+<div class="ab L" id="fg">
+ <div class="ab" id="grad"></div>
+ <div class="ab L" id="f1"><div class="ab" id="frame"></div><div class="ab sh" id="cap1b"><div class="k">COMO FOI FEITO</div><div class="h">a Central editou este vídeo</div></div></div>
+ <div class="ab" id="f3"></div><div class="ab" id="f5"></div>
+ <div class="ab L" id="f6"><div class="ab" id="fant">Uma tomada.<br><i>Vários visuais.</i></div></div>
+ <div class="ab L" id="f8"><div class="ab" id="chk"><div class="t"><span>• FLUXO DA CENTRAL</span><span id="chkn">0 de 3</span></div><div class="bar"><i></i><i></i><i></i></div>
+   <div class="it"><div class="ck">✓</div>A equipe grava</div><div class="it"><div class="ck">✓</div>Eu aprovo</div><div class="it"><div class="ck">✓</div>Está pronto</div></div></div>
+ <div class="ab L sh" id="hdr"><div class="a">O que a minha <i>Central</i> faz</div><div class="b">COM OS MEUS VÍDEOS</div></div>
+ <div class="ab L sh" id="lab"><div class="n" id="labn"></div><div class="m" id="labm"></div></div>
+ <div id="cap" class="sh"></div>
+ <div class="ab L sh" id="cta">Aula ao vivo e <i>gratuita</i><br>10/11, às 20h<div class="at">LINK AQUI · @NUBIACITTY</div></div>
+</div>
+<script>
+const D={"pages": [{"a": 0.0, "b": 0.98, "w": [["Eu", 0.0], ["não", 0.2], ["tenho", 0.33], ["mais", 0.67], ["uma", 0.85]]}, {"a": 0.98, "b": 1.69, "w": [["equipe", 0.98], ["de", 1.16], ["marketing,", 1.25]]}, {"a": 1.69, "b": 3.34, "w": [["eu", 1.69], ["criei", 1.76], ["ela", 2.02], ["com", 2.27], ["IA!", 2.44]]}, {"a": 2.9, "b": 3.65, "w": [["Essa", 2.9], ["é", 3.2], ["a", 3.29], ["série,", 3.38]]}, {"a": 3.65, "b": 4.31, "w": [["coisas", 3.65], ["que", 3.8], ["eu", 3.94], ["criei", 4.0], ["com", 4.22]]}, {"a": 4.31, "b": 4.58, "w": [["a", 4.31], ["IA,", 4.36]]}, {"a": 4.58, "b": 5.33, "w": [["porque", 4.58], ["eu", 4.67], ["não", 4.73], ["aguentava", 4.8], ["mais", 5.16]]}, {"a": 5.33, "b": 6.43, "w": [["fazer", 5.33], ["sozinha.", 5.53]]}, {"a": 6.13, "b": 6.93, "w": [["toda", 6.13], ["semana", 6.33], ["era", 6.57], ["a", 6.77], ["mesma", 6.82]]}, {"a": 6.93, "b": 8.22, "w": [["coisa,", 6.93], ["o", 7.42], ["que", 7.51], ["postar,", 7.59]]}, {"a": 8.22, "b": 9.24, "w": [["o", 8.22], ["que", 8.33], ["escrever,", 8.48]]}, {"a": 9.24, "b": 10.0, "w": [["qual", 9.24], ["o", 9.48], ["texto,", 9.68]]}, {"a": 10.0, "b": 10.6, "w": [["qual", 10.0], ["o", 10.08], ["gancho,", 10.24]]}, {"a": 10.6, "b": 11.93, "w": [["qual", 10.6], ["o", 10.69], ["roteiro", 10.77], ["Ai,", 11.24]]}, {"a": 11.93, "b": 12.84, "w": [["que", 11.93], ["confusão", 11.95], ["gente,", 12.42]]}, {"a": 12.84, "b": 13.73, "w": [["agora", 12.84], ["tem", 13.0], ["essa", 13.24], ["IA", 13.4], ["que", 13.62]]}, {"a": 13.73, "b": 14.88, "w": [["ela", 13.73], ["faz", 13.82], ["basicamente", 13.99], ["tudo", 14.46], ["pra", 14.68]]}, {"a": 14.88, "b": 15.77, "w": [["mim", 14.88], ["Ela", 15.0], ["me", 15.15], ["manda", 15.28], ["qual", 15.59]]}, {"a": 15.77, "b": 16.75, "w": [["é", 15.77], ["o", 15.95], ["radar", 16.0], ["da", 16.26], ["semana", 16.44]]}, {"a": 16.75, "b": 17.98, "w": [["com", 16.75], ["as", 16.88], ["principais", 16.93], ["notícias", 17.31], ["Já", 17.75]]}, {"a": 17.98, "b": 19.05, "w": [["fornece", 17.98], ["o", 18.38], ["roteiro,", 18.41]]}, {"a": 19.05, "b": 20.21, "w": [["já", 19.05], ["tem", 19.21], ["o", 19.36], ["teleprompter", 19.41], ["dentro", 19.89]]}, {"a": 20.21, "b": 21.5, "w": [["dela", 20.21], ["E", 20.61], ["ela", 20.96], ["edita", 21.07], ["pra", 21.36]]}, {"a": 21.5, "b": 22.52, "w": [["mim,", 21.5], ["com", 21.79], ["a", 21.96], ["minha", 22.01], ["voz,", 22.16]]}, {"a": 22.52, "b": 23.05, "w": [["com", 22.52], ["o", 22.67], ["jeito", 22.72], ["que", 22.83], ["eu", 22.98]]}, {"a": 23.05, "b": 23.96, "w": [["falo,", 23.05], ["assim,", 23.61]]}, {"a": 23.96, "b": 24.97, "w": [["tudo", 23.96], ["pronto!", 24.07]]}, {"a": 24.83, "b": 25.62, "w": [["E", 24.83], ["como", 25.0], ["foi", 25.15], ["ótimo,", 25.33]]}, {"a": 25.62, "b": 26.33, "w": [["pra", 25.62], ["mim", 25.73], ["obviamente,", 25.88]]}, {"a": 26.33, "b": 27.02, "w": [["eu", 26.33], ["coloquei", 26.37], ["isso", 26.64], ["também", 26.71], ["pra", 26.91]]}, {"a": 27.02, "b": 28.3, "w": [["equipe", 27.02], ["do", 27.31], ["escritório.", 27.4]]}, {"a": 28.04, "b": 29.39, "w": [["A", 28.04], ["equipe", 28.26], ["grava", 28.5], ["lendo", 28.85], ["aqui", 29.17]]}, {"a": 29.39, "b": 30.87, "w": [["e", 29.39], ["eu", 29.75], ["só", 29.85], ["aprovo.", 29.97]]}, {"a": 30.6, "b": 31.66, "w": [["dia", 30.6], ["10", 30.8], ["às", 31.11], ["20", 31.28], ["horas", 31.42]]}, {"a": 31.66, "b": 32.77, "w": [["eu", 31.66], ["vou", 31.77], ["te", 31.84], ["ensinar", 31.89], ["exatamente", 32.15]]}, {"a": 32.77, "b": 33.71, "w": [["como", 32.77], ["você", 33.02], ["pode", 33.22], ["fazer", 33.35], ["a", 33.57]]}, {"a": 33.71, "b": 34.88, "w": [["sua", 33.71], ["e", 34.06], ["vou", 34.24], ["mostrar", 34.35], ["como", 34.62]]}, {"a": 34.88, "b": 37.07, "w": [["que", 34.88], ["funciona", 34.98], ["essa", 35.42], ["minha", 35.97], ["aqui", 36.17]]}, {"a": 36.4, "b": 38.68, "w": [["Aula", 36.4], ["ao", 36.69], ["vivo", 36.78], ["e", 37.06], ["gratuita!", 38.01]]}, {"a": 38.68, "b": 40.11, "w": [["O", 38.68], ["link", 38.73], ["tá", 38.9], ["bem", 39.08], ["aqui.", 39.21]]}], "E": [{"n": "01", "name": "capa de revista", "a": 0, "b": 2.9}, {"n": "02", "name": "texto atrás", "a": 2.9, "b": 6.13}, {"n": "03", "name": "parede de notas", "a": 6.13, "b": 12.6}, {"n": "04", "name": "mockup do app", "a": 12.6, "b": 18.2}, {"n": "05", "name": "órbita", "a": 18.2, "b": 20.6}, {"n": "06", "name": "uma tomada, vários visuais", "a": 20.6, "b": 24.83}, {"n": "07", "name": "recorte de papel", "a": 24.83, "b": 28.04}, {"n": "08", "name": "checklist", "a": 28.04, "b": 30.6}, {"n": "09", "name": "parede de vídeos", "a": 30.6, "b": 39.64}], "total": 39.64, "cta": 36.4};const LAYER=(location.search||'?fg').slice(1);document.getElementById(LAYER).style.opacity=1;
+const $=id=>document.getElementById(id);const ez=t=>{t=Math.min(1,Math.max(0,t));return 1-Math.pow(1-t,3)};
+function win(id,s,a,b,f=0.35){const E=$(id);const i=ez((s-a)/f),o=ez((s-(b-f))/f);const v=i*(1-o);E.style.opacity=v;return v}
+// notes E3
+const N=[['O que <b>postar</b>?',6.75,60,560,-6,'b'],['O que <b>escrever</b>?',8.4,600,460,5,'f'],['Qual o <b>texto</b>?',9.4,80,1000,4,'f'],['Qual o <b>gancho</b>?',9.9,640,1040,-5,'b'],['Qual o <b>roteiro</b>?',10.6,330,300,2,'b'],['Ai, que <b>confusão</b>',11.4,520,1330,-3,'f']];
+N.forEach((n,i)=>{const d=document.createElement('div');d.className='note';d.id='n'+i;d.innerHTML='<div class="tp"></div>'+n[0];d.style.left=n[2]+'px';d.style.top=n[3]+'px';d.style.opacity=0;$(n[5]=='b'?'b3':'f3').appendChild(d)});
+// orbit cards E5
+const C=['card','tele','aprovar','hoje'];C.forEach((c,i)=>{['b5','f5'].forEach(L=>{const d=document.createElement('div');d.className='card';d.id=L+'c'+i;d.innerHTML='<img src="./shots/'+c+'.png">';d.style.opacity=0;$(L).appendChild(d)})});
+// grid E9
+const g=$('grid');for(let i=0;i<16;i++){const im=document.createElement('img');im.src='./th/t'+(i%12)+'.jpg';g.appendChild(im)}
+window.setT=(s)=>{
+ const E=D.E.find(e=>s>=e.a&&s<e.b)||D.E[D.E.length-1];
+ win('g1',s,-1,2.9,.3);win('f1',s,-1,2.9,.3);
+ const v2=win('g2',s,2.9,6.13,.35);$('big2').style.transform=`translateY(${(1-ez((s-2.9)/0.6))*40}px) scale(${1+(s-2.9)*0.012})`;
+ N.forEach((n,i)=>{const e=$('n'+i);const a=n[1];const v=ez((s-a)/0.3)*(1-ez((s-12.3)/0.3));e.style.opacity=s<a?0:v;e.style.transform=`rotate(${n[4]}deg) scale(${0.85+0.15*ez((s-a)/0.3)})`});
+ win('g4',s,12.6,18.2,.4);const k4=Math.min(1,Math.max(0,(s-13.4)/4.4));$('im4').style.top=(-k4*520)+'px';$('ph4').style.transform=`rotate(${9-3*ez((s-12.6)/0.8)}deg) translateX(${(1-ez((s-12.6)/0.6))*300}px)`;
+ // orbit
+ const ov=(s>=18.0&&s<20.8)?ez((s-18.0)/0.3)*(1-ez((s-20.5)/0.3)):0;
+ C.forEach((c,i)=>{const ang=(s-18.0)*1.6+i*Math.PI/2;const x=540+Math.cos(ang)*390-150,y=760+Math.sin(ang)*130-310;const front=Math.sin(ang)>0;const sc=0.78+0.22*Math.sin(ang);
+   ['b5','f5'].forEach(L=>{const d=$(L+'c'+i);const show=(L=='f5')==front;d.style.opacity=show?ov:0;d.style.left=x+'px';d.style.top=y+'px';d.style.transform=`scale(${sc}) rotate(${Math.cos(ang)*-8}deg)`})});
+ win('g6',s,20.6,24.83,.25);win('f6',s,20.6,24.83,.3);
+ win('g7',s,24.83,28.04,.25);
+ const v8=win('f8',s,28.04,30.6,.3);const its=[...document.querySelectorAll('#chk .it')];const tt=[28.1,29.4,30.0];let n8=0;its.forEach((e,i)=>{const on=s>=tt[i];e.className='it'+(on?' on':'');if(on)n8++});$('chkn').textContent=n8+' de 3';[...document.querySelectorAll('#chk .bar i')].forEach((e,i)=>e.className=i<n8?'on':'');
+ win('g9',s,30.6,40.5,.4);$('grid').style.transform=`translateY(${-(s-30.6)*28}px)`;
+ // header + label
+ const hv=(s>=2.9&&s<36.4)?ez((s-2.9)/0.4)*(1-ez((s-36.0)/0.4)):0;$('hdr').style.opacity=(s>=20.6&&s<28.04)?0:hv;
+ const la=E.a, lv=(s<36.4)?ez((s-la)/0.3)*(1-ez((s-(la+2.2))/0.4)):0;$('labn').textContent=E.n+'/09';$('labm').textContent=E.name;$('lab').style.opacity=lv;
+ const fanDark=(s>=20.6&&s<24.83);$('lab').style.color=fanDark?'#141011':'#fff';$('labm').style.color=fanDark?'#8E2A3E':'#F0C3CC';$('lab').classList.toggle('sh',!fanDark);
+ win('cta',s,36.4,41,.4);
+ const pg=(s>=36.35||(s>=la&&s<la+2.2&&s<36.4&&false))?null:D.pages.find(p=>s>=p.a-0.05&&s<p.b+0.1);const cap=$('cap');
+ if(pg&&!(s>=0&&s<2.9)){cap.innerHTML=pg.w.map(w=>`<span class="${s>=w[1]?'on':''}">${w[0]}</span>`).join(' ');cap.style.opacity=1;cap.style.color='';
+   [...cap.children].forEach(c=>{if(fanDark){c.style.color=c.className=='on'?'#141011':'rgba(20,16,17,.5)';c.style.textShadow='none'}})}else cap.style.opacity=0;
+ $('grad').style.opacity=(fanDark||(s>=24.83&&s<28.04))?0:1;
+};
+</script></body></html>
