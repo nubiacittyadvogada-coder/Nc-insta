@@ -119,6 +119,7 @@ td.t { white-space: normal; min-width: 160px }
 .redesw button { appearance: none; border: 0; background: var(--surface); color: var(--ink); padding: 12px 8px; font: 700 15px/1 var(--sans); cursor: pointer }
 .redesw button[aria-pressed="true"] { background: var(--wine); color: var(--wine-ink) }
 .redesw .badge { display: inline-block; min-width: 18px; padding: 2px 6px; border-radius: 999px; background: rgba(0,0,0,.12); font-size: 12px }
+.redesec { margin: 18px 0 8px } .redesec-h { display: flex; align-items: center; gap: 8px } .redesec-h h2 { margin: 0 } .redesec-v { border: 1px dashed var(--line); border-radius: 12px; padding: 14px }
 .redetag { font-size: .55em; color: var(--muted); font-style: normal }
 .chips button { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 12px; font: 600 13px/1 var(--sans); cursor: pointer }
 .chips button[aria-pressed="true"] { background: var(--wine); color: var(--wine-ink); border-color: var(--wine) }
@@ -146,7 +147,7 @@ const S = {
   experiments: [], decisions: [], funnel: [], goals: null, dim: 'format', rede: (() => { try { const v = localStorage.getItem('nc-rede'); return v === 'tiktok' ? 'tiktok' : 'instagram'; } catch (e) { return 'instagram'; } })(),
   brand: null, usage: null, rotina: null, rotinaMkt: null, tiktok: null, loaded: false, offline: false, busy: {}
 };
-const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina', 'tiktok'];
+const VIEWS = ['hoje', 'ig', 'tk', 'gravar', 'aprovar', 'prontos', 'calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina', 'tiktok'];
 const TYPE = { reel7: 'Reel 7s', reelFalado: 'Reel falado', carrossel: 'Carrossel', stories: 'Stories', estatico: 'Post' };
 const OBJ = { crescimento: 'Crescimento', autoridade: 'Autoridade', conversao: 'Conversão' };
 const OBJ_COLOR = { crescimento: 'var(--wine)', autoridade: 'var(--gold)', conversao: 'var(--ok)' };
@@ -190,7 +191,7 @@ const num = (v) => { if (v == null || v === '') return null; const n = Number(St
 const pct = (a, b) => (a != null && b) ? (a / b * 100) : null;
 const f1 = (n) => n == null ? '–' : n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 const brand = () => S.brand || DEFAULT_BRAND;
-const view = () => { const h = location.hash.replace('#', ''); return VIEWS.includes(h) ? h : 'hoje'; };
+const view = () => { let h = location.hash.replace('#', ''); if (typeof MARCA !== 'undefined' && MARCA !== 'nc' && ['gravar', 'aprovar', 'prontos'].includes(h)) h = (S.rede === 'tiktok' ? 'tk' : 'ig'); if (MARCA === 'nc' && ['ig', 'tk'].includes(h)) h = 'gravar'; return VIEWS.includes(h) ? h : 'hoje'; };
 const MARCA = (() => { try { return localStorage.getItem('central-marca') === 'nc' ? 'nc' : 'nubia'; } catch (e) { return 'nubia'; } })();
 const PFX = MARCA === 'nc' ? 'nc_' : '';
 const MARCA_NOME = MARCA === 'nc' ? 'NC Advogados' : 'Núbia Citty';
@@ -264,12 +265,17 @@ const ICON = {
   hoje: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>',
   gravar: '<svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="13.5" height="12" rx="2.5"/><path d="M16 10.2l5.5-3v9.6l-5.5-3z"/></svg>',
   aprovar: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7.5 12.3l3 3 6-6.3"/></svg>',
+  ig: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6"/></svg>',
+  tk: '<svg viewBox="0 0 24 24"><path d="M14 3.5v11.2a3.8 3.8 0 1 1-3.8-3.8"/><path d="M14 3.5c.4 2.6 2.3 4.4 5 4.6"/></svg>',
   prontos: '<svg viewBox="0 0 24 24"><path d="M12 3.5v11M7.5 10.5l4.5 4.5 4.5-4.5M4 17.5v1.5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5"/></svg>',
   mais: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg>'
 };
 function renderNav() {
-  const v = view(); const n = (st) => CS().filter(c => c.status === st).length;
-  const items = [['hoje', 'Hoje'], ['gravar', 'Gravar', n('gravar')], ['aprovar', 'Aprovar', n('aprovar')], ['prontos', 'Prontos'], ['mais', 'Mais']];
+  const v = view(); const n = (st) => S.contents.filter(c => c.status === st).length;
+  const pend = f => S.contents.filter(c => ['gravar', 'aprovar'].includes(c.status) && redeMatch(c, f)).length;
+  const items = MARCA === 'nc'
+    ? [['hoje', 'Hoje'], ['gravar', 'Gravar', n('gravar')], ['aprovar', 'Aprovar', n('aprovar')], ['prontos', 'Prontos'], ['mais', 'Mais']]
+    : [['hoje', 'Hoje'], ['ig', 'Instagram', pend('instagram')], ['tk', 'TikTok', pend('tiktok')], ['mais', 'Mais']];
   $('#nav').innerHTML = items.map(([k, label, badge]) => {
     const cur = k === v || (k === 'mais' && ['calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina', 'tiktok'].includes(v));
     return `<a href="${k === 'mais' ? '#' : '#' + k}" data-nav="${k}" ${cur ? 'aria-current="page"' : ''}>${ICON[k]}<span>${label}</span>${badge ? `<span class="badge">${badge}</span>` : ''}</a>`;
@@ -279,7 +285,7 @@ document.addEventListener('click', (e) => {
   const a = e.target.closest('[data-nav="mais"]');
   if (a) { e.preventDefault(); openSheet(`<h2>Mais</h2><div class="more">
     <a href="#conversa" data-close style="grid-column:1/-1"><b>Conversa com o diretor</b><span class="small muted">Avise o que subiu, peça ajustes e veja as respostas</span></a>
-    <a href="#tiktok" data-close style="grid-column:1/-1"><b>${MARCA === 'nc' ? 'Estratégia do NC' : 'Estratégia TikTok'}</b><span class="small muted">${MARCA === 'nc' ? 'Séries, frases fixas, edição e regras da OAB' : 'Fases, formatos e funil dos produtos'}</span></a>
+    <a href="#tiktok" data-close style="grid-column:1/-1"><b>${MARCA === 'nc' ? 'Estratégia do NC' : 'Estratégia do TikTok (fases e funil)'}</b><span class="small muted">${MARCA === 'nc' ? 'Séries, frases fixas, edição e regras da OAB' : 'Fases, formatos e funil dos produtos'}</span></a>
     <a href="#rotina" data-close style="grid-column:1/-1"><b>Rotina do marketing</b><span class="small muted">O que postar e o que fazer em cada dia</span></a>
     <a href="#diretor" data-close style="grid-column:1/-1"><b>Diretor de marketing</b><span class="small muted">Metas, funil, experimentos e relatório semanal</span></a>
     <a href="#calendario" data-close><b>Calendário</b><span class="small muted">Programação das publicações</span></a>
@@ -406,7 +412,7 @@ function empty(title, text, btn) { return `<div class="empty"><b style="color:va
 function offlineNote() {
   return S.offline ? `<div class="card"><span class="pill warn">Modo visualização</span><p class="small">Esta página precisa ser aberta pelo claude.ai, logada na sua conta, para salvar, gerar e baixar conteúdos.</p></div>` : '';
 }
-function header(eyebrow, title, extra) { return `<div class="head"><div class="row between"><span class="eyebrow">${eyebrow}</span><div class="row" style="gap:6px">${S.isOwner === false ? `<span class="pill">NC Advogados</span>` : `<button class="btn small ${MARCA === 'nc' ? 'primary' : ''}" data-act="trocarMarca" aria-label="Trocar de marca">${MARCA === 'nc' ? 'NC Advogados ⇄' : 'Núbia Citty ⇄'}</button>`}<button class="btn ghost small" data-act="atualizar" aria-label="Atualizar a Central">↻</button></div></div>${['hoje', 'gravar', 'aprovar', 'prontos', 'calendario'].includes(view()) ? redeSwitch() : ''}<h1>${title}${['gravar', 'aprovar', 'prontos'].includes(view()) && MARCA !== 'nc' ? ` <span class="redetag">· ${REDE_NOME[S.rede]}</span>` : ''}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
+function header(eyebrow, title, extra) { return `<div class="head"><div class="row between"><span class="eyebrow">${eyebrow}</span><div class="row" style="gap:6px">${S.isOwner === false ? `<span class="pill">NC Advogados</span>` : `<button class="btn small ${MARCA === 'nc' ? 'primary' : ''}" data-act="trocarMarca" aria-label="Trocar de marca">${MARCA === 'nc' ? 'NC Advogados ⇄' : 'Núbia Citty ⇄'}</button>`}<button class="btn ghost small" data-act="atualizar" aria-label="Atualizar a Central">↻</button></div></div><h1>${title}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
 
 function vHoje() {
   const d = new Date(); const h = d.getHours(); const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -418,11 +424,11 @@ function vHoje() {
   const rot = S.rotina;
   return `${header(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }), (MARCA === 'nc' ? `${saud}. <em>NC Advogados.</em>` : `${saud}, <em>Núbia.</em>`))}
   ${offlineNote()}
-  <div class="tiles">
+  ${MARCA === 'nc' ? `<div class="tiles">
     <button class="tile" data-act="ir" data-to="gravar"><b>${n('gravar')}</b><span class="small muted">para gravar</span></button>
     <button class="tile" data-act="ir" data-to="aprovar"><b>${n('aprovar')}</b><span class="small muted">para aprovar</span></button>
     <button class="tile" data-act="ir" data-to="prontos"><b>${n('pronto') + n('agendado')}</b><span class="small muted">prontos</span></button>
-  </div>
+  </div>` : `<div class="tiles" style="grid-template-columns:1fr 1fr">${[['ig', 'instagram', 'Instagram'], ['tk', 'tiktok', 'TikTok']].map(([to, r, nome]) => { const q = st => S.contents.filter(c => st.includes(c.status) && redeMatch(c, r)).length; return `<button class="tile" data-act="ir" data-to="${to}" style="text-align:left"><b style="font-size:20px">${nome}</b><span class="small">${q(['aprovar'])} para aprovar</span><span class="small">${q(['gravar'])} para gravar</span><span class="small muted">${q(['pronto', 'agendado'])} prontos</span></button>`; }).join('')}</div>`}
   <div class="row"><button class="btn primary" data-act="criar">Criar conteúdo</button><button class="btn" data-act="semana">Montar a semana</button></div>
   ${pessoal.length ? `<section><h2>Preciso de você</h2>${pessoal.map(c => `<div class="card"><span class="pill wine">${TYPE[c.type]}</span><h3>${esc(plain(c.title))}</h3><p class="small">${esc(c.perguntaPessoal || '')}</p><div class="row"><button class="btn" data-act="responder" data-id="${c.id}">Responder</button></div></div>`).join('')}</section>` : ''}
   ${manualHoje.length ? `<section><h2>Você posta hoje pelo app</h2><p class="small muted">Estes não saem sozinhos: precisam de música em alta, figurinha ou stories. Poste pelo Instagram e marque como publicado.</p>${manualHoje.map(c => `<div class="card"><span class="pill warn">${TYPE[c.type]}${c.horario ? ' · ' + esc(c.horario) : ''}</span><h3>${esc(plain(c.title))}</h3><div class="row"><button class="btn primary" data-act="baixar" data-id="${c.id}">Baixar</button><button class="btn" data-act="publicado" data-id="${c.id}">Marcar publicado</button></div></div>`).join('')}</section>` : ''}
@@ -477,7 +483,7 @@ function redeOf(c) {
 }
 const REDE_NOME = { instagram: 'Instagram', tiktok: 'TikTok', ambos: 'TikTok + Instagram' };
 function redeMatch(c, f) { const r = redeOf(c); return f === 'todos' || r === f || r === 'ambos'; }
-function CS() { return MARCA === 'nc' ? S.contents : S.contents.filter(c => redeMatch(c, S.rede)); }
+function CS() { return S.contents; }
 function redeSwitch() {
   if (MARCA === 'nc') return '';
   const pend = f => S.contents.filter(c => ['gravar', 'aprovar'].includes(c.status) && redeMatch(c, f)).length;
@@ -486,6 +492,22 @@ function redeSwitch() {
 function redeChips(list) {
   const n = f => list.filter(c => redeMatch(c, f)).length;
   return `<div class="chips" role="group" aria-label="Rede">${[['todos', 'Todos'], ['instagram', 'Instagram'], ['tiktok', 'TikTok']].map(([k, l]) => `<button type="button" data-act="rede" data-rede="${k}" aria-pressed="${S.rede === k}">${l} ${n(k)}</button>`).join('')}</div>`;
+}
+
+function vRede(rede) {
+  S.rede = rede; try { localStorage.setItem('nc-rede', rede); } catch (e) {}
+  const nome = rede === 'tiktok' ? 'TikTok' : 'Instagram';
+  const all = S.contents.filter(c => redeMatch(c, rede));
+  const ord = (a, b) => (a.scheduledFor || '9').localeCompare(b.scheduledFor || '9') || (b.createdAt || '').localeCompare(a.createdAt || '');
+  const sec = (sts, titulo, sub, mode, vazio) => {
+    const l = all.filter(c => sts.includes(c.status)).sort(ord);
+    return `<section class="redesec"><div class="redesec-h"><h2>${titulo}</h2><span class="pill ${l.length ? 'wine' : ''}">${l.length}</span></div><p class="small muted">${sub}</p>${l.length ? `<div class="stack">${l.map(c => contentCard(c, mode)).join('')}</div>` : `<p class="small muted redesec-v">${vazio}</p>`}</section>`;
+  };
+  return `${header(nome, `${nome}`, rede === 'tiktok' ? 'Só o que vai para o TikTok.' : 'Só o que vai para o Instagram.')}${offlineNote()}
+    ${sec(['aprovar'], '1. Para aprovar', 'Leia e aprove. Nada é publicado sem o seu sim.', 'aprovar', 'Nada esperando aprovação.')}
+    ${sec(['gravar'], '2. Para gravar', 'Grave com o teleprompter e envie o vídeo.', 'gravar', 'Nada para gravar.')}
+    ${sec(['pronto', 'agendado'], '3. Prontos para postar', 'Baixe, copie a legenda e publique.', 'pronto', 'Nada pronto ainda.')}
+    <div class="row" style="margin-top:8px"><button class="btn primary" data-act="criar">Criar conteúdo para o ${nome}</button></div>`;
 }
 
 function vLista(status, eyebrow, title, sub, emptyT, emptyX) {
@@ -767,7 +789,7 @@ function render() {
   const v = view(); renderNav();
   if (!S.loaded) return;
   const html = {
-    hoje: vHoje,
+    hoje: vHoje, ig: () => vRede('instagram'), tk: () => vRede('tiktok'),
     gravar: () => vLista(['gravar'], 'Gravar', 'Roteiros para <em>gravar</em>', 'Grave, envie o vídeo e a Central prepara o restante do que já está integrado.', 'Nada para gravar', 'Quando você aprovar um Reel, ele aparece aqui com cena e roteiro.'),
     aprovar: () => vLista(['aprovar'], 'Aprovar', 'Esperando seu <em>sim</em>', 'Nada é publicado sem a sua aprovação expressa.', 'Nada aguardando', 'Crie um conteúdo ou monte a semana para receber propostas.'),
     prontos: () => vLista(['pronto', 'agendado'], 'Prontos', 'Arquivos para <em>publicar</em>', 'Baixe os arquivos, copie a legenda e publique.', 'Nenhum arquivo pronto', 'Aprove conteúdos para que as artes finais apareçam aqui.'),
