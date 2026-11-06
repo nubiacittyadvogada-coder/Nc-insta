@@ -138,7 +138,7 @@ td.t { white-space: normal; min-width: 160px }
 const S = {
   db: null, assets: null, sample: null, downloads: null, user: null,
   contents: [], products: [], references: [], metrics: [], learning: [], series: [], reports: [], radar: [], log: [], mensagens: [],
-  experiments: [], decisions: [], funnel: [], goals: null, dim: 'format',
+  experiments: [], decisions: [], funnel: [], goals: null, dim: 'format', rede: (() => { try { return localStorage.getItem('nc-rede') || 'todos'; } catch (e) { return 'todos'; } })(),
   brand: null, usage: null, rotina: null, rotinaMkt: null, tiktok: null, loaded: false, offline: false, busy: {}
 };
 const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina', 'tiktok'];
@@ -330,7 +330,7 @@ function strip(c) {
 function meta(c) {
   const [label, tone] = STATUS[c.status] || ['', ''];
   const q = c.qualidade;
-  return `<div class="row"><span class="pill wine">${TYPE[c.type] || c.type}</span><span class="pill">Objetivo: ${GOALS[goalOf(c)]}</span>
+  return `<div class="row"><span class="pill wine">${TYPE[c.type] || c.type}</span><span class="pill">${REDE_NOME[redeOf(c)]}</span><span class="pill">Objetivo: ${GOALS[goalOf(c)]}</span>
     ${q ? `<span class="pill ${q.aprovado ? 'ok' : 'bad'}">${q.aprovado ? 'Diferencial: ' + esc(q.diferencial) : 'Genérico'}</span>` : ''}
     ${c.seriesName ? `<span class="pill">${esc(c.seriesName)}</span>` : ''}<span class="pill ${tone}">${label}</span>
     ${c.scheduledFor ? `<span class="pill">${fmtDay(c.scheduledFor)}</span>` : ''}${c.metricoolUuid && !postaManual(c) ? '<span class="pill ok">Agendado no Metricool</span>' : ''}${postaManual(c) ? '<span class="pill warn">Você posta pelo app</span>' : ''}</div>`;
@@ -463,10 +463,25 @@ function mixCard() {
     ${seriesDup.length ? `<p class="small"><span class="pill warn">Série repetida</span> ${seriesDup.map(([s, n]) => `${esc(s)} aparece ${n}x nesta semana. O limite é 1.`).join(' ')}</p>` : ''}</div>`;
 }
 
+// ================= rede: TikTok x Instagram =================
+function redeOf(c) {
+  const r = String(c.rede || '').toLowerCase();
+  const tk = r.includes('tiktok') || /^tk-/.test(c.id || '') || /tiktok/i.test(c.title || '');
+  const ig = r.includes('instagram') || /^ig-/.test(c.id || '') || (!tk);
+  return tk && ig ? 'ambos' : tk ? 'tiktok' : 'instagram';
+}
+const REDE_NOME = { instagram: 'Instagram', tiktok: 'TikTok', ambos: 'TikTok + Instagram' };
+function redeMatch(c, f) { const r = redeOf(c); return f === 'todos' || r === f || r === 'ambos'; }
+function redeChips(list) {
+  const n = f => list.filter(c => redeMatch(c, f)).length;
+  return `<div class="chips" role="group" aria-label="Rede">${[['todos', 'Todos'], ['instagram', 'Instagram'], ['tiktok', 'TikTok']].map(([k, l]) => `<button type="button" data-act="rede" data-rede="${k}" aria-pressed="${S.rede === k}">${l} ${n(k)}</button>`).join('')}</div>`;
+}
+
 function vLista(status, eyebrow, title, sub, emptyT, emptyX) {
   const list = S.contents.filter(c => status.includes(c.status)).sort((a, b) => (a.scheduledFor || '9').localeCompare(b.scheduledFor || '9') || (b.createdAt || '').localeCompare(a.createdAt || ''));
   const mode = status[0] === 'pronto' ? 'pronto' : status[0];
-  return `${header(eyebrow, title, sub)}${offlineNote()}${list.length ? `<div class="stack">${list.map(c => contentCard(c, mode)).join('')}</div>` : empty(emptyT, emptyX, `<button class="btn primary" data-act="criar">Criar conteúdo</button>`)}`;
+  const vis = list.filter(c => redeMatch(c, S.rede));
+  return `${header(eyebrow, title, sub)}${offlineNote()}${list.length ? `${redeChips(list)}<div class="stack" style="margin-top:12px">${vis.length ? vis.map(c => contentCard(c, mode)).join('') : `<p class="small muted">Nada de ${REDE_NOME[S.rede] || ''} aqui agora.</p>`}</div>` : empty(emptyT, emptyX, `<button class="btn primary" data-act="criar">Criar conteúdo</button>`)}`;
 }
 
 function vCalendario() {
@@ -941,6 +956,7 @@ const ACTIONS = {
   resultado: (c) => openMetric(c),
   classificar: () => classify(),
   dim: (c, b) => { S.dim = b.dataset.dim; render(); },
+  rede: (c, b) => { S.rede = b.dataset.rede; try { localStorage.setItem('nc-rede', S.rede); } catch (e) {} render(); },
   async decidir(c, b) {
     const d = S.decisions.find(x => x.id === b.dataset.id); if (!d || !needDb()) return; const v = b.dataset.v;
     if (v === 'aprovada') await applyDecision(d);
