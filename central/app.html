@@ -520,9 +520,11 @@ function vRede(rede) {
   const ord = (a, b) => (a.scheduledFor || '9').localeCompare(b.scheduledFor || '9') || (b.createdAt || '').localeCompare(a.createdAt || '');
   const sec = (sts, titulo, sub, mode, vazio) => {
     const l = all.filter(c => sts.includes(c.status)).sort(ord);
-    return `<section class="redesec"><div class="redesec-h"><h2>${titulo}</h2><span class="pill ${l.length ? 'wine' : ''}">${l.length}</span></div><p class="small muted">${sub}</p>${l.length ? `<div class="stack">${l.map(c => contentCard(c, mode)).join('')}</div>` : `<p class="small muted redesec-v">${vazio}</p>`}</section>`;
+    return `<section class="redesec" id="sec-${mode}"><div class="redesec-h"><h2>${titulo}</h2><span class="pill ${l.length ? 'wine' : ''}">${l.length}</span></div><p class="small muted">${sub}</p>${l.length ? `<div class="stack">${l.map(c => contentCard(c, mode)).join('')}</div>` : `<p class="small muted redesec-v">${vazio}</p>`}</section>`;
   };
-  return `${header(nome, `${nome}`, rede === 'tiktok' ? 'Só o que vai para o TikTok.' : 'Só o que vai para o Instagram.')}${offlineNote()}
+  const nSt = sts => all.filter(c => sts.includes(c.status)).length;
+  const tabs = `<div class="chips" role="group" aria-label="Ir para" style="position:sticky;top:0;z-index:5;background:var(--bg,#fbf7f3);padding:8px 0">${[['aprovar', 'Aprovar', ['aprovar']], ['gravar', 'Gravar', ['gravar']], ['pronto', 'Prontos para postar', ['pronto', 'agendado']]].map(([m, l, st]) => `<button type="button" data-act="irSec" data-sec="${m}">${l} ${nSt(st)}</button>`).join('')}</div>`;
+  return `${header(nome, `${nome}`, rede === 'tiktok' ? 'Só o que vai para o TikTok.' : 'Só o que vai para o Instagram.')}${offlineNote()}${tabs}
     ${sec(['aprovar'], '1. Para aprovar', 'Leia e aprove. Nada é publicado sem o seu sim.', 'aprovar', 'Nada esperando aprovação.')}
     ${sec(['gravar'], '2. Para gravar', 'Grave com o teleprompter e envie o vídeo.', 'gravar', 'Nada para gravar.')}
     ${sec(['pronto', 'agendado'], '3. Prontos para postar', 'Baixe, copie a legenda e publique.', 'pronto', 'Nada pronto ainda.')}
@@ -882,6 +884,7 @@ function mainText(c) {
 }
 
 const ACTIONS = {
+  irSec: (c, b) => { const el = document.getElementById('sec-' + b.dataset.sec); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
   desarquivar: async (c) => { if (!c) return; await col('contents').doc(c.id).update({ status: c.statusAnterior || 'gravar', updatedAt: now() }); toast('Voltou para a lista'); },
   cronoCheck: async (c, b) => { const k = b.dataset.k; const cr = S.crono || {}; const f = Object.assign({}, cr.feito || {}); if (f[k]) delete f[k]; else f[k] = now(); await col('settings').doc('cronograma').set(Object.assign({}, cr, { feito: f })); },
   ir: (c, b) => { location.hash = b.dataset.to; },
