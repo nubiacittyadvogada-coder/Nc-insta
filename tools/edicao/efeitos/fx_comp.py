@@ -34,7 +34,13 @@ if a.clip:
     fc += [f"[{cur}]split=2[pa][pb]", f"[pb]crop=1080:960:0:{yc}[pbot]", f"[{n}:v]format=rgba,setpts=PTS+{t0}/TB[clp]",
            f"[pa][pbot]overlay=0:960:enable='{en}'[pm2]", f"[pm2][clp]overlay=0:0:eof_action=pass:enable='{en}'[vc]"]
     cur = 'vc'
-fc += [f"[{cur}][3:v]overlay=0:0:eof_action=pass[v1]", "[v1][4:v]overlay=0:0:eof_action=pass,setpts=PTS/1.1,fps=30,format=yuv420p[o]", "[0:a]atempo=1.1[ao]"]
+fc += [f"[{cur}][3:v]overlay=0:0:eof_action=pass[v1]", "[v1][4:v]overlay=0:0:eof_action=pass,setpts=PTS/1.1,fps=30,format=yuv420p[o]"]
 t = T / 1.1; br = min(int(19 * 2**20 * 8 / t) - 200000, 6_000_000)
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-threads', '4'] + ins + ['-filter_complex', ';'.join(fc), '-map', '[o]', '-map', '[ao]', '-c:v', 'libx264', '-b:v', str(br), '-maxrate', str(int(br * 1.3)), '-bufsize', str(br * 2), '-preset', 'medium', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', a.out], check=True)
+# ERRO REAL 06/11/2026: atempo dentro do mesmo filter_complex deixava o áudio até 3 s atrasado.
+# Agora: vídeo sem áudio, áudio acelerado à parte, e junção com -shortest.
+vtmp, atmp = a.out + '.v.mp4', a.out + '.a.m4a'
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-threads', '4'] + ins + ['-filter_complex', ';'.join(fc), '-map', '[o]', '-an', '-c:v', 'libx264', '-b:v', str(br), '-maxrate', str(int(br * 1.3)), '-bufsize', str(br * 2), '-preset', 'medium', vtmp], check=True)
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', f'{D}/cut.mp4', '-vn', '-filter:a', 'atempo=1.1', '-c:a', 'aac', '-b:a', '128k', atmp], check=True)
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', vtmp, '-i', atmp, '-map', '0:v', '-map', '1:a', '-c', 'copy', '-shortest', '-movflags', '+faststart', a.out], check=True)
+os.remove(vtmp); os.remove(atmp)
 print(a.out, round(os.path.getsize(a.out) / 2**20, 1), 'MiB')

@@ -110,6 +110,10 @@ Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os aju
 - Vídeo de série abre com animação: "EPISÓDIO N" (Archivo, caixa alta, pequeno) e o nome da série em Bodoni com itálico, revelado com elegância nos primeiros 2,5 a 3s, depois some. Ela ocupa o lugar do título grande do gancho no topo (uma camada no topo por vez). Pode ficar atrás da pessoa se o topo estiver livre, sem a cabeça cobrir as palavras.
 - LEGENDA DESDE O PRIMEIRO SEGUNDO, inclusive durante o gancho. (Substitui a regra antiga "sem legenda no gancho".) No CTA final a legenda continua opcional.
 
+## ERRO REAL: áudio fora de sincronia no premium (06/11/2026)
+
+O `atempo=1.1` dentro do mesmo filter_complex do vídeo deixou o áudio até 3 s atrasado em todos os premium. O fx_comp.py agora renderiza o vídeo sem áudio, acelera o áudio à parte e junta com `-shortest`. Conferência obrigatória antes de entregar: duração do stream de vídeo e de áudio iguais (diferença menor que 0,15 s) e um quadro de legenda no meio e no fim batendo com a fala.
+
 ## PADRÃO PREMIUM DE EDIÇÃO (06/11/2026, aprovado pela Núbia: "adorei")
 Edição simples demais foi reprovada ("básica, sem imagens junto da fala, sem animação, sem diferencial"). A partir de agora todo vídeo usa o motor de efeitos:
 - `efeitos/fx_engine.html` + um `fx.js` por vídeo (exemplos em `efeitos/exemplos/`). Tipos: `cover` (capa de revista atrás da cabeça), `img` (imagem da fala ATRÁS da pessoa, com zoom lento e flash na entrada), `text` (título atrás, com subtítulo que entra no tempo da fala), `strike` (palavra riscada e a correção), `comments` (comentários surgindo e sendo riscados), `compare` (quadro com ✓ marcando), `counter` (relógio/contador), `list` (lista numerada entrando item a item), `tag` (etiqueta).
