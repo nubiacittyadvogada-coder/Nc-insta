@@ -160,7 +160,7 @@ const HOOKS = ['contradição', 'pergunta', 'confissão', 'alerta', 'opinião po
 const CTAS = ['salvar', 'compartilhar', 'comentar', 'seguir', 'direct', 'link na bio', 'nenhum'];
 const CLICHES = ['acredite em você', 'nunca desista', 'zona de conforto', 'o sucesso é', 'você é capaz', 'melhor versão', 'o segredo do sucesso', 'tudo é possível', 'foco, força e fé', 'só depende de você', 'sonhe grande', 'faça acontecer', 'quem quer arruma', 'transforme sua vida', 'neste post', 'é importante ressaltar', 'vale ressaltar', 'no mundo de hoje', 'cada vez mais', 'mulheres poderosas', 'contrate devagar', 'demita rápido', 'emprego com cnpj', 'feito é melhor que perfeito', 'não é sorte', 'gratidão sempre'];
 const DIMS = { estiloReel: 'Estilo do Reel', format: 'Formato', tema: 'Tema', tipoGancho: 'Gancho', duracaoFaixa: 'Duração', tipoCta: 'CTA', turno: 'Horário', goal: 'Objetivo' };
-const STATUS = { aprovar: ['Aguardando aprovação', 'warn'], gravar: ['Gravar', 'wine'], pronto: ['Pronto', 'ok'], agendado: ['Agendado', 'ok'], publicado: ['Publicado', ''], rejeitado: ['Rejeitado', 'bad'] };
+const STATUS = { aprovar: ['Aguardando aprovação', 'warn'], gravar: ['Gravar', 'wine'], pronto: ['Pronto', 'ok'], agendado: ['Agendado', 'ok'], publicado: ['Publicado', ''], rejeitado: ['Rejeitado', 'bad'], ideia: ['Banco de ideias', ''], arquivado: ['Arquivado', ''] };
 const STYLE_NAME = { editorial: 'Editorial sofisticado', lifestyle: 'Lifestyle com foto', colagem: 'Colagem criativa', jornalistico: 'Jornalístico provocativo', minimal: 'Minimalismo tipográfico', agenda: 'Agenda sobre foto' };
 const REJECT_REASONS = ['Não é a minha voz', 'Gancho fraco', 'Tema repetido', 'Risco jurídico ou ético', 'Muito comercial', 'Parece texto de IA', 'Opinião que não é minha'];
 
@@ -526,7 +526,8 @@ function vRede(rede) {
     ${sec(['aprovar'], '1. Para aprovar', 'Leia e aprove. Nada é publicado sem o seu sim.', 'aprovar', 'Nada esperando aprovação.')}
     ${sec(['gravar'], '2. Para gravar', 'Grave com o teleprompter e envie o vídeo.', 'gravar', 'Nada para gravar.')}
     ${sec(['pronto', 'agendado'], '3. Prontos para postar', 'Baixe, copie a legenda e publique.', 'pronto', 'Nada pronto ainda.')}
-    <div class="row" style="margin-top:8px"><button class="btn primary" data-act="criar">Criar conteúdo para o ${nome}</button></div>`;
+    <div class="row" style="margin-top:8px"><button class="btn primary" data-act="criar">Criar conteúdo para o ${nome}</button></div>
+    ${(() => { const b = all.filter(c => c.status === 'ideia').sort(ord); return b.length ? `<details class="card" style="margin-top:14px"><summary class="small"><b>Banco de ideias (${b.length})</b> · roteiros guardados para depois, fora das listas</summary>${b.map(c => `<div class="row between" style="padding:8px 0;border-top:1px solid var(--line,#0001);gap:10px"><span class="small" style="min-width:0">${esc(plain(c.title))}</span><button class="btn small" data-act="desarquivar" data-id="${c.id}">Trazer de volta</button></div>`).join('')}</details>` : ''; })()}`;
 }
 
 function vLista(status, eyebrow, title, sub, emptyT, emptyX) {
@@ -537,7 +538,7 @@ function vLista(status, eyebrow, title, sub, emptyT, emptyX) {
 
 function vCalendario() {
   const start = today(); const days = Array.from({ length: 14 }, (_, i) => addDays(start, i));
-  const sched = CS().filter(c => c.scheduledFor && c.status !== 'rejeitado');
+  const sched = CS().filter(c => c.scheduledFor && !['rejeitado', 'arquivado', 'ideia'].includes(c.status));
   const semData = CS().filter(c => !c.scheduledFor && ['pronto', 'gravar', 'aprovar'].includes(c.status));
   return `${header('Calendário', 'Próximos <em>14 dias</em>', 'Conteúdos agendados aparecem aqui. Toque em um dia vazio para ver o que pode entrar.')}
   ${mixCard()}
@@ -881,6 +882,7 @@ function mainText(c) {
 }
 
 const ACTIONS = {
+  desarquivar: async (c) => { if (!c) return; await col('contents').doc(c.id).update({ status: c.statusAnterior || 'gravar', updatedAt: now() }); toast('Voltou para a lista'); },
   cronoCheck: async (c, b) => { const k = b.dataset.k; const cr = S.crono || {}; const f = Object.assign({}, cr.feito || {}); if (f[k]) delete f[k]; else f[k] = now(); await col('settings').doc('cronograma').set(Object.assign({}, cr, { feito: f })); },
   ir: (c, b) => { location.hash = b.dataset.to; },
   atualizar: () => { location.reload(); },
