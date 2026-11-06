@@ -115,6 +115,11 @@ td.t { white-space: normal; min-width: 160px }
 .more a { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; color: var(--ink); text-decoration: none; display: grid; gap: 4px }
 .more a b { font: 600 18px/1.2 var(--serif) }
 .chips { display: flex; gap: 6px; flex-wrap: wrap }
+.redesw { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 10px 0 6px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden }
+.redesw button { appearance: none; border: 0; background: var(--surface); color: var(--ink); padding: 12px 8px; font: 700 15px/1 var(--sans); cursor: pointer }
+.redesw button[aria-pressed="true"] { background: var(--wine); color: var(--wine-ink) }
+.redesw .badge { display: inline-block; min-width: 18px; padding: 2px 6px; border-radius: 999px; background: rgba(0,0,0,.12); font-size: 12px }
+.redetag { font-size: .55em; color: var(--muted); font-style: normal }
 .chips button { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 12px; font: 600 13px/1 var(--sans); cursor: pointer }
 .chips button[aria-pressed="true"] { background: var(--wine); color: var(--wine-ink); border-color: var(--wine) }
 .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: sp .8s linear infinite }
@@ -138,7 +143,7 @@ td.t { white-space: normal; min-width: 160px }
 const S = {
   db: null, assets: null, sample: null, downloads: null, user: null,
   contents: [], products: [], references: [], metrics: [], learning: [], series: [], reports: [], radar: [], log: [], mensagens: [],
-  experiments: [], decisions: [], funnel: [], goals: null, dim: 'format', rede: (() => { try { return localStorage.getItem('nc-rede') || 'todos'; } catch (e) { return 'todos'; } })(),
+  experiments: [], decisions: [], funnel: [], goals: null, dim: 'format', rede: (() => { try { const v = localStorage.getItem('nc-rede'); return v === 'tiktok' ? 'tiktok' : 'instagram'; } catch (e) { return 'instagram'; } })(),
   brand: null, usage: null, rotina: null, rotinaMkt: null, tiktok: null, loaded: false, offline: false, busy: {}
 };
 const VIEWS = ['hoje', 'gravar', 'aprovar', 'prontos', 'calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina', 'tiktok'];
@@ -263,7 +268,7 @@ const ICON = {
   mais: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg>'
 };
 function renderNav() {
-  const v = view(); const n = (st) => S.contents.filter(c => c.status === st).length;
+  const v = view(); const n = (st) => CS().filter(c => c.status === st).length;
   const items = [['hoje', 'Hoje'], ['gravar', 'Gravar', n('gravar')], ['aprovar', 'Aprovar', n('aprovar')], ['prontos', 'Prontos'], ['mais', 'Mais']];
   $('#nav').innerHTML = items.map(([k, label, badge]) => {
     const cur = k === v || (k === 'mais' && ['calendario', 'diretor', 'resultados', 'vendas', 'marca', 'conversa', 'rotina', 'tiktok'].includes(v));
@@ -401,15 +406,15 @@ function empty(title, text, btn) { return `<div class="empty"><b style="color:va
 function offlineNote() {
   return S.offline ? `<div class="card"><span class="pill warn">Modo visualização</span><p class="small">Esta página precisa ser aberta pelo claude.ai, logada na sua conta, para salvar, gerar e baixar conteúdos.</p></div>` : '';
 }
-function header(eyebrow, title, extra) { return `<div class="head"><div class="row between"><span class="eyebrow">${eyebrow}</span><div class="row" style="gap:6px">${S.isOwner === false ? `<span class="pill">NC Advogados</span>` : `<button class="btn small ${MARCA === 'nc' ? 'primary' : ''}" data-act="trocarMarca" aria-label="Trocar de marca">${MARCA === 'nc' ? 'NC Advogados ⇄' : 'Núbia Citty ⇄'}</button>`}<button class="btn ghost small" data-act="atualizar" aria-label="Atualizar a Central">↻</button></div></div><h1>${title}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
+function header(eyebrow, title, extra) { return `<div class="head"><div class="row between"><span class="eyebrow">${eyebrow}</span><div class="row" style="gap:6px">${S.isOwner === false ? `<span class="pill">NC Advogados</span>` : `<button class="btn small ${MARCA === 'nc' ? 'primary' : ''}" data-act="trocarMarca" aria-label="Trocar de marca">${MARCA === 'nc' ? 'NC Advogados ⇄' : 'Núbia Citty ⇄'}</button>`}<button class="btn ghost small" data-act="atualizar" aria-label="Atualizar a Central">↻</button></div></div>${['hoje', 'gravar', 'aprovar', 'prontos', 'calendario'].includes(view()) ? redeSwitch() : ''}<h1>${title}${['gravar', 'aprovar', 'prontos'].includes(view()) && MARCA !== 'nc' ? ` <span class="redetag">· ${REDE_NOME[S.rede]}</span>` : ''}</h1>${extra ? `<p class="muted">${extra}</p>` : ''}</div>`; }
 
 function vHoje() {
   const d = new Date(); const h = d.getHours(); const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-  const n = (st) => S.contents.filter(c => c.status === st).length;
+  const n = (st) => CS().filter(c => c.status === st).length;
   const sd = c => (c.scheduledFor || '').slice(0, 10);
-  const hoje = S.contents.filter(c => sd(c) === today() && !['rejeitado', 'publicado'].includes(c.status));
+  const hoje = CS().filter(c => sd(c) === today() && !['rejeitado', 'publicado'].includes(c.status));
   const manualHoje = hoje.filter(postaManual);
-  const pessoal = S.contents.filter(c => c.precisaInputPessoal && !c.respostaPessoal && ['aprovar', 'gravar'].includes(c.status));
+  const pessoal = CS().filter(c => c.precisaInputPessoal && !c.respostaPessoal && ['aprovar', 'gravar'].includes(c.status));
   const rot = S.rotina;
   return `${header(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }), (MARCA === 'nc' ? `${saud}. <em>NC Advogados.</em>` : `${saud}, <em>Núbia.</em>`))}
   ${offlineNote()}
@@ -472,22 +477,27 @@ function redeOf(c) {
 }
 const REDE_NOME = { instagram: 'Instagram', tiktok: 'TikTok', ambos: 'TikTok + Instagram' };
 function redeMatch(c, f) { const r = redeOf(c); return f === 'todos' || r === f || r === 'ambos'; }
+function CS() { return MARCA === 'nc' ? S.contents : S.contents.filter(c => redeMatch(c, S.rede)); }
+function redeSwitch() {
+  if (MARCA === 'nc') return '';
+  const pend = f => S.contents.filter(c => ['gravar', 'aprovar'].includes(c.status) && redeMatch(c, f)).length;
+  return `<div class="redesw" role="group" aria-label="Rede">${[['instagram', 'Instagram'], ['tiktok', 'TikTok']].map(([k, l]) => `<button type="button" data-act="rede" data-rede="${k}" aria-pressed="${S.rede === k}">${l}${pend(k) ? ` <span class="badge">${pend(k)}</span>` : ''}</button>`).join('')}</div>`;
+}
 function redeChips(list) {
   const n = f => list.filter(c => redeMatch(c, f)).length;
   return `<div class="chips" role="group" aria-label="Rede">${[['todos', 'Todos'], ['instagram', 'Instagram'], ['tiktok', 'TikTok']].map(([k, l]) => `<button type="button" data-act="rede" data-rede="${k}" aria-pressed="${S.rede === k}">${l} ${n(k)}</button>`).join('')}</div>`;
 }
 
 function vLista(status, eyebrow, title, sub, emptyT, emptyX) {
-  const list = S.contents.filter(c => status.includes(c.status)).sort((a, b) => (a.scheduledFor || '9').localeCompare(b.scheduledFor || '9') || (b.createdAt || '').localeCompare(a.createdAt || ''));
+  const list = CS().filter(c => status.includes(c.status)).sort((a, b) => (a.scheduledFor || '9').localeCompare(b.scheduledFor || '9') || (b.createdAt || '').localeCompare(a.createdAt || ''));
   const mode = status[0] === 'pronto' ? 'pronto' : status[0];
-  const vis = list.filter(c => redeMatch(c, S.rede));
-  return `${header(eyebrow, title, sub)}${offlineNote()}${list.length ? `${redeChips(list)}<div class="stack" style="margin-top:12px">${vis.length ? vis.map(c => contentCard(c, mode)).join('') : `<p class="small muted">Nada de ${REDE_NOME[S.rede] || ''} aqui agora.</p>`}</div>` : empty(emptyT, emptyX, `<button class="btn primary" data-act="criar">Criar conteúdo</button>`)}`;
+  return `${header(eyebrow, title, sub)}${offlineNote()}${list.length ? `<div class="stack">${list.map(c => contentCard(c, mode)).join('')}</div>` : empty(emptyT, emptyX, `<button class="btn primary" data-act="criar">Criar conteúdo</button>`)}`;
 }
 
 function vCalendario() {
   const start = today(); const days = Array.from({ length: 14 }, (_, i) => addDays(start, i));
-  const sched = S.contents.filter(c => c.scheduledFor && c.status !== 'rejeitado');
-  const semData = S.contents.filter(c => !c.scheduledFor && ['pronto', 'gravar', 'aprovar'].includes(c.status));
+  const sched = CS().filter(c => c.scheduledFor && c.status !== 'rejeitado');
+  const semData = CS().filter(c => !c.scheduledFor && ['pronto', 'gravar', 'aprovar'].includes(c.status));
   return `${header('Calendário', 'Próximos <em>14 dias</em>', 'Conteúdos agendados aparecem aqui. Toque em um dia vazio para ver o que pode entrar.')}
   ${mixCard()}
   <div class="card" style="gap:0">${days.map(d => { const items = sched.filter(c => c.scheduledFor.slice(0, 10) === d); const dt = new Date(d + 'T12:00:00');
@@ -1155,7 +1165,7 @@ async function generate(o) {
     throw new Error(`Descartei a proposta: continuou genérica depois de 2 reescritas (${q.motivos.slice(0, 2).join('; ') || 'sem diferencial claro'}). Tente outro tema ou ângulo.`);
   }
   const serie = o.series ? S.series.find(s => s.id === o.series) : null;
-  const c = Object.assign({ id: uid(), type: o.type, goal: o.goal || 'alcance', objective: PILLAR[o.goal] || 'crescimento', qualidade: q, experimentId: o.experimentId || null, series: o.series || null, seriesName: serie ? serie.nome : '', status: 'aprovar', createdAt: now(), updatedAt: now(), version: 1, origem: 'app', precisaGravacao: o.type === 'reel7' || o.type === 'reelFalado', productId: o.product ? o.product.id : null, scheduledFor: o.date || null, files: [] }, n);
+  const c = Object.assign({ id: uid(), type: o.type, goal: o.goal || 'alcance', objective: PILLAR[o.goal] || 'crescimento', qualidade: q, experimentId: o.experimentId || null, series: o.series || null, seriesName: serie ? serie.nome : '', status: 'aprovar', createdAt: now(), updatedAt: now(), version: 1, origem: 'app', precisaGravacao: o.type === 'reel7' || o.type === 'reelFalado', productId: o.product ? o.product.id : null, scheduledFor: o.date || null, files: [], rede: MARCA === 'nc' ? 'instagram' : S.rede }, n);
   c.slug = NCRender.slug(c.title);
   await col('contents').doc(c.id).set(c);
   log('gerou', c.title);
