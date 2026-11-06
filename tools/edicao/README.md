@@ -118,3 +118,4 @@ Edição simples demais foi reprovada ("básica, sem imagens junto da fala, sem 
 - Legenda o vídeo inteiro (Estética A, overlay_min.py), elegância mantida: Bodoni + Archivo, sem emoji, uma coisa por vez no topo.
 - Trechos sensíveis (violência, criança, caso real do escritório): sem efeito lúdico, só etiqueta discreta e texto sóbrio.
 - Cena de novela/série: só se a Núbia autorizar (decisão dela sobre direito autoral), som mudo, crédito na tela.
+- Gravação de CORPO INTEIRO (cabeça perto do topo): textos de destaque vão na camada da frente, na parte de baixo (top ~1460, abaixo da legenda), com `layer:'fg'` e `band:true` (faixa escura para ler sobre roupa clara). Medir a máscara antes: se a cabeça começa acima de y=400, não usar texto atrás no topo. Exemplo: `efeitos/exemplos/fx-261-corpo-inteiro.js`.
