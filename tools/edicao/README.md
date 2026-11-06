@@ -119,3 +119,6 @@ Edição simples demais foi reprovada ("básica, sem imagens junto da fala, sem 
 - Trechos sensíveis (violência, criança, caso real do escritório): sem efeito lúdico, só etiqueta discreta e texto sóbrio.
 - Cena de novela/série: só se a Núbia autorizar (decisão dela sobre direito autoral), som mudo, crédito na tela.
 - Gravação de CORPO INTEIRO (cabeça perto do topo): textos de destaque vão na camada da frente, na parte de baixo (top ~1460, abaixo da legenda), com `layer:'fg'` e `band:true` (faixa escura para ler sobre roupa clara). Medir a máscara antes: se a cabeça começa acima de y=400, não usar texto atrás no topo. Exemplo: `efeitos/exemplos/fx-261-corpo-inteiro.js`.
+
+## Revisão de legenda obrigatória (06/11/2026, Núbia: "Ressocialização está errado")
+O Whisper erra palavra jurídica e nome. Antes de renderizar, leia a legenda inteira (ov.json) como revisor e corrija com `fix`/`seq`. Erros já vistos: Restrocialização → Ressocialização; remissão → remição (pena); Enseja/ENCEJA → ENCCEJA; compreendo pena → cumprindo pena; e -mail → e-mail; sexta -feira → sexta-feira; aplaudi → aplaude; Donik/dono → Donny; "o índio" → "alguém"; nomes de série e personagens. Na dúvida sobre o que a pessoa disse, transcreva o trecho de novo com `initial_prompt` contendo o roteiro e ouça antes de escrever.
