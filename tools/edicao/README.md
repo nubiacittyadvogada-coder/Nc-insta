@@ -109,3 +109,12 @@ Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os aju
 ## Abertura de série e legenda desde o início (06/11/2026, pedido da Núbia)
 - Vídeo de série abre com animação: "EPISÓDIO N" (Archivo, caixa alta, pequeno) e o nome da série em Bodoni com itálico, revelado com elegância nos primeiros 2,5 a 3s, depois some. Ela ocupa o lugar do título grande do gancho no topo (uma camada no topo por vez). Pode ficar atrás da pessoa se o topo estiver livre, sem a cabeça cobrir as palavras.
 - LEGENDA DESDE O PRIMEIRO SEGUNDO, inclusive durante o gancho. (Substitui a regra antiga "sem legenda no gancho".) No CTA final a legenda continua opcional.
+
+## PADRÃO PREMIUM DE EDIÇÃO (06/11/2026, aprovado pela Núbia: "adorei")
+Edição simples demais foi reprovada ("básica, sem imagens junto da fala, sem animação, sem diferencial"). A partir de agora todo vídeo usa o motor de efeitos:
+- `efeitos/fx_engine.html` + um `fx.js` por vídeo (exemplos em `efeitos/exemplos/`). Tipos: `cover` (capa de revista atrás da cabeça), `img` (imagem da fala ATRÁS da pessoa, com zoom lento e flash na entrada), `text` (título atrás, com subtítulo que entra no tempo da fala), `strike` (palavra riscada e a correção), `comments` (comentários surgindo e sendo riscados), `compare` (quadro com ✓ marcando), `counter` (relógio/contador), `list` (lista numerada entrando item a item), `tag` (etiqueta).
+- Render: `node efeitos/render_camadas.js fx.html bg|fg pasta N` e composição `python3 efeitos/fx_comp.py PASTA saida.mp4 [--paper a,b] [--clip arquivo,inicio,ycorte,duracao]` (recorte de papel e cena de referência em tela dividida).
+- Ritmo: algo muda na tela a cada 3 a 5 segundos. Imagem junto da fala sempre que a fala descreve uma cena (geradas no Runway, sóbrias, sem rosto real, placa borrada). Palavra-chave animada no momento em que é dita.
+- Legenda o vídeo inteiro (Estética A, overlay_min.py), elegância mantida: Bodoni + Archivo, sem emoji, uma coisa por vez no topo.
+- Trechos sensíveis (violência, criança, caso real do escritório): sem efeito lúdico, só etiqueta discreta e texto sóbrio.
+- Cena de novela/série: só se a Núbia autorizar (decisão dela sobre direito autoral), som mudo, crédito na tela.

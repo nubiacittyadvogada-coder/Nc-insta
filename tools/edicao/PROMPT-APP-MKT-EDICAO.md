@@ -84,6 +84,12 @@ Sem o `format=rgb24` no início o filtro não tem efeito. Fundo: `eq=brightness=
 - Vídeo de série abre com animação de 2,5 a 3s: "EPISÓDIO N" e o nome da série, no topo, no lugar do título do gancho.
 - Legenda desde o primeiro segundo, inclusive no gancho.
 
+### 3.4 Padrão premium (06/11/2026)
+- Edição simples foi reprovada pela cliente. Todo vídeo tem ritmo visual: algo muda a cada 3 a 5 segundos.
+- Biblioteca de efeitos com camada atrás e na frente da pessoa recortada: capa de revista, imagem da fala atrás da pessoa, texto atrás, palavra riscada com correção, comentários surgindo, quadro comparativo com ✓, contador/relógio, lista numerada, etiqueta, recorte de papel, cena de referência em tela dividida, flash nas trocas.
+- Imagem junto da fala sempre que a fala descreve uma cena. Palavra-chave animada no momento exato em que é dita.
+- Trechos sensíveis: só texto sóbrio.
+
 ### 4. De onde vêm as imagens de apoio (b-roll)
 Ordem de preferência, configurável por cliente:
 1. **Imagens da própria equipe** (biblioteca do cliente: escritório, mãos digitando, rotina). São as mais autênticas.
