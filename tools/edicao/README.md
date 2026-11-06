@@ -114,6 +114,18 @@ Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os aju
 
 O `atempo=1.1` dentro do mesmo filter_complex do vídeo deixou o áudio até 3 s atrasado em todos os premium. O fx_comp.py agora renderiza o vídeo sem áudio, acelera o áudio à parte e junta com `-shortest`. Conferência obrigatória antes de entregar: duração do stream de vídeo e de áudio iguais (diferença menor que 0,15 s) e um quadro de legenda no meio e no fim batendo com a fala.
 
+## Qual padrão usar (decisão da Núbia, 06/11/2026)
+
+- **Perfil pessoal (@nubiacitty, Instagram e TikTok): PADRÃO PREMIUM** (seção abaixo).
+- **NC Advogados: PADRÃO RÁPIDO NC.** Meta: pronto em 10 a 15 minutos depois de baixar o bruto. Nada de Runway, de motor de efeitos nem de fx_comp.
+  1. Mesmos cortes de sempre (fala contínua, energia, +0,06 s no fim, -0,04 s no começo, um -ss por segmento, 1,1x).
+  2. **Zoom e troca de enquadramento** para dar ritmo sem efeito pesado: alterne a cada fala entre plano aberto (escala 1,0) e plano fechado (escala 1,15 a 1,25, centrado no rosto pela máscara ou pelo terço superior). Dentro de uma fala longa, zoom lento de 1,0 para 1,08. Na palavra mais forte do bloco, punch-in seco de 1,0 para 1,2 por 0,4 s. Nunca cortar a cabeça nem o microfone de lapela.
+  3. Gancho animado nos 3 primeiros segundos, ficha de nome e cargo (sem inventar área nem sobrenome), frase da série na tela quando dita.
+  4. Legenda desde o primeiro segundo (overlay_min.py modo A), revisada palavra por palavra.
+  5. No máximo 2 ou 3 palavras-chave animadas (etiqueta ou texto atrás), só nos conceitos centrais.
+  6. Cor natural, fundo levemente desfocado. Logo no fim com endcard.py. Arquivo abaixo de 20 MiB.
+  7. Mesma conferência final: quadros nos cortes e nos zooms, silencedetect, transcrição contra o roteiro.
+
 ## PADRÃO PREMIUM DE EDIÇÃO (06/11/2026, aprovado pela Núbia: "adorei")
 Edição simples demais foi reprovada ("básica, sem imagens junto da fala, sem animação, sem diferencial"). A partir de agora todo vídeo usa o motor de efeitos:
 - `efeitos/fx_engine.html` + um `fx.js` por vídeo (exemplos em `efeitos/exemplos/`). Tipos: `cover` (capa de revista atrás da cabeça), `img` (imagem da fala ATRÁS da pessoa, com zoom lento e flash na entrada), `text` (título atrás, com subtítulo que entra no tempo da fala), `strike` (palavra riscada e a correção), `comments` (comentários surgindo e sendo riscados), `compare` (quadro com ✓ marcando), `counter` (relógio/contador), `list` (lista numerada entrando item a item), `tag` (etiqueta).
