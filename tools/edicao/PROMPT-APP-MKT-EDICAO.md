@@ -80,6 +80,10 @@ Sem o `format=rgb24` no início o filtro não tem efeito. Fundo: `eq=brightness=
 - Texto atrás da pessoa: lado livre do quadro, palavra-chave nunca escondida pela cabeça (medir a máscara na janela inteira). Uma camada por vez.
 - O app registra na entrega quais recursos usou e por quê, para o cliente aprovar ou pedir outro.
 
+### 3.3 Abertura de série e legenda desde o início (06/11/2026)
+- Vídeo de série abre com animação de 2,5 a 3s: "EPISÓDIO N" e o nome da série, no topo, no lugar do título do gancho.
+- Legenda desde o primeiro segundo, inclusive no gancho.
+
 ### 4. De onde vêm as imagens de apoio (b-roll)
 Ordem de preferência, configurável por cliente:
 1. **Imagens da própria equipe** (biblioteca do cliente: escritório, mãos digitando, rotina). São as mais autênticas.

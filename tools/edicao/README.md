@@ -105,3 +105,7 @@ Gerar com `python3 overlay_min.py <config> A`. Substitui a Estética v2 e os aju
 - Sempre que houver texto atrás: lado livre do quadro, medindo a máscara na janela inteira do evento; a palavra-chave nunca pode ficar escondida atrás da cabeça (se a pessoa se inclinar, ajuste o tempo ou a posição).
 - Uma camada por vez: durante uma animação, some a legenda, a ficha e o número do ponto.
 - Na mensagem de entrega, diga em uma linha quais recursos usou e por quê.
+
+## Abertura de série e legenda desde o início (06/11/2026, pedido da Núbia)
+- Vídeo de série abre com animação: "EPISÓDIO N" (Archivo, caixa alta, pequeno) e o nome da série em Bodoni com itálico, revelado com elegância nos primeiros 2,5 a 3s, depois some. Ela ocupa o lugar do título grande do gancho no topo (uma camada no topo por vez). Pode ficar atrás da pessoa se o topo estiver livre, sem a cabeça cobrir as palavras.
+- LEGENDA DESDE O PRIMEIRO SEGUNDO, inclusive durante o gancho. (Substitui a regra antiga "sem legenda no gancho".) No CTA final a legenda continua opcional.
