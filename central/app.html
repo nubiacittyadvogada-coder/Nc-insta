@@ -937,7 +937,8 @@ const ACTIONS = {
       try { q = await qualityCheck(c.type, c); q.reescritas = 0; await col('contents').doc(c.id).update({ qualidade: q }); } finally { setBusy(c.id); }
     }
     if (q && !q.aprovado && !forcar && !c.editadoPelaNubia) { gateSheet(c, q); return; }
-    const next = c.precisaGravacao ? 'gravar' : 'pronto';
+    const temEditado = (c.files || []).some(f => f.kind === 'video' && f.grupo === 'editado');
+    const next = (c.precisaGravacao && !temEditado) ? 'gravar' : 'pronto';
     await col('contents').doc(c.id).update({ status: next, aprovadoEm: now(), updatedAt: now() });
     await learn(forcar ? 'aprovado_contra_filtro' : 'aprovado', c); log(forcar ? 'aprovou contra o filtro' : 'aprovou', plain(c.title));
     toast(next === 'gravar' ? 'Aprovado. Está em Gravar.' : 'Aprovado. Arquivos em Prontos.');
@@ -1516,6 +1517,8 @@ async function avisarDiretorVideo(c, el) {
     await col('mensagens').add({ at: now(), autor: 'equipe', nome: nome || (S.isOwner ? 'Núbia' : 'Equipe'), tipo: 'video', contentId: c.id, titulo: plain(c.title), quem, texto: obs || 'Vídeo enviado. Sem observação: seguiu o roteiro.', status: 'novo', marca: MARCA_NOME });
     if (quem) await col('contents').doc(c.id).update({ gravadoPor: quem, obsGravacao: obs });
   } catch (e) {}
+  // chama o editor na hora, sem esperar a checagem de hora em hora (silencioso se a conexão não estiver liberada neste aparelho)
+  try { if (S.mcp) { await S.mcp.callTool('Claude Code Remote', 'fire_trigger', { trigger_id: 'trig_01NHdUuEHmZBPs4ynBf9Cdrt' }); log('chamou o editor na hora', plain(c.title)); } } catch (e) { log('editor fica para a checagem de hora em hora', (e && (e.code || e.message)) || ''); }
 }
 // comprime vídeo grande no aparelho (canvas + MediaRecorder, com áudio) e fecha uma parte a cada ~16 MB
 // (o Safari ignora o bitrate pedido, então o corte é por tamanho). Cada parte sobe assim que fecha;
