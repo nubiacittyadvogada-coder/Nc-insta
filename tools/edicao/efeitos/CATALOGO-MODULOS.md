@@ -17,6 +17,7 @@ Tempos sempre na linha do corte (antes do 1,1x). Identidade: creme, rosé, vinho
 | `conversa` | balões de mensagem entrando | `{type:'conversa',t0,t1,items:[{txt,lado:'e'/'d',at}]}` |
 | `lei` | página de código com o trecho que importa sendo grifado | `{type:'lei',t0,t1,lei:'CÓDIGO PENAL',art:'Art. 147-A',txt:'... [[grifo]] ...',pena,marcaAt}` |
 | `vertigem` | efeito vertigem (dolly zoom): ela fica igual e o fundo avança | evento `{type:'vertigem',t0,t1}` (só para o som) + `fx_comp.py --vertigem t0,t1,plate.png[,zoom]` |
+| `assinatura` | selo "Citty sendo Citty" nos 2 primeiros segundos (perfil pessoal, todo vídeo) | `{type:'assinatura',t0:0.1,t1:2.3,toqueAt}` |
 | `som` | som avulso em qualquer ponto | `{type:'som',t0,som:'impacto'}` |
 
 Ícones próprios (sem imagem de terceiros): algema, martelo, balanca, relogio, documento, celular, cadeado, alerta, grade, escudo, dinheiro, ia.
@@ -46,3 +47,10 @@ Texto SEMPRE copiado da fonte oficial (planalto.gov.br), conferido palavra por p
 
 ## Vertigem: como fazer
 1. Tirar um quadro do corte no momento do efeito. 2. Runway (imagem): "a mesma sala, mesmo ângulo e luz, vazia, sem a pessoa" com o quadro como referência (cerca de 20 créditos). 3. Conferir o alinhamento lado a lado com o quadro. 4. `--vertigem t0,t1,plate.png,0.5` (negativo = fundo se afasta). Janela de 1,5 a 2,5 s, no momento da virada. No máximo 1 por vídeo. Precisa de câmera parada.
+
+## Assinatura de abertura "Citty sendo Citty" (Núbia, 07/11/2026)
+Todo vídeo do Instagram pessoal (e a primeira tela de cada sequência de stories) abre com: a mão coloca o objeto do vídeo na mesa com um toque seco, depois o rosto e a frase "Citty sendo Citty." seguida da situação do dia.
+Na edição: módulo `assinatura` de 0,1 s a cerca de 2,3 s, com `toqueAt` no quadro em que o objeto encosta na mesa (o som `toque` reforça o toque real). O selo fica no canto de cima e o motor afasta do rosto.
+Exceção: conteúdo sério (crime real, vítima, prisão de alguém, luto, violência) abre sem a frase e sem o selo, só com o gesto. NC Advogados nunca usa.
+Se o bruto não tiver o gesto, não invente: use só o selo e avise no retorno à equipe.
+Legenda: #CittySendoCitty + 4 hashtags do tema.

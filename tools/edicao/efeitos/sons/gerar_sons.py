@@ -73,3 +73,6 @@ save('carimbo', cb, 0.8)
 tt = t(0.45); p = tt / 0.45; pg = rng.standard_normal(len(tt)); pg = (lp(pg, 1500 + 5000 * p) - lp(pg, 700)) * (np.sin(np.pi * p) ** 2) * (1 + 0.6 * np.sin(2 * np.pi * 22 * tt))
 save('pagina', pg, 0.5)
 print('ok', sorted(f for f in os.listdir(D) if f.endswith('.wav')))
+# toque seco (assinatura "Citty sendo Citty": objeto colocado na mesa)
+tt = t(0.22); tq = lp(rng.standard_normal(len(tt)), 3200) * env(len(tt), 0.0005, 0.012) + np.sin(2 * np.pi * 140 * tt) * env(len(tt), 0.0008, 0.045) * 0.9 + np.sin(2 * np.pi * 620 * tt) * env(len(tt), 0.0005, 0.02) * 0.35
+save('toque', tq, 0.85)

@@ -14,6 +14,7 @@ ev.forEach(e=>{if(e.sfx===false)return;if(typeof e.sfx==='string'){add(e.t0,e.sf
  case 'conversa':e.items.forEach(it=>add(it.at,'bolha'));break
  case 'lei':add(e.t0,'pagina');add(e.marcaAt??e.t0+1.2,'marcador');break
  case 'vertigem':add(e.t0,'tensao:'+(e.t1-e.t0).toFixed(2));break
+ case 'assinatura':if(e.toqueAt!=null)add(e.toqueAt,'toque');add(e.t0,'whoosh_curto',0.5);break
  case 'som':add(e.t0,e.som,e.g||1);break
  case 'text':case 'cover':add(e.t0,'whoosh_curto',0.6);break
  case 'img':add(e.t0,'whoosh',0.6);break
