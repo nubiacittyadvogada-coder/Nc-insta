@@ -22,6 +22,12 @@ Tempos sempre na linha do corte (antes do 1,1x). Identidade: creme, rosé, vinho
 Ícones próprios (sem imagem de terceiros): algema, martelo, balanca, relogio, documento, celular, cadeado, alerta, grade, escudo, dinheiro, ia.
 Para um objeto ou personagem novo: gerar imagem sóbria no Runway, remover o fundo, salvar PNG e usar `src:'img/arquivo.png'` no `objeto` ou no `painel`.
 
+## REGRA DE OURO: nada tampa o rosto (Núbia, 07/11/2026)
+Antes de renderizar a camada fg, SEMPRE: `python3 zona_segura.py mask.mp4 PASTA/safe.js` (mesma pasta do fx_engine.html e do fx.js).
+O motor lê o rosto a cada 0,25 s e encaixa cada elemento acima do rosto (sobe e encolhe) ou abaixo dele; o painel encurta e, se não couber, desce.
+Na conferência dos quadros, olhar o rosto durante cada efeito. Se algum elemento encostar no rosto, o vídeo NÃO sobe.
+Se o elemento ficar pequeno demais para ler (rosto muito alto no quadro), troque por um módulo menor ou divida o texto em dois momentos.
+
 ## Regras de uso (decisão da Núbia: o diferencial vem da edição, sem copiar ninguém)
 1. Um "momento de diferencial" por vídeo, no ponto mais importante da fala. No máximo 2 módulos grandes (painel, lousa, fluxo) por vídeo.
 2. Escolha pelo conteúdo: explicação de processo = `fluxo`; conceito que o público confunde = `lousa`; lista de direitos ou passos = `passos`; série IA = `prompt`; número ou prazo = `counter` (antigo) ou `objeto` relógio.

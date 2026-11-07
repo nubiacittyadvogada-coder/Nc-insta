@@ -23,7 +23,7 @@ html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hi
 .lst{font-family:A;font-weight:500;font-size:40px;line-height:1.5;text-align:left;display:inline-block}
 .lst div{opacity:0}.lst b{color:#F0C3CC;font-weight:600;margin-right:16px}
 .fl{position:absolute;inset:0;background:#fff;opacity:0}
-</style><script src="modulos.js"></script><script src="fx.js"></script></head><body><div class="L" id="bg"></div><div class="L" id="fg"></div>
+</style><script src="safe.js"></script><script src="modulos.js"></script><script src="fx.js"></script></head><body><div class="L" id="bg"></div><div class="L" id="fg"></div>
 <script>
 const LAYER=(location.search||'?fg').slice(1);document.getElementById(LAYER).style.opacity=1;
 const E=t=>{t=Math.max(0,Math.min(1,t));return 1-Math.pow(1-t,3)};const H=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
@@ -41,8 +41,18 @@ FX.events.forEach((e,i)=>{if(['som','vertigem'].includes(e.type))return;const ho
  else if(e.type==='counter'){el=H(`<div class="a" style="${e.side==='left'?'left':'right'}:70px;top:${top}px;text-align:center"><svg width="240" height="240" viewBox="0 0 220 220"><circle cx="110" cy="110" r="96" fill="rgba(20,14,12,.6)" stroke="rgba(244,237,230,.25)" stroke-width="6"/><circle class="arc" cx="110" cy="110" r="96" fill="none" stroke="#F0C3CC" stroke-width="8" stroke-linecap="round" transform="rotate(-90 110 110)" stroke-dasharray="603" stroke-dashoffset="603"/><text class="tx" x="110" y="128" text-anchor="middle" font-family="S" font-size="60" fill="#F4EDE6"></text></svg><div class="k" style="margin-top:10px">${e.label||''}</div></div>`);const arc=el.querySelector('.arc'),tx=el.querySelector('.tx');up=s=>{const p=E((s-e.t0-0.2)/(e.dur||2.4));arc.style.strokeDashoffset=603*(1-p);tx.textContent=Math.round(e.from+(e.to-e.from)*p)+(e.suffix||'')}}
  else if(e.type==='tag'){el=H(`<div class="a" style="${e.left!=null?'left:'+e.left+'px':'left:0;right:0;text-align:center'};top:${top}px"><span class="tag" ${e.accent?'style="border-color:#F0C3CC;color:#F0C3CC"':''}>${e.text}</span></div>`)}
  else if(e.type==='list'){el=H(`<div class="card a" style="top:${top}px">${e.k?`<div class="k" style="margin-bottom:12px">${e.k}</div>`:''}<div class="lst">${e.items.map((it,j)=>`<div><b>${String(j+1).padStart(2,'0')}</b>${it.txt}</div>`).join('')}</div></div>`);const ds=[...el.querySelectorAll('.lst div')];up=s=>ds.forEach((d,j)=>{const at=e.items[j].at;const q=E((s-at)/0.3);d.style.opacity=s<at?0:q;d.style.transform=`translateX(${(1-q)*-30}px)`})}
- host.appendChild(el);R.push([el,e,up])});
+ const wr=document.createElement('div');wr.style.cssText='position:absolute;inset:0;transform-origin:50% 0';wr.appendChild(el);host.appendChild(wr);R.push([el,e,up,wr])});
+/* REGRA: nenhum elemento tampa o rosto. Encaixa cada evento acima do rosto (sobe e encolhe) ou abaixo dele. */
+const ROSTO_M=28;let fitted=false;
+function rostoEm(t0,t1){const Ro=window.ROSTO;if(!Ro)return null;let b=null;for(let i=Math.floor(t0/Ro.dt);i<=Math.ceil(t1/Ro.dt)&&i<Ro.r.length;i++){const r=Ro.r[i];if(!r)continue;b=b?[Math.min(b[0],r[0]),Math.min(b[1],r[1]),Math.max(b[2],r[2]),Math.max(b[3],r[3])]:r.slice()}return b}
+function caixa(el){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const all=[el,...el.querySelectorAll('*')];all.forEach(n=>{const cs=getComputedStyle(n);if(n!==el&&cs.position!=='absolute'&&n.parentElement!==el)return;const r=n.getBoundingClientRect();if(r.width<2||r.height<2)return;if(r.width>=1070&&r.height>=1800)return;x0=Math.min(x0,r.left);y0=Math.min(y0,r.top);x1=Math.max(x1,r.right);y1=Math.max(y1,r.bottom)});return x0<1e9?[x0,y0,x1,y1]:null}
+function encaixar(){R.forEach(([el,e,up,wr])=>{if(wr.closest('#bg'))return;const f=rostoEm(e.t0,e.t1);if(!f)return;const top=f[1]-ROSTO_M,bot=f[3]+ROSTO_M;
+  if(el.classList.contains('m-pn')){const h=parseFloat(el.style.height);if(h>top){if(top>=560){el.style.height=top+'px';const ob=el.querySelector('.ob');if(ob)ob.style.zoom=Math.max(0.5,Math.min(1,(top-430)/430))}else{el.style.top=bot+'px';el.style.height=Math.max(500,1920-bot-120)+'px';el.style.borderRadius='46px 46px 0 0'}}return}
+  const b=caixa(el);if(!b)return;if(b[2]<f[0]-ROSTO_M||b[0]>f[2]+ROSTO_M||b[3]<top||b[1]>bot)return;
+  const h=b[3]-b[1];const acima=Math.max(0,top-110),abaixo=Math.max(0,1700-bot);
+  if((b[1]+b[3])/2<=(f[1]+f[3])/2&&acima>=h*0.6||abaixo<h*0.6){const sc=Math.min(1,acima/h);wr.style.transformOrigin='540px 0px';wr.style.transform=`translateY(110px) scale(${sc}) translateY(${-b[1]}px)`}
+  else{const sc=Math.min(1,abaixo/h);wr.style.transformOrigin='540px 0px';wr.style.transform=`translateY(${bot}px) scale(${sc}) translateY(${-b[1]}px)`}})}
 const fl=H('<div class="fl"></div>');document.getElementById('fg').appendChild(fl);
-window.setT=(s)=>{R.forEach(([el,e,up])=>{const io=e.io||0.3;const v=Math.min(E((s-e.t0)/io),1-E((s-(e.t1-io))/io));el.style.opacity=(s<e.t0||s>e.t1)?0:v;if(!['img','comments'].includes(e.type)&&!e._own)el.style.transform=`translateY(${(1-E((s-e.t0)/io))*20}px)`;if(up)up(s)});
+window.setT=(s)=>{if(!fitted){fitted=true;encaixar()}R.forEach(([el,e,up])=>{const io=e.io||0.3;const v=Math.min(E((s-e.t0)/io),1-E((s-(e.t1-io))/io));el.style.opacity=(s<e.t0||s>e.t1)?0:v;if(!['img','comments'].includes(e.type)&&!e._own)el.style.transform=`translateY(${(1-E((s-e.t0)/io))*20}px)`;if(up)up(s)});
  let f=0;flashes.forEach(t=>{const d=s-t;if(d>=0&&d<0.18)f=Math.max(f,0.5*(1-d/0.18))});fl.style.opacity=f};
 </script></body></html>
