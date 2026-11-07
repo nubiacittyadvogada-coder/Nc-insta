@@ -122,8 +122,8 @@ M.lei=e=>{const tx=e.txt.replace(/\[\[(.+?)\]\]/g,'<span class="hl">$1</span>');
  const hls=[...el.querySelectorAll('.hl')];const ma=e.marcaAt??e.t0+1.2;
  return {el,own:1,up:s=>{const q=E((s-e.t0)/0.5);const out=E((s-(e.t1-0.35))/0.35);el.style.transform=`translateY(${(1-q)*120-out*60}px) rotate(${(1-q)*-4}deg)`;hls.forEach((h,j)=>{const st=ma+j*0.7;h.style.backgroundSize=(100*E((s-st)/0.7))+'% 100%'})}}};
 
-/* 10. ASSINATURA "Citty sendo Citty" (Núbia, 07/11): selo do FECHAMENTO de todo vídeo do perfil pessoal,
-   entrando quando ela fala "Citty sendo Citty." até o fim. {type:'assinatura', t0, t1, toqueAt? (som do objeto da abertura)} */
+/* 10. ASSINATURA "Citty sendo Citty" (Núbia, 07/11): selo da ABERTURA de todo vídeo @nubiacitty (Instagram e TikTok),
+   do toque do objeto na mesa até cerca de 2,5 s. {type:'assinatura', t0, t1, toqueAt? (som do objeto da abertura)} */
 M.assinatura=e=>{const el=H(`<div style="position:absolute;left:60px;top:${e.top||150}px"><div class="sg" style="display:inline-flex;align-items:center;gap:16px;background:rgba(107,30,46,.92);border:1px solid rgba(246,241,234,.35);border-radius:60px;padding:16px 30px 18px;box-shadow:0 12px 40px rgba(0,0,0,.35)"><span style="width:12px;height:12px;border-radius:50%;background:#F6F1EA"></span><span style="font-family:S;font-style:italic;font-size:50px;color:#F6F1EA;letter-spacing:.5px">Citty sendo Citty</span></div></div>`);
  const sg=el.querySelector('.sg');
  return {el,own:1,up:s=>{const q=B((s-e.t0)/0.45);sg.style.transform=`translateX(${(1-Math.min(1,q))*-40}px) scale(${0.85+0.15*q})`;sg.style.transformOrigin='left center'}}};
