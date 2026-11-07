@@ -138,3 +138,14 @@ Edição simples demais foi reprovada ("básica, sem imagens junto da fala, sem 
 
 ## Revisão de legenda obrigatória (06/11/2026, Núbia: "Ressocialização está errado")
 O Whisper erra palavra jurídica e nome. Antes de renderizar, leia a legenda inteira (ov.json) como revisor e corrija com `fix`/`seq`. Erros já vistos: Restrocialização → Ressocialização; remissão → remição (pena); Enseja/ENCEJA → ENCCEJA; compreendo pena → cumprindo pena; e -mail → e-mail; sexta -feira → sexta-feira; aplaudi → aplaude; Donik/dono → Donny; "o índio" → "alguém"; nomes de série e personagens. Na dúvida sobre o que a pessoa disse, transcreva o trecho de novo com `initial_prompt` contendo o roteiro e ouça antes de escrever.
+
+## Rosto livre e expressão boa nos cortes (07/11/2026, regra da Núbia)
+ERRO REAL: no vídeo da Lívia (pensão) entrou um pedaço de 0,28 s sem palavra (estalo de boca) com ela de língua de fora, logo depois do gancho.
+Regras:
+1. Nenhum elemento tampa o rosto (efeitos/zona_segura.py + encaixe automático do motor; no padrão rápido NC, posicionar longe do rosto).
+2. Pedaço de corte com menos de 0,5 s sai sempre (é ruído de boca ou respiração). O mk.py já faz isso.
+3. FOLHA DE ROSTOS obrigatória antes de subir: `python3 folha_rostos.py final.mp4 segs.json folha.jpg` e OLHAR a imagem.
+   Reprova: língua de fora, olho fechado no começo ou fim de trecho, boca torta, careta, rosto cortado.
+   Correção: mover a borda 2 a 4 quadros para o quadro bom mais próximo dentro do silêncio; se a careta é no meio da fala, usar outra tentativa do bruto.
+   O detector automático de expressão não é confiável (óculos e olhar para baixo enganam): a revisão é visual.
+4. Escolher a tentativa de cada fala também pelo rosto, não só pelo áudio: entre duas tentativas boas, fica a de expressão mais natural.
