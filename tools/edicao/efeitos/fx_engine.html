@@ -23,7 +23,7 @@ html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hi
 .lst{font-family:A;font-weight:500;font-size:40px;line-height:1.5;text-align:left;display:inline-block}
 .lst div{opacity:0}.lst b{color:#F0C3CC;font-weight:600;margin-right:16px}
 .fl{position:absolute;inset:0;background:#fff;opacity:0}
-</style><script src="fx.js"></script></head><body><div class="L" id="bg"></div><div class="L" id="fg"></div>
+</style><script src="modulos.js"></script><script src="fx.js"></script></head><body><div class="L" id="bg"></div><div class="L" id="fg"></div>
 <script>
 const LAYER=(location.search||'?fg').slice(1);document.getElementById(LAYER).style.opacity=1;
 const E=t=>{t=Math.max(0,Math.min(1,t));return 1-Math.pow(1-t,3)};const H=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
@@ -31,7 +31,8 @@ const FX=window.FX||{events:[]};const R=[];let flashes=[];
 const BGT=['cover','img','text','strike','comments'];
 FX.events.forEach((e,i)=>{const host=document.getElementById(e.layer||(BGT.includes(e.type)?'bg':'fg'));let el,up;
  const top=e.top||200;
- if(e.type==='cover'){el=H(`<div class="a" style="left:0;right:0;top:${top-30}px;text-align:center"><div class="k">${e.k||''}</div><div class="big" style="margin-top:22px">${e.big}</div></div>`);const b=el.querySelector('.big');up=s=>{b.style.letterSpacing=(-6-14*E((s-e.t0)/2.5))+'px'}}
+ if(window.FXMOD&&FXMOD.M[e.type]){const r=FXMOD.M[e.type](e);el=r.el;up=r.up;if(r.own)e._own=1}
+ else if(e.type==='cover'){el=H(`<div class="a" style="left:0;right:0;top:${top-30}px;text-align:center"><div class="k">${e.k||''}</div><div class="big" style="margin-top:22px">${e.big}</div></div>`);const b=el.querySelector('.big');up=s=>{b.style.letterSpacing=(-6-14*E((s-e.t0)/2.5))+'px'}}
  else if(e.type==='img'){flashes.push(e.t0);el=H(`<div class="a" style="inset:0"><div class="img" style="background-image:url(${e.src})"></div><div class="shade"></div>${e.title?`<div class="ttl" style="position:absolute;left:40px;right:40px;top:${top}px;text-align:center;font-size:${e.size||96}px">${e.title}</div>`:''}${e.label?`<div style="position:absolute;left:0;right:0;top:${e.title?top-70:top}px;text-align:center"><span class="tag">${e.label}</span></div>`:''}</div>`);const im=el.querySelector('.img');const z=e.kb||[1,1.12];up=s=>{const p=Math.max(0,Math.min(1,(s-e.t0)/(e.t1-e.t0)));im.style.transform=`scale(${z[0]+(z[1]-z[0])*p})`}}
  else if(e.type==='text'){el=H(`<div class="a" style="${e.band?'left:0;right:0;padding:34px 40px 40px;background:linear-gradient(rgba(0,0,0,0),rgba(15,10,9,.62) 22%,rgba(15,10,9,.62) 78%,rgba(0,0,0,0))':'left:40px;right:40px'};top:${top}px;text-align:center">${e.k?`<div class="k">${e.k}</div>`:''}<div class="ttl" style="margin-top:14px;font-size:${e.size||100}px">${e.ttl}</div>${e.sub?`<div class="k sb" style="margin-top:18px;${e.subAt?'opacity:0':''}">${e.sub}</div>`:''}</div>`);if(e.subAt){const sb=el.querySelector('.sb');up=s=>{const q=E((s-e.subAt)/0.4);sb.style.opacity=q;sb.style.transform=`translateY(${(1-q)*16}px)`}}}
  else if(e.type==='strike'){el=H(`<div class="a" style="left:40px;right:40px;top:${top}px;text-align:center">${e.k?`<div class="k">${e.k}</div>`:''}<div class="ttl" style="font-size:${e.size||90}px"><span class="st">${e.word}<span class="strike"></span></span></div><div class="ttl th" style="opacity:0;font-size:${e.size||90}px">${e.then||''}</div></div>`);const sk=el.querySelector('.strike'),th=el.querySelector('.th');up=s=>{sk.style.width=(108*E((s-e.at)/0.4))+'%';th.style.opacity=E((s-(e.thenAt||1e9))/0.4)}}
@@ -42,6 +43,6 @@ FX.events.forEach((e,i)=>{const host=document.getElementById(e.layer||(BGT.inclu
  else if(e.type==='list'){el=H(`<div class="card a" style="top:${top}px">${e.k?`<div class="k" style="margin-bottom:12px">${e.k}</div>`:''}<div class="lst">${e.items.map((it,j)=>`<div><b>${String(j+1).padStart(2,'0')}</b>${it.txt}</div>`).join('')}</div></div>`);const ds=[...el.querySelectorAll('.lst div')];up=s=>ds.forEach((d,j)=>{const at=e.items[j].at;const q=E((s-at)/0.3);d.style.opacity=s<at?0:q;d.style.transform=`translateX(${(1-q)*-30}px)`})}
  host.appendChild(el);R.push([el,e,up])});
 const fl=H('<div class="fl"></div>');document.getElementById('fg').appendChild(fl);
-window.setT=(s)=>{R.forEach(([el,e,up])=>{const io=e.io||0.3;const v=Math.min(E((s-e.t0)/io),1-E((s-(e.t1-io))/io));el.style.opacity=(s<e.t0||s>e.t1)?0:v;if(!['img','comments'].includes(e.type))el.style.transform=`translateY(${(1-E((s-e.t0)/io))*20}px)`;if(up)up(s)});
+window.setT=(s)=>{R.forEach(([el,e,up])=>{const io=e.io||0.3;const v=Math.min(E((s-e.t0)/io),1-E((s-(e.t1-io))/io));el.style.opacity=(s<e.t0||s>e.t1)?0:v;if(!['img','comments'].includes(e.type)&&!e._own)el.style.transform=`translateY(${(1-E((s-e.t0)/io))*20}px)`;if(up)up(s)});
  let f=0;flashes.forEach(t=>{const d=s-t;if(d>=0&&d<0.18)f=Math.max(f,0.5*(1-d/0.18))});fl.style.opacity=f};
 </script></body></html>

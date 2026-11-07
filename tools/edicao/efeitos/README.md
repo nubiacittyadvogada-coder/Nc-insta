@@ -9,3 +9,5 @@ Composição ffmpeg: vídeo base → camada bg → (vídeo "uma tomada, vários 
 Efeitos prontos em vitrine-efeitos.html: 01 capa de revista (título atrás da cabeça), 02 texto atrás, 03 parede de notas/manchetes, 04 mockup do app, 05 órbita, 06 uma tomada vários visuais, 07 recorte de papel, 08 checklist, 09 parede de vídeos.
 Regra de uso no Instagram de criminalista: no máximo 1 ou 2 efeitos por vídeo (capa de revista na abertura de série, parede de manchetes reais em react). Os lúdicos (órbita, recorte, rabisco) ficam para o TikTok do sistema e para anúncio do produto.
 Funciona melhor com a pessoa do peito para cima, a um braço de distância, fundo liso.
+
+Módulos novos (07/11/2026): ver CATALOGO-MODULOS.md (prompt, passos, painel, lousa, fluxo, objeto, cta, conversa).
