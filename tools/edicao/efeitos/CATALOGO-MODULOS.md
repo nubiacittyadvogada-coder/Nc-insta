@@ -15,6 +15,9 @@ Tempos sempre na linha do corte (antes do 1,1x). Identidade: creme, rosé, vinho
 | `objeto` | ícone ou personagem entrando com mola e flutuando | `{type:'objeto',t0,t1,icon:'algema',x,y,size,label}` |
 | `cta` | botão com cursor clicando | `{type:'cta',t0,t1,txt:'Comenta AULA',sub,clickAt}` |
 | `conversa` | balões de mensagem entrando | `{type:'conversa',t0,t1,items:[{txt,lado:'e'/'d',at}]}` |
+| `lei` | página de código com o trecho que importa sendo grifado | `{type:'lei',t0,t1,lei:'CÓDIGO PENAL',art:'Art. 147-A',txt:'... [[grifo]] ...',pena,marcaAt}` |
+| `vertigem` | efeito vertigem (dolly zoom): ela fica igual e o fundo avança | evento `{type:'vertigem',t0,t1}` (só para o som) + `fx_comp.py --vertigem t0,t1,plate.png[,zoom]` |
+| `som` | som avulso em qualquer ponto | `{type:'som',t0,som:'impacto'}` |
 
 Ícones próprios (sem imagem de terceiros): algema, martelo, balanca, relogio, documento, celular, cadeado, alerta, grade, escudo, dinheiro, ia.
 Para um objeto ou personagem novo: gerar imagem sóbria no Runway, remover o fundo, salvar PNG e usar `src:'img/arquivo.png'` no `objeto` ou no `painel`.
@@ -26,3 +29,14 @@ Para um objeto ou personagem novo: gerar imagem sóbria no Runway, remover o fun
 4. `conversa` sem print real autorizado sai SEMPRE com o selo SIMULAÇÃO (já é automático). Nunca inventar fala de cliente como se fosse real.
 5. Conteúdo jurídico do quadro passa pela mesma checagem do roteiro (nada de promessa de resultado, nada de caso identificável).
 6. Perfil pessoal: livre. NC: padrão rápido; no máximo 1 módulo (fluxo ou passos) quando a explicação pedir.
+
+## Sons (07/11/2026)
+Biblioteca própria em `sons/` (sintetizada por `sons/gerar_sons.py`, sem direitos de terceiros): whoosh, whoosh_curto, tensao, pop, pop_grave, bolha, clique, tecla0-3, check, giz, marcador, impacto, carimbo, pagina.
+Cada módulo já tem o seu som automático (`sfx_cues.js`). Para ativar: `fx_comp.py ... --sfx fx.js` (volume em `--ganho-sfx`, padrão 0.32). `sfx:false` no evento tira o som; `sfx:'impacto'` troca.
+Use `{type:'som',t0,som:'impacto'}` na palavra mais forte do vídeo (uma vez só).
+
+## Lei na tela: regra
+Texto SEMPRE copiado da fonte oficial (planalto.gov.br), conferido palavra por palavra. Grifar só o trecho que a fala explica. Pena só se a fala citar.
+
+## Vertigem: como fazer
+1. Tirar um quadro do corte no momento do efeito. 2. Runway (imagem): "a mesma sala, mesmo ângulo e luz, vazia, sem a pessoa" com o quadro como referência (cerca de 20 créditos). 3. Conferir o alinhamento lado a lado com o quadro. 4. `--vertigem t0,t1,plate.png,0.5` (negativo = fundo se afasta). Janela de 1,5 a 2,5 s, no momento da virada. No máximo 1 por vídeo. Precisa de câmera parada.

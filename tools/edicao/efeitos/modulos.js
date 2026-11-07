@@ -26,6 +26,13 @@ const css=`@font-face{font-family:M;font-weight:500;src:url("${F}caveat-latin-50
 .m-cta{display:inline-flex;align-items:center;gap:18px;background:#F0C3CC;color:#140E0C;font-family:A;font-weight:700;font-size:46px;border-radius:70px;padding:30px 54px;box-shadow:0 16px 50px rgba(0,0,0,.45)}
 .m-bl{position:absolute;max-width:700px;padding:22px 28px;border-radius:30px;font-family:A;font-weight:500;font-size:36px;line-height:1.25;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .m-bl.e{left:70px;background:#F4EDE6;color:#140E0C;border-bottom-left-radius:8px}.m-bl.d{right:70px;background:#8E2A3E;color:#F4EDE6;border-bottom-right-radius:8px}
+.m-lei{position:absolute;left:70px;right:70px;background:#F6F0E6;color:#2a1f1c;border-radius:10px;padding:46px 50px 40px;box-shadow:0 30px 80px rgba(0,0,0,.5);font-family:S;background-image:linear-gradient(rgba(142,42,62,.06) 1px,transparent 1px);background-size:100% 58px}
+.m-lei .cab{font-family:A;font-weight:600;font-size:22px;letter-spacing:.28em;color:#8E2A3E;border-bottom:2px solid rgba(142,42,62,.35);padding-bottom:16px;margin-bottom:22px;display:flex;justify-content:space-between}
+.m-lei .art{font-family:S;font-weight:700;font-size:58px;margin-bottom:14px}
+.m-lei .tx{font-size:44px;line-height:1.32}
+.m-lei .hl{background-image:linear-gradient(transparent 52%,rgba(240,150,170,.75) 52%,rgba(240,150,170,.75) 92%,transparent 92%);background-repeat:no-repeat;background-size:0% 100%;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.m-lei .pn{font-family:A;font-weight:600;font-size:30px;margin-top:22px;color:#8E2A3E}
+.m-lei .fo{font-family:A;font-weight:500;font-size:19px;letter-spacing:.16em;color:#7a6a64;margin-top:20px}
 .m-pill{display:inline-block;font-family:A;font-weight:600;font-size:24px;letter-spacing:.26em;color:#F0C3CC;background:rgba(20,14,12,.82);border:1px solid rgba(240,195,204,.45);border-radius:40px;padding:12px 22px}
 .m-sim{font-family:A;font-weight:600;font-size:20px;letter-spacing:.24em;color:rgba(244,237,230,.7)}`;
 const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
@@ -108,6 +115,12 @@ M.cta=e=>{const el=H(`<div style="position:absolute;left:0;right:0;top:${e.top||
 M.conversa=e=>{const el=H(`<div style="position:absolute;inset:0">${e.real?'':`<div style="position:absolute;left:0;right:0;top:${(e.top||220)-80}px;text-align:center"><span class="m-pill" style="font-size:20px">SIMULAÇÃO</span></div>`}</div>`);let y=e.top||220;
  const bs=e.items.map(it=>{const d=H(`<div class="m-bl ${it.lado||'e'}" style="top:${y}px">${it.txt}</div>`);el.appendChild(d);y+=it.h||(Math.ceil(it.txt.length/30)*46+60);return d});
  return {el,up:s=>bs.forEach((d,j)=>{const at=e.items[j].at;const q=B((s-at)/0.35);d.style.opacity=s<at?0:1;d.style.transform=`translateY(${(1-Math.min(1,q))*30}px) scale(${0.85+0.15*q})`;d.style.transformOrigin=e.items[j].lado==='d'?'right bottom':'left bottom'})}};
+
+/* 9. LEI NA TELA: página de código com o trecho que importa sendo grifado. Texto SEMPRE copiado da fonte oficial (planalto.gov.br).
+   {lei:'CÓDIGO PENAL', art:'Art. 147-A', txt:'... [[trecho grifado]] ...', pena?, fonte?, marcaAt, top} */
+M.lei=e=>{const tx=e.txt.replace(/\[\[(.+?)\]\]/g,'<span class="hl">$1</span>');const el=H(`<div class="m-lei" style="top:${e.top||180}px"><div class="cab"><span>${e.lei||'CÓDIGO PENAL'}</span><span>${e.lado||''}</span></div><div class="art">${e.art}</div><div class="tx">${tx}</div>${e.pena?`<div class="pn">${e.pena}</div>`:''}<div class="fo">${e.fonte||'FONTE: PLANALTO.GOV.BR'}</div></div>`);
+ const hls=[...el.querySelectorAll('.hl')];const ma=e.marcaAt??e.t0+1.2;
+ return {el,own:1,up:s=>{const q=E((s-e.t0)/0.5);const out=E((s-(e.t1-0.35))/0.35);el.style.transform=`translateY(${(1-q)*120-out*60}px) rotate(${(1-q)*-4}deg)`;hls.forEach((h,j)=>{const st=ma+j*0.7;h.style.backgroundSize=(100*E((s-st)/0.7))+'% 100%'})}}};
 
 window.FXMOD={M,ico,ICONES:Object.keys(I)};
 })();

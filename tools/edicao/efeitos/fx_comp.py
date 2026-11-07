@@ -5,18 +5,34 @@ A PASTA precisa ter: cut.mp4 (cortado, sem 1,1x), mask.mp4, fxbg/ e fxfg/ (quadr
 fr/ (legendas e textos do overlay_min.py). Tempos na linha do corte (antes do 1,1x).
 --paper: janelas de "recorte de papel" (contorno branco atrás da pessoa). Pode repetir.
 --clip: vídeo na metade de cima (cena de referência), pessoa embaixo.
+--sfx fx.js: trilha de efeitos sonoros automática (sfx.py) misturada à voz antes do 1,1x.
+--vertigem t0,t1,plate.png[,zoom]: efeito vertigem (dolly zoom). plate = a mesma cena SEM a pessoa (Runway).
+  A pessoa fica do mesmo tamanho e o fundo se aproxima (zoom positivo) ou se afasta (negativo, ex. -0.3).
 """
 import subprocess, sys, os, argparse
 ap = argparse.ArgumentParser()
 ap.add_argument('d'); ap.add_argument('out')
 ap.add_argument('--paper', action='append', default=[])
 ap.add_argument('--clip', default=None)
+ap.add_argument('--sfx', default=None)
+ap.add_argument('--ganho-sfx', type=float, default=0.32)
+ap.add_argument('--vertigem', default=None)
 a = ap.parse_args(); D = a.d
 GR = "format=rgb24,colorbalance=rs=0.015:bs=-0.02:rm=0.025:bm=-0.025:rh=0.01:bh=-0.01,eq=contrast=1.06:brightness=0.01:saturation=1.03,curves=all='0/0.03 0.5/0.505 1/0.975',format=gbrp"
 ins = ['-i', f'{D}/cut.mp4', '-i', f'{D}/mask.mp4', '-framerate', '30', '-i', f'{D}/fxbg/f%04d.png', '-framerate', '30', '-i', f'{D}/fxfg/f%04d.png', '-framerate', '30', '-i', f'{D}/fr/f%04d.png']
+nin = 5
 T = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f'{D}/cut.mp4']))
 fc = [f"[0:v]{GR},vignette=PI/4.8,split=2[sharp][b0]",
-      "[b0]gblur=sigma=6,eq=brightness=-0.03:saturation=0.88,format=rgba[bgb]",
+      "[b0]gblur=sigma=6,eq=brightness=-0.03:saturation=0.88,format=rgba[bgb0]"]
+if a.vertigem:
+    vp = a.vertigem.split(','); v0, v1, plate = float(vp[0]), float(vp[1]), vp[2]; zm = float(vp[3]) if len(vp) > 3 else 0.5
+    nf = int((v1 - v0) * 30) + 1; ins += ['-i', plate]; vi = nin; nin += 1
+    z0, z1 = (1.0, 1.0 + zm) if zm > 0 else (1.0 - zm, 1.0)
+    fc += [f"[{vi}:v]scale=4320:7680,{GR},zoompan=z='{z0}+({z1}-{z0})*(1-pow(1-on/{nf},2))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={nf}:s=1080x1920:fps=30,vignette=PI/4.8,gblur=sigma=6,eq=brightness=-0.03:saturation=0.88,format=rgba,setpts=PTS+{v0}/TB[plz]",
+           f"[bgb0][plz]overlay=0:0:eof_action=pass:enable='between(t,{v0},{v1})'[bgb]"]
+else:
+    fc += ["[bgb0]null[bgb]"]
+fc += [
       "[bgb][2:v]overlay=0:0:eof_action=pass,format=rgba[bg1]",
       "[1:v]format=gray,split=2[m1][m2]",
       "[m1]dilation,dilation,dilation,dilation,dilation,dilation,dilation,gblur=sigma=4,format=gbrp[mk]"]
@@ -29,7 +45,7 @@ fc += ["[bg][sharp][mk]maskedmerge[dof]", "[dof]noise=alls=3:allf=t,format=rgba[
 cur = 'v0'
 if a.clip:
     f, t0, yc, du = a.clip.split(','); t0, du = float(t0), float(du)
-    ins += ['-i', f]; n = 5
+    ins += ['-i', f]; n = nin; nin += 1
     en = f"between(t,{t0},{t0 + du})"
     fc += [f"[{cur}]split=2[pa][pb]", f"[pb]crop=1080:960:0:{yc}[pbot]", f"[{n}:v]format=rgba,setpts=PTS+{t0}/TB[clp]",
            f"[pa][pbot]overlay=0:960:enable='{en}'[pm2]", f"[pm2][clp]overlay=0:0:eof_action=pass:enable='{en}'[vc]"]
@@ -40,7 +56,13 @@ t = T / 1.1; br = min(int(19 * 2**20 * 8 / t) - 200000, 6_000_000)
 # Agora: vídeo sem áudio, áudio acelerado à parte, e junção com -shortest.
 vtmp, atmp = a.out + '.v.mp4', a.out + '.a.m4a'
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-threads', '4'] + ins + ['-filter_complex', ';'.join(fc), '-map', '[o]', '-an', '-c:v', 'libx264', '-b:v', str(br), '-maxrate', str(int(br * 1.3)), '-bufsize', str(br * 2), '-preset', 'medium', vtmp], check=True)
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', f'{D}/cut.mp4', '-vn', '-filter:a', 'atempo=1.1', '-c:a', 'aac', '-b:a', '128k', atmp], check=True)
+if a.sfx:
+    sw = a.out + '.sfx.wav'
+    subprocess.run(['python3', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sfx.py'), a.sfx, str(T), sw, '--ganho', str(a.ganho_sfx)], check=True)
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', f'{D}/cut.mp4', '-i', sw, '-filter_complex', '[0:a]aresample=48000[v];[1:a]aresample=48000[s];[v][s]amix=inputs=2:duration=first:normalize=0,atempo=1.1[o]', '-map', '[o]', '-c:a', 'aac', '-b:a', '160k', atmp], check=True)
+    os.remove(sw)
+else:
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', f'{D}/cut.mp4', '-vn', '-filter:a', 'atempo=1.1', '-c:a', 'aac', '-b:a', '128k', atmp], check=True)
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', vtmp, '-i', atmp, '-map', '0:v', '-map', '1:a', '-c', 'copy', '-shortest', '-movflags', '+faststart', a.out], check=True)
 os.remove(vtmp); os.remove(atmp)
 print(a.out, round(os.path.getsize(a.out) / 2**20, 1), 'MiB')
