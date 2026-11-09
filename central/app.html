@@ -390,10 +390,13 @@ function alerts(c) {
   if (c.respostaPessoal) a.push(`<div class="box"><span class="eyebrow">Sua resposta</span><p class="small">${esc(c.respostaPessoal)}</p></div>`);
   return a.join('');
 }
+// Trava (Núbia, 09/11/2026): peça com marcação de dado não conferido não pode ser aprovada, agendada nem publicada.
+function pendencias(c) { const t = JSON.stringify([c.title, c.payload, c.legenda]); const m = t.match(/\[(CONFIRMAR|VERIFICAR|PREENCHER|CHECAR)[^\]]*\]/gi) || []; return [...new Set(m)]; }
+function travaPendencia(c) { const p = pendencias(c); if (!p.length) return false; toast(`Bloqueado: ${p.length} dado(s) sem conferir na peça. Preencha ou retire antes: ${p[0].slice(0, 80)}`); return true; }
 function contentCard(c, mode) {
   const busy = S.busy[c.id];
   const acts = {
-    aprovar: `<button class="btn primary" data-act="aprovar" data-id="${c.id}">Aprovar</button><button class="btn" data-act="editar" data-id="${c.id}">Editar</button><button class="btn" data-act="versao" data-id="${c.id}">Nova versão</button><button class="btn ghost danger" data-act="rejeitar" data-id="${c.id}">Rejeitar</button>`,
+    aprovar: `${pendencias(c).length ? `<p class="small" style="color:#8E2A3E"><b>Aprovação bloqueada:</b> ${pendencias(c).length} dado(s) sem conferir (${esc(pendencias(c)[0].slice(0, 90))}). Edite e preencha antes.</p>` : ''}<button class="btn primary" data-act="aprovar" data-id="${c.id}"${pendencias(c).length ? ' disabled' : ''}>Aprovar</button><button class="btn" data-act="editar" data-id="${c.id}">Editar</button><button class="btn" data-act="versao" data-id="${c.id}">Nova versão</button><button class="btn ghost danger" data-act="rejeitar" data-id="${c.id}">Rejeitar</button>`,
     gravar: `<button class="btn primary" data-act="video" data-id="${c.id}">Enviar vídeo gravado</button><button class="btn" data-act="gravei" data-id="${c.id}">Já editei por fora</button>`,
     pronto: `<button class="btn primary" data-act="baixar" data-id="${c.id}">Baixar tudo</button><button class="btn" data-act="agendar" data-id="${c.id}">${c.scheduledFor ? 'Mudar data' : 'Agendar'}</button><button class="btn" data-act="publicado" data-id="${c.id}">Marcar publicado</button>`,
     lista: ''
@@ -932,6 +935,7 @@ const ACTIONS = {
   semana: () => openWeek(),
   async aprovar(c, b) {
     if (!needDb()) return;
+    if (travaPendencia(c)) return;
     const forcar = b && b.dataset.forcar === '1';
     let q = c.qualidade;
     if (!q && !c.editadoPelaNubia) {
@@ -990,6 +994,7 @@ const ACTIONS = {
   async gravei(c) { if (!needDb()) return; await col('contents').doc(c.id).update({ status: 'pronto', updatedAt: now() }); log('gravado (edição externa)', plain(c.title)); toast('Movido para Prontos'); },
   baixar: (c) => baixar(c),
   agendar(c) {
+    if (travaPendencia(c)) return;
     openSheet(`<h2>Agendar</h2><p class="small muted">${esc(plain(c.title))}</p><label for="ag-data">Data de publicação<input type="date" id="ag-data" value="${c.scheduledFor || today()}" min="${today()}"></label>
       <div class="row"><button class="btn primary" id="ag-ok">Salvar data</button>${c.scheduledFor ? '<button class="btn" id="ag-rm">Tirar data</button>' : ''}</div>`, (el) => {
       $('#ag-ok', el).addEventListener('click', async () => { if (!needDb()) return; const d = $('#ag-data', el).value; if (!d) return;
@@ -999,6 +1004,7 @@ const ACTIONS = {
     });
   },
   publicado(c) {
+    if (travaPendencia(c)) return;
     const local = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     openSheet(`<h2>Marcar como publicado</h2><p class="small muted">${esc(plain(c.title))}</p>
       <label for="pb-url">Link do post (opcional)<input id="pb-url" type="url" placeholder="https://www.instagram.com/p/…"></label>
