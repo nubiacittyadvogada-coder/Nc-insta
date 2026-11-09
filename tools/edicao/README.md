@@ -149,3 +149,8 @@ Regras:
    Correção: mover a borda 2 a 4 quadros para o quadro bom mais próximo dentro do silêncio; se a careta é no meio da fala, usar outra tentativa do bruto.
    O detector automático de expressão não é confiável (óculos e olhar para baixo enganam): a revisão é visual.
 4. Escolher a tentativa de cada fala também pelo rosto, não só pelo áudio: entre duas tentativas boas, fica a de expressão mais natural.
+
+## Vídeos de audiência e júri (09/11/2026, decisão da Núbia)
+- Não desfocar rostos: só o réu, se aparecer. Policiais e demais presentes ficam como estão; o fundo pode ficar levemente desfocado.
+- Estrutura: gancho forte primeiro (a frase mais forte do trecho, mesmo fora de ordem) e depois a explicação real. Alvo de 25 a 35 s.
+- Sem "Citty sendo Citty" nem selo (caso real), sem nomes, sem detalhe do caso, sem veredito.
