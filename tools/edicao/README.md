@@ -123,7 +123,7 @@ O `atempo=1.1` dentro do mesmo filter_complex do vídeo deixou o áudio até 3 s
   3. Gancho animado nos 3 primeiros segundos, ficha de nome e cargo (sem inventar área nem sobrenome), frase da série na tela quando dita.
   4. Legenda desde o primeiro segundo (overlay_min.py modo A), revisada palavra por palavra.
   5. No máximo 2 ou 3 palavras-chave animadas (etiqueta ou texto atrás), só nos conceitos centrais.
-  6. Cor natural, fundo levemente desfocado. Logo no fim com endcard.py. Arquivo abaixo de 20 MiB.
+  6. Cor natural, fundo levemente desfocado. Logo no fim com endcard.py. Qualidade: CRF 18, até 8 Mbps, cor BT.709 (regra de 10/11/2026; o limite antigo de 20 MiB foi abolido porque borrava o vídeo).
   7. Mesma conferência final: quadros nos cortes e nos zooms, silencedetect, transcrição contra o roteiro.
 
 ## PADRÃO PREMIUM DE EDIÇÃO (06/11/2026, aprovado pela Núbia: "adorei")
@@ -160,3 +160,4 @@ Regras:
 - Intermediários quase sem perda (CRF 10); só a etapa final comprime.
 - Final com CRF 18 e teto de 8 Mbps (endcard.py). O limite antigo de 3,4 Mbps borrava a imagem.
 - Bruto da equipe só pelo Google Drive, nunca pelo WhatsApp (o WhatsApp recomprime).
+- 10/11/2026: o limite "arquivo final abaixo de 20 MiB" está ABOLIDO em todos os padrões (NC e pessoal). Ele forçava 1,2 a 3,4 Mbps e era a causa do vídeo ruim. Para caber na Central, vídeo publicado há mais de 7 dias sai da Central e fica no repositório (decisão da Núbia, 10/11).
