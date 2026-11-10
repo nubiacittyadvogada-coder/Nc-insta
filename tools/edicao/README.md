@@ -154,3 +154,9 @@ Regras:
 - Não desfocar rostos: só o réu, se aparecer. Policiais e demais presentes ficam como estão; o fundo pode ficar levemente desfocado.
 - Estrutura: gancho forte primeiro (a frase mais forte do trecho, mesmo fora de ordem) e depois a explicação real. Alvo de 25 a 35 s.
 - Sem "Citty sendo Citty" nem selo (caso real), sem nomes, sem detalhe do caso, sem veredito.
+
+## Qualidade e cor do NC (10/11/2026)
+- Cor sempre marcada como BT.709 (colorspace, primaries, trc, range tv) em todas as etapas; sem marcação o Instagram e o iPhone mostram a cor errada.
+- Intermediários quase sem perda (CRF 10); só a etapa final comprime.
+- Final com CRF 18 e teto de 8 Mbps (endcard.py). O limite antigo de 3,4 Mbps borrava a imagem.
+- Bruto da equipe só pelo Google Drive, nunca pelo WhatsApp (o WhatsApp recomprime).
