@@ -335,7 +335,7 @@ function strip(c) {
   return `<div class="strip">${items.map(it => it.spec.format === 'overlay'
     ? `<div class="ov"><img src="${previewSrc(c, it)}" alt="Texto na tela do Reel"></div>`
     : `<img src="${previewSrc(c, it)}" alt="${esc(it.name)}" loading="lazy">`).join('')}
-    ${vids.map(v => `<video src="${esc(v.url)}" controls playsinline preload="metadata"></video>`).join('')}</div>${editados.length ? `<div class="row"><button class="btn primary" data-cel="${esc(editados[editados.length - 1].url)}" data-celname="${esc(editados[editados.length - 1].name)}">Salvar vídeo no celular</button><a class="btn small" href="${esc(editados[editados.length - 1].url)}" target="_blank" rel="noopener">Abrir em tela cheia</a></div>` : ''}${driveLink ? `<div class="row">${driveLink}</div>` : ''}`;
+    ${vids.map(v => `<video src="${esc(v.url)}" controls playsinline preload="metadata"></video>`).join('')}</div>${editados.length ? `<div class="row"><button class="btn primary" data-cel="${esc(editados[editados.length - 1].url)}" data-celname="${esc(editados[editados.length - 1].name)}">Salvar vídeo no celular</button><a class="btn small" href="${esc(editados[editados.length - 1].url)}" target="_blank" rel="noopener">Abrir em tela cheia</a>${editados[editados.length - 1].hq ? `<a class="btn small" href="${esc(editados[editados.length - 1].hq)}" target="_blank" rel="noopener">Alta qualidade (para postar)</a>` : ''}</div>${editados[editados.length - 1].hq ? '<p class="small muted">O vídeo acima é uma prévia leve para aprovar. Para postar, use Alta qualidade.</p>' : ''}` : ''}${driveLink ? `<div class="row">${driveLink}</div>` : ''}`;
 }
 
 // ================= cartão de conteúdo =================
