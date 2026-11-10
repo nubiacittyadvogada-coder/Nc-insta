@@ -335,7 +335,7 @@ function strip(c) {
   return `<div class="strip">${items.map(it => it.spec.format === 'overlay'
     ? `<div class="ov"><img src="${previewSrc(c, it)}" alt="Texto na tela do Reel"></div>`
     : `<img src="${previewSrc(c, it)}" alt="${esc(it.name)}" loading="lazy">`).join('')}
-    ${vids.map(v => `<video src="${esc(v.url)}" controls playsinline preload="metadata"></video>`).join('')}</div>${driveLink ? `<div class="row">${driveLink}</div>` : ''}`;
+    ${vids.map(v => `<video src="${esc(v.url)}" controls playsinline preload="metadata"></video>`).join('')}</div>${editados.length ? `<div class="row"><button class="btn primary" data-cel="${esc(editados[editados.length - 1].url)}" data-celname="${esc(editados[editados.length - 1].name)}">Salvar vídeo no celular</button><a class="btn small" href="${esc(editados[editados.length - 1].url)}" target="_blank" rel="noopener">Abrir em tela cheia</a></div>` : ''}${driveLink ? `<div class="row">${driveLink}</div>` : ''}`;
 }
 
 // ================= cartão de conteúdo =================
@@ -1267,6 +1267,26 @@ async function produzirArquivos(c) {
 }
 
 // ================= downloads =================
+// Salvar no celular: baixa o vídeo uma vez e abre o menu Compartilhar do aparelho (iPhone: "Salvar vídeo" vai direto para Fotos).
+const celCache = new Map();
+async function salvarCelular(btn) {
+  const url = btn.dataset.cel, name = btn.dataset.celname || 'video.mp4';
+  let file = celCache.get(url);
+  if (!file) {
+    btn.disabled = true; const t0 = btn.textContent; btn.textContent = 'Baixando o vídeo…';
+    try { const r = await fetch(url); file = new File([await r.blob()], name, { type: 'video/mp4' }); celCache.set(url, file); }
+    catch (e) { toast('Não consegui baixar: ' + (e.message || e)); btn.textContent = t0; btn.disabled = false; return; }
+    btn.disabled = false;
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { btn.textContent = 'Pronto: toque para salvar'; return; }
+  }
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: name }); btn.textContent = 'Salvar vídeo no celular'; return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  if (await save(name, file)) toast('Vídeo enviado para Arquivos/Downloads');
+  btn.textContent = 'Salvar vídeo no celular';
+}
+document.addEventListener('click', (ev) => { const b = ev.target.closest && ev.target.closest('[data-cel]'); if (b) { ev.preventDefault(); salvarCelular(b); } });
 async function fileBlob(c, it) {
   const f = (c.files || []).find(x => x.name === it.name && x.url);
   if (f) { try { const r = await fetch(f.url); if (r.ok) return await r.blob(); } catch (e) { } }
@@ -1298,6 +1318,7 @@ async function baixar(c) {
     <div class="stack">${items.map((it, i) => `<button class="btn" data-dl="${i}">${esc(it.name)}</button>`).join('')}
     ${vids.map((v, i) => `<button class="btn" data-dlv="${i}">${esc(v.name)}</button>`).join('')}
     <button class="btn" id="dl-txt">Textos e legenda (.txt)</button>${c.type === 'reelFalado' ? '<button class="btn" id="dl-srt">Legendas do vídeo (.srt revisável)</button>' : ''}</div>
+    ${vids.filter(v => v.grupo === 'editado').slice(-1).map(v => `<button class="btn primary" data-cel="${esc(v.url)}" data-celname="${esc(v.name)}">Salvar vídeo no celular (vai para Fotos)</button>`).join('')}
     <p class="small muted">No iPhone, imagens baixadas vão para Arquivos. Para mandar para Fotos, abra a imagem e toque em Compartilhar e depois Salvar imagem.</p>`, (el) => {
     el.querySelectorAll('[data-dl]').forEach(btn => btn.addEventListener('click', async () => { const it = items[+btn.dataset.dl]; if (await save(it.name, await fileBlob(c, it))) toast('Arquivo enviado'); }));
     el.querySelectorAll('[data-dlv]').forEach(btn => btn.addEventListener('click', async () => { const v = vids[+btn.dataset.dlv]; const r = await fetch(v.url); if (await save(v.name, await r.blob())) toast('Vídeo enviado'); }));
