@@ -335,7 +335,7 @@ function strip(c) {
   return `<div class="strip">${items.map(it => it.spec.format === 'overlay'
     ? `<div class="ov"><img src="${previewSrc(c, it)}" alt="Texto na tela do Reel"></div>`
     : `<img src="${previewSrc(c, it)}" alt="${esc(it.name)}" loading="lazy">`).join('')}
-    ${vids.map(v => `<video src="${esc(v.url)}" controls playsinline preload="metadata"></video>`).join('')}</div>${editados.length ? `<div class="row"><button class="btn primary" data-cel="${esc(editados[editados.length - 1].url)}" data-celname="${esc(editados[editados.length - 1].name)}">Salvar vídeo no celular</button><a class="btn small" href="${esc(editados[editados.length - 1].url)}" target="_blank" rel="noopener">Abrir em tela cheia</a>${editados[editados.length - 1].hq ? `<a class="btn small" href="${esc(editados[editados.length - 1].hq)}" target="_blank" rel="noopener">Alta qualidade (para postar)</a>` : ''}</div>${editados[editados.length - 1].hq ? '<p class="small muted">O vídeo acima é uma prévia leve para aprovar. Para postar, use Alta qualidade.</p>' : ''}` : ''}${driveLink ? `<div class="row">${driveLink}</div>` : ''}`;
+    ${vids.map(v => `<video src="${esc(v.url)}" controls playsinline preload="metadata"></video>`).join('')}</div>${editados.length ? `<div class="row"><button class="btn primary" data-cel="${esc(editados[editados.length - 1].hq || editados[editados.length - 1].url)}" data-celalt="${esc(editados[editados.length - 1].url)}" data-celname="${esc(editados[editados.length - 1].name)}">Salvar vídeo no celular</button><a class="btn small" href="${esc(editados[editados.length - 1].url)}" target="_blank" rel="noopener">Abrir em tela cheia</a>${editados[editados.length - 1].hq ? `<a class="btn small" href="${esc(editados[editados.length - 1].hq)}" target="_blank" rel="noopener">Alta qualidade (para postar)</a>` : ''}</div>${editados[editados.length - 1].hq ? '<p class="small muted">O vídeo acima é uma prévia leve para aprovar. O botão Salvar vídeo no celular já baixa a versão em alta qualidade.</p>' : ''}` : ''}${driveLink ? `<div class="row">${driveLink}</div>` : ''}`;
 }
 
 // ================= cartão de conteúdo =================
@@ -1274,8 +1274,11 @@ async function salvarCelular(btn) {
   let file = celCache.get(url);
   if (!file) {
     btn.disabled = true; const t0 = btn.textContent; btn.textContent = 'Baixando o vídeo…';
-    try { const r = await fetch(url); file = new File([await r.blob()], name, { type: 'video/mp4' }); celCache.set(url, file); }
-    catch (e) { toast('Não consegui baixar: ' + (e.message || e)); btn.textContent = t0; btn.disabled = false; return; }
+    try { const r = await fetch(url); if (!r.ok) throw new Error('HTTP ' + r.status); file = new File([await r.blob()], name, { type: 'video/mp4' }); celCache.set(url, file); }
+    catch (e) {
+      const alt = btn.dataset.celalt;
+      if (alt && alt !== url) { window.open(url, '_blank', 'noopener'); toast('Abri a versão em alta qualidade: toque e segure o vídeo para salvar'); btn.textContent = t0; btn.disabled = false; return; }
+      toast('Não consegui baixar: ' + (e.message || e)); btn.textContent = t0; btn.disabled = false; return; }
     btn.disabled = false;
     if (navigator.canShare && navigator.canShare({ files: [file] })) { btn.textContent = 'Pronto: toque para salvar'; return; }
   }
