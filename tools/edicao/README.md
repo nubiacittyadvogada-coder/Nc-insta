@@ -161,3 +161,8 @@ Regras:
 - Final com CRF 18 e teto de 8 Mbps (endcard.py). O limite antigo de 3,4 Mbps borrava a imagem.
 - Bruto da equipe só pelo Google Drive, nunca pelo WhatsApp (o WhatsApp recomprime).
 - 10/11/2026: o limite "arquivo final abaixo de 20 MiB" está ABOLIDO em todos os padrões (NC e pessoal). Ele forçava 1,2 a 3,4 Mbps e era a causa do vídeo ruim. Para caber na Central, vídeo publicado há mais de 7 dias sai da Central e fica no repositório (decisão da Núbia, 10/11).
+
+## Cor padrão (decisão de 11/11/2026)
+Todo vídeo da Núbia recebe esta correção depois do tonemap, antes do texto na tela:
+`curves=all='0/0.0 0.3/0.26 0.7/0.74 1/1',eq=saturation=1.08:contrast=1.04,colorbalance=rm=0.015:gm=-0.02:bm=0.0,unsharp=5:5:0.35`
+Mais contraste, pele natural e sem o tom esverdeado/lavado do fundo. Exportar com CRF 16 a 18 e tags BT.709.
