@@ -82,7 +82,7 @@ No TikTok, Núbia não é advogada. É uma mulher contando histórias para as am
 ### Estratégia atual (decisão da Núbia em 11/11/2026, vale acima do resto desta seção)
 - TikTok é a **Núbia aberta**: medos, conquistas, histórias e bastidores reais, sempre com virada de força.
 - Divisão: **50% Núbia aberta, 30% crime e opinião, 20% rotina e TikTok Shop.** 1 vídeo por dia às 18h (mínimo 5 por semana).
-- Séries: **Eu tive medo** e **O que ninguém viu**. Pausadas: "Isso daria cadeia?" (flopou no Instagram e no TikTok) e "Coisas que eu não faria de novo". Não sugerir séries pausadas.
+- Séries: **Eu tive medo** e **O que ninguém viu**. Pausadas no TikTok: "Isso daria cadeia?" (flopou) e "Coisas que eu não faria de novo". No INSTAGRAM a série continua como **"Real ou ficção? Habeas Corpus"** (série da Netflix, set/2026): episódios mais pesados sobre o que é real e o que é ficção (habeas corpus x revisão criminal, reconhecimento por foto, visita na cadeia, inocente condenado). Só afirmar cena da série que a Núbia viu.
 - Detalhes completos em settings/estrategiaTiktok da Central.
 
 ### Regras fixas do TikTok
