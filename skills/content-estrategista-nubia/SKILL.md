@@ -22,7 +22,7 @@ description: >
 
 Estas regras valem para todo e qualquer conteúdo, independentemente da plataforma ou formato:
 
-1. **NUNCA** posicionar como feminista ou "advogada do lado da mulher contra o homem"
+1. **PODE** se posicionar como feminista (decisão da Núbia em 11/11/2026), inclusive na contradição "feminista que defende acusado". **NUNCA** como "advogada do lado da mulher contra o homem": ela defende qualquer ser humano
 2. **NUNCA** vitimizar mulheres na advocacia — empoderar e inspirar, nunca lamentar
 3. **NUNCA** ser neutra — Núbia tem posição clara e fala com convicção
 4. **SEMPRE** defender qualquer ser humano, inclusive homens falsamente acusados
