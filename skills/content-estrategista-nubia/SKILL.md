@@ -79,6 +79,12 @@ Nenhum roteiro, reedição ou legenda é entregue sem passar por estas regras. S
 ### Filosofia
 No TikTok, Núbia não é advogada. É uma mulher contando histórias para as amigas. A advocacia aparece como pano de fundo da vida, não como tema central. Quem para no vídeo é a história. Quem segue é a pessoa.
 
+### Estratégia atual (decisão da Núbia em 11/11/2026, vale acima do resto desta seção)
+- TikTok é a **Núbia aberta**: medos, conquistas, histórias e bastidores reais, sempre com virada de força.
+- Divisão: **50% Núbia aberta, 30% crime e opinião, 20% rotina e TikTok Shop.** 1 vídeo por dia às 18h (mínimo 5 por semana).
+- Séries: **Eu tive medo**, **O que ninguém viu**, **Isso daria cadeia?**. "Coisas que eu não faria de novo" está pausada.
+- Detalhes completos em settings/estrategiaTiktok da Central.
+
 ### Regras fixas do TikTok
 - **Sempre narrativa.** Nunca explicativo, nunca didático, nunca institucional
 - **Formatos obrigatórios:** "o dia em que...", "coisas que me dou ao luxo de ter...", "uma coisa que aprendi...", "a cliente que...", "quando eu era iniciante...", contando para amigas
