@@ -3,8 +3,8 @@ import random, json, math, sys
 W,H=1080,1350
 LT,LS=120,90
 def row(i): return LT+LS*i
-F5='caveat500.ttf'; F7='caveat700.ttf'
-INK=(28,30,44)
+F5='cedarville-cursive.ttf'; F7='cedarville-cursive.ttf'
+INK=(22,28,62)
 def paper(seed=1):
     random.seed(seed)
     im=Image.new('RGB',(W,H),(244,242,236))
@@ -14,17 +14,35 @@ def paper(seed=1):
     d=ImageDraw.Draw(im)
     for y in range(LT,H,LS): d.line((0,y,W,y),fill=(150,175,215),width=2)
     d.line((110,0,110,H),fill=(214,120,120),width=3)
+    im=im.convert('RGBA'); CANVAS[0]=im
     return im
 def wobble_line(d,x1,y,x2,w=4,amp=3,seed=0):
     random.seed(seed); pts=[]
     for i in range(0,41):
         x=x1+(x2-x1)*i/40; pts.append((x,y+amp*math.sin(i/6+seed)+random.uniform(-0.8,0.8)))
     d.line(pts,fill=INK,width=w,joint='curve')
-def text(d,xy,s,size,bold=False,fill=INK):
-    d.text(xy,s,font=ImageFont.truetype(F7 if bold else F5,size),fill=fill)
-    return ImageFont.truetype(F7 if bold else F5,size).getlength(s)
+CANVAS=[None]
+def text(d,xy,s,size,bold=False,fill=INK,maxw=None):
+    maxw=maxw or (W-60-xy[0])
+    f=ImageFont.truetype(F5,size)
+    while f.getlength(s)>maxw and size>30: size-=2; f=ImageFont.truetype(F5,size)
+    L=f.getlength(s); h=int(size*1.6)
+    lay=Image.new('RGBA',(int(L)+40,h+40),(0,0,0,0)); ld=ImageDraw.Draw(lay)
+    ld.text((20,20),s,font=f,fill=fill+(235,),stroke_width=(1 if bold else 0),stroke_fill=fill+(235,))
+    lay=lay.rotate(random.uniform(-0.7,0.7),resample=Image.BICUBIC,expand=False)
+    lay=lay.filter(ImageFilter.GaussianBlur(0.35))
+    CANVAS[0].alpha_composite(lay,(int(xy[0])-20,int(xy[1]-0.31*size)-20+int(random.uniform(-2,2))))
+    return L
 def sign(d): 
     f=ImageFont.truetype(F5,40); s='@nubiacitty'; d.text((W-60-f.getlength(s),45),s,font=f,fill=(90,90,110))
+def finish(im):
+    im=CANVAS[0].convert('RGB')
+    # luz de foto: leve vinheta e gradiente
+    g=Image.new('L',(W,H),0); gd=ImageDraw.Draw(g)
+    for i in range(0,60): gd.rectangle((i*6,i*6,W-i*6,H-i*6),outline=int(i*1.2))
+    g=g.filter(ImageFilter.GaussianBlur(40))
+    dark=Image.new('RGB',(W,H),(205,200,190))
+    return Image.composite(im,dark,g.point(lambda v:min(255,185+v)))
 def cover(title,items,out,seed):
     im=paper(seed); d=ImageDraw.Draw(im); r=1
     for k,line in enumerate(title):
@@ -41,14 +59,14 @@ def cover(title,items,out,seed):
     yy=row(r)-30
     d.line((W-600,yy,W-520,yy),fill=INK,width=5); d.line((W-538,yy-14,W-518,yy),fill=INK,width=5); d.line((W-538,yy+14,W-518,yy),fill=INK,width=5)
     wobble_line(d,W-500,row(r)+10,W-500+L,3,2,seed+5)
-    sign(d); im.save(out,quality=95)
+    sign(d); finish(im).save(out,quality=95)
 def explain(blocks,out,seed):
     im=paper(seed); d=ImageDraw.Draw(im); r=1
     for head,body in blocks:
         L=text(d,(150,row(r)-76),head,84,True); wobble_line(d,150,row(r)+8,150+L,3,2,seed); r+=1
         for l in body: text(d,(150,row(r)-62),l,66); r+=1
         r+=0.0
-    sign(d); im.save(out,quality=95)
+    sign(d); finish(im).save(out,quality=95)
 def final(lines,out,seed,photo='/home/user/Nc-insta/links/foto.png'):
     im=paper(seed); d=ImageDraw.Draw(im)
     p=Image.open(photo).convert('RGB'); s=min(p.size); p=p.crop(((p.width-s)//2,0,(p.width-s)//2+s,s)).resize((380,380))
@@ -57,7 +75,7 @@ def final(lines,out,seed,photo='/home/user/Nc-insta/links/foto.png'):
     y=row(6)-70
     for l,sz,b in lines:
         f=ImageFont.truetype(F7 if b else F5,sz); x=(W-f.getlength(l))/2; d.text((x,y),l,font=f,fill=INK); y+=LS
-    sign(d); im.save(out,quality=95)
+    sign(d); finish(im).save(out,quality=95)
 spec=json.load(open(sys.argv[1]))
 for c in spec:
     cover(c['title'],c['items'],c['id']+'-1.jpg',c['seed'])
