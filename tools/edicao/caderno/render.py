@@ -29,9 +29,10 @@ def text(d,xy,s,size,bold=False,fill=INK,maxw=None):
     L=f.getlength(s); h=int(size*1.6)
     lay=Image.new('RGBA',(int(L)+40,h+40),(0,0,0,0)); ld=ImageDraw.Draw(lay)
     ld.text((20,20),s,font=f,fill=fill+(235,),stroke_width=(1 if bold else 0),stroke_fill=fill+(235,))
-    lay=lay.rotate(random.uniform(-0.7,0.7),resample=Image.BICUBIC,expand=False)
+    lay=lay.rotate(random.uniform(-0.35,0.35),resample=Image.BICUBIC,expand=False)
     lay=lay.filter(ImageFilter.GaussianBlur(0.35))
-    CANVAS[0].alpha_composite(lay,(int(xy[0])-20,int(xy[1]-0.31*size)-20+int(random.uniform(-2,2))))
+    asc=f.getmetrics()[0]
+    CANVAS[0].alpha_composite(lay,(int(xy[0])-20,int(xy[1]-asc)-20+int(random.uniform(-1,1))))
     return L
 def sign(d): 
     f=ImageFont.truetype(F5,40); s='@nubiacitty'; d.text((W-60-f.getlength(s),45),s,font=f,fill=(90,90,110))
@@ -46,25 +47,25 @@ def finish(im):
 def cover(title,items,out,seed):
     im=paper(seed); d=ImageDraw.Draw(im); r=1
     for k,line in enumerate(title):
-        L=text(d,(150,row(r)-84),line,100,True)
-        if k==len(title)-1: wobble_line(d,150,row(r)+12,150+L,4,2,seed); wobble_line(d,165,row(r)+24,150+L-15,3,2,seed+2)
+        L=text(d,(150,row(r)),line,88,True)
+        if k==len(title)-1: wobble_line(d,150,row(r)+18,150+L,4,2,seed); wobble_line(d,165,row(r)+30,150+L-15,3,2,seed+2)
         r+=1
     r+=1
     for it in items:
         lines=it if isinstance(it,list) else [it]
-        d.ellipse((140,row(r)-34,158,row(r)-16),fill=INK)
-        for l in lines: text(d,(185,row(r)-72),l,84); r+=1
+        d.ellipse((140,row(r)-34,158,row(r)),fill=INK)
+        for l in lines: text(d,(185,row(r)),l,76); r+=1
     r=max(r+1,12)
-    L=text(d,(W-500,row(r)-72),'passe pro lado',76)
-    yy=row(r)-30
+    L=text(d,(W-500,row(r)),'passe pro lado',70)
+    yy=row(r)-22
     d.line((W-600,yy,W-520,yy),fill=INK,width=5); d.line((W-538,yy-14,W-518,yy),fill=INK,width=5); d.line((W-538,yy+14,W-518,yy),fill=INK,width=5)
-    wobble_line(d,W-500,row(r)+10,W-500+L,3,2,seed+5)
+    wobble_line(d,W-500,row(r)+16,W-500+L,3,2,seed+5)
     sign(d); finish(im).save(out,quality=95)
 def explain(blocks,out,seed):
     im=paper(seed); d=ImageDraw.Draw(im); r=1
     for head,body in blocks:
-        L=text(d,(150,row(r)-76),head,84,True); wobble_line(d,150,row(r)+8,150+L,3,2,seed); r+=1
-        for l in body: text(d,(150,row(r)-62),l,66); r+=1
+        L=text(d,(150,row(r)),head,76,True); wobble_line(d,150,row(r)+16,150+L,3,2,seed); r+=1
+        for l in body: text(d,(150,row(r)),l,62); r+=1
         r+=0.0
     sign(d); finish(im).save(out,quality=95)
 def final(lines,out,seed,photo='/home/user/Nc-insta/links/foto.png'):
@@ -72,9 +73,8 @@ def final(lines,out,seed,photo='/home/user/Nc-insta/links/foto.png'):
     p=Image.open(photo).convert('RGB'); s=min(p.size); p=p.crop(((p.width-s)//2,0,(p.width-s)//2+s,s)).resize((380,380))
     m=Image.new('L',(380,380),0); ImageDraw.Draw(m).ellipse((0,0,380,380),fill=255)
     im.paste(p,((W-380)//2,140),m); d.ellipse(((W-380)//2-6,134,(W+380)//2+6,526),outline=INK,width=4)
-    y=row(6)-70
-    for l,sz,b in lines:
-        f=ImageFont.truetype(F7 if b else F5,sz); x=(W-f.getlength(l))/2; d.text((x,y),l,font=f,fill=INK); y+=LS
+    for i,(l,sz,b) in enumerate(lines):
+        f=ImageFont.truetype(F5,sz); x=(W-f.getlength(l))/2; text(d,(x,row(6+i)),l,sz,b)
     sign(d); finish(im).save(out,quality=95)
 spec=json.load(open(sys.argv[1]))
 for c in spec:
