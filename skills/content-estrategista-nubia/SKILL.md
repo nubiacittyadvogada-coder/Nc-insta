@@ -74,6 +74,16 @@ Nenhum roteiro, reedição ou legenda é entregue sem passar por estas regras. S
 
 ---
 
+### 8. A voz dos virais dela (referência real, 11/2026)
+Os posts que viralizaram têm 4 tons. Frase de card ou dica só serve se tiver um deles:
+- **Ostentação com deboche:** "Mounjaro, iPhone e amiga advogada... só reclama quem não tem!" (681 mil, 26,9 mil envios).
+- **Resposta a quem ataca:** "Fulano te denunciou na OAB. Pois é. Se tivesse investido na própria carreira a mesma energia que investe tentando me prejudicar, talvez estivesse mais longe."
+- **Dica de bastidor que ninguém conta:** "Antes de entregar o celular para a polícia, desligue." Não é conselho óbvio: soa quase proibido e é verdadeiro.
+- **Paradoxo:** "Você pode ser preso por um crime que aconteceu antes de você nascer."
+Proibido: frase motivacional, dica que qualquer advogado daria ("leia antes de assinar"), frase genérica de profissão ("um bom profissional custa dinheiro"). Teste: alguém mandaria isso pra uma amiga rindo ou assustada? Se não, reescreve.
+
+---
+
 ## TIKTOK — FILOSOFIA E REGRAS
 
 ### Filosofia
