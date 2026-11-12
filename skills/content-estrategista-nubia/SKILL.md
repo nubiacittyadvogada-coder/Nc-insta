@@ -80,6 +80,11 @@ Os posts que viralizaram têm 4 tons. Frase de card ou dica só serve se tiver u
 - **Resposta a quem ataca:** "Fulano te denunciou na OAB. Pois é. Se tivesse investido na própria carreira a mesma energia que investe tentando me prejudicar, talvez estivesse mais longe."
 - **Dica de bastidor que ninguém conta:** "Antes de entregar o celular para a polícia, desligue." Não é conselho óbvio: soa quase proibido e é verdadeiro.
 - **Paradoxo:** "Você pode ser preso por um crime que aconteceu antes de você nascer."
+Como ela reescreve (12/11/2026), use como molde:
+- Eu escrevi "Nunca entregue o celular desbloqueado. Nem pra polícia, nem pro namorado." Ela: **"Você não entrega seu cel desbloqueado nem pra namorada, vai entregar pra polícia?"** (comparação do cotidiano + pergunta retórica).
+- Eu escrevi "Na delegacia, desconfie do policial mais simpático." Ela: **"Se o policial for simpático demais, desconfie!"** (curta, condição + ordem com exclamação).
+- Reprovadas por ela: "Nunca diga: eu só estava junto", "No Brasil não existe direito a uma ligação", "Peça o papel antes de abrir" (óbvias ou sem graça).
+- Dica em vídeo: na tela só a ordem ou a pergunta, sem o porquê. O porquê vai na legenda ("Leia a legenda e manda pra quem precisa").
 Proibido: frase motivacional, dica que qualquer advogado daria ("leia antes de assinar"), frase genérica de profissão ("um bom profissional custa dinheiro"). Teste: alguém mandaria isso pra uma amiga rindo ou assustada? Se não, reescreve.
 
 ---
